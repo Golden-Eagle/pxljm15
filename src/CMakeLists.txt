@@ -1,0 +1,36 @@
+# list headers here
+SET(gecom_hdr
+	"Camera.hpp"
+	"GECom.hpp"
+	"GLOW.hpp"
+	"Initial3D.hpp"
+	"Image.hpp"
+	"Log.hpp"
+	"Perlin.hpp"
+	"Window.hpp"
+	"Concurrent.hpp"
+	"SimpleShader.hpp"
+	"Scene.hpp"
+	"Entity.hpp"
+	"Game.hpp"
+	"Renderer.hpp"
+)
+
+
+# list sources here
+SET(gecom_src
+	"main.cpp"
+	"Log.cpp"
+	"Perlin.hpp"
+	"Window.cpp"
+	"Concurrent.cpp"
+	"Entity.cpp"
+)
+
+
+add_executable(gecom ${gecom_hdr} ${gecom_src})
+
+target_link_libraries(gecom glfw ${GLFW_LIBRARIES})
+
+add_definitions(${GLAER_DEFINITIONS})
+target_link_libraries(gecom glaer ${GLAER_LIBRARIES})
