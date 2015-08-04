@@ -40,8 +40,10 @@ class Game {
 
 			m_scene = std::make_shared<Scene>();
 			entity_ptr e = std::make_shared<Entity>();
-			entity_draw_ptr ec = std::make_shared<Drawable>();
-			e->addComponent(ec);
+			entity_draw_ptr md = std::make_shared<MeshDrawable>();
+			md.mesh = std::make_shared<Mesh>();
+			md.material = std::make_shared<Material>();
+			e->addComponent(md);
 			m_scene->add(e);
 
 		}

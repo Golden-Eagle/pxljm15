@@ -14,6 +14,8 @@ SET(gecom_hdr
 	"Entity.hpp"
 	"Game.hpp"
 	"Renderer.hpp"
+	"Geometry.hpp"
+	"Material.hpp"
 )
 
 
@@ -25,6 +27,8 @@ SET(gecom_src
 	"Window.cpp"
 	"Concurrent.cpp"
 	"Entity.cpp"
+	"Geometry.cpp"
+	"Material.cpp"
 )
 
 

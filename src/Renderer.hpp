@@ -53,9 +53,9 @@ namespace gecom {
 
 			std::vector< entity_draw_ptr > drawList = s->getDrawList();
 			for ( auto drawable : drawList ) {
-				drawable->loadShader();
-				drawable->loadMaterial();
-				drawable->loadData();
+				material_ptr m = drawable->getMaterial();
+				m->shader.bind();
+				m->bind();
 				drawable->draw(view_matrix, proj_matrix);
 			}
 

@@ -8,6 +8,8 @@
 #include "GECom.hpp"
 #include "Initial3D.hpp"
 #include "SimpleShader.hpp"
+#include "Geometry.hpp"
+#include "Material.hpp"
 
 
 namespace gecom {
@@ -86,7 +88,7 @@ namespace gecom {
 	//
 	class Transform : public EntityComponent {
 	public:
-		Transform() : m_transform(i3d::mat4d()) {}
+		Transform();
 
 		i3d::mat4d matrix();
 
@@ -101,19 +103,28 @@ namespace gecom {
 	//
 	class Drawable : public EntityComponent {
 	public:
-		Drawable() {}
+		Drawable();
 
-		virtual void loadShader();
-		virtual void loadMaterial();
-		virtual void loadData();
-		virtual void draw(i3d::mat4f, i3d::mat4f);
-		
+		virtual void draw(i3d::mat4f, i3d::mat4f) = 0;
+		virtual mesh_ptr getMaterial() = 0;
+
 	protected:
 		virtual void registerTo(DrawableSystem *) override final;
 
-	private:
-		GLuint prog = 0;
-		GLuint vao = 0;
+	};
+
+	// Mesh Drawable
+	//
+	class MeshDrawable :  public Drawable {
+	public:
+		MeshDrawable();
+
+		virtual mesh_ptr getMaterial();
+		virtual void draw(i3d::mat4f, i3d::mat4f);
+
+		mesh_ptr mesh;
+		material_ptr material;
+
 	};
 
 
