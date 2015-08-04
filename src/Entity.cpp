@@ -101,14 +101,14 @@ void Drawable::registerTo(DrawableSystem *ds) {
 MeshDrawable::MeshDrawable() { }
 
 
-mesh_ptr MeshDrawable::getMaterial() { return material; }
+material_ptr MeshDrawable::getMaterial() { return material; }
 
 
 void MeshDrawable::draw(i3d::mat4f worldViewMat, i3d::mat4f projMat) {
-	glUniformMatrix4fv(glGetUniformLocation(prog, "projectionMatrix"), 1, true, i3d::mat4f(projMat));
-	glUniformMatrix4fv(glGetUniformLocation(prog, "modelViewMatrix"), 1, true, worldViewMat * getParent()->root()->matrix());
-	mesh.bind();
-	mesh.draw();
+	glUniformMatrix4fv(glGetUniformLocation(material->shader->prog, "projectionMatrix"), 1, true, i3d::mat4f(projMat));
+	glUniformMatrix4fv(glGetUniformLocation(material->shader->prog, "modelViewMatrix"), 1, true, worldViewMat * getParent()->root()->matrix());
+	mesh->bind();
+	mesh->draw();
 }
 
 

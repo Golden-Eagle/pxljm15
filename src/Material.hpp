@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "GECom.hpp"
+#include "GLOW.hpp"
 #include "Initial3D.hpp"
 #include "SimpleShader.hpp"
 
@@ -34,8 +35,7 @@ namespace gecom {
 		~Shader();
 		void bind();
 
-	private:
-		GLuint m_prog;
+		GLuint prog = 0;
 	};
 
 }

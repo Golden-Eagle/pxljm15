@@ -4,10 +4,17 @@ using namespace std;
 using namespace gecom;
 
 
-Material::Material() {shader = shared_ptr<Shader>()}
-Material::~Material() {}
+Material::Material() { 
+	shader = make_shared<Shader>();
+}
 
-void Material::bind() {}
+
+Material::~Material() { }
+
+
+void Material::bind() { }
+
+
 
 Shader::Shader() {
 	static const char *shader_prog_src = R"delim(
@@ -47,12 +54,15 @@ Shader::Shader() {
 
 		#endif
 		)delim";
-	if (m_prog == 0) {
-		m_prog = makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
+	if (prog == 0) {
+		prog = makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
 	}
 }
 
-Shader::~Shader() {}
+
+Shader::~Shader() { }
+
+
 void Shader::bind() {
 	glUseProgram(prog);
 }

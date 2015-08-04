@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "GECom.hpp"
+#include "GLOW.hpp"
 #include "Initial3D.hpp"
 #include "SimpleShader.hpp"
 #include "Geometry.hpp"
@@ -23,9 +24,11 @@ namespace gecom {
 
 	class EntityComponent;
 	class Drawable;
+	class MeshDrawable;
 	class Transform;
 	using entity_comp_ptr = std::shared_ptr<EntityComponent>;
 	using entity_draw_ptr = std::shared_ptr<Drawable>;
+	using entity_mesh_ptr = std::shared_ptr<MeshDrawable>;
 	using entity_tran_ptr = std::shared_ptr<Transform>;
 
 	class Scene;
@@ -106,7 +109,7 @@ namespace gecom {
 		Drawable();
 
 		virtual void draw(i3d::mat4f, i3d::mat4f) = 0;
-		virtual mesh_ptr getMaterial() = 0;
+		virtual material_ptr getMaterial() = 0;
 
 	protected:
 		virtual void registerTo(DrawableSystem *) override final;
@@ -119,7 +122,7 @@ namespace gecom {
 	public:
 		MeshDrawable();
 
-		virtual mesh_ptr getMaterial();
+		virtual material_ptr getMaterial();
 		virtual void draw(i3d::mat4f, i3d::mat4f);
 
 		mesh_ptr mesh;

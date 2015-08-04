@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "GECom.hpp"
+#include "GLOW.hpp"
 #include "Initial3D.hpp"
 
 
@@ -24,6 +25,6 @@ namespace gecom {
 
 		void draw();
 	private:
-		GLuint m_vao;
+		GLuint m_vao = 0;
 	};
 }
