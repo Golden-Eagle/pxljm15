@@ -12,7 +12,9 @@ Material::Material() {
 Material::~Material() { }
 
 
-void Material::bind() { }
+void Material::bind(i3d::mat4d projectionMatrix) {
+	glUniformMatrix4fv(glGetUniformLocation(shader->prog, "projectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
+}
 
 
 

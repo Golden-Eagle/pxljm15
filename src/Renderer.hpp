@@ -51,18 +51,19 @@ namespace gecom {
 			i3d::mat4d view_matrix = m_camera->getViewTransform();
 
 
-			std::vector< entity_draw_ptr > drawList = s->getDrawList();
-			for ( auto drawable : drawList ) {
+			std::vector<Drawable::drawcall *> drawList = s->getDrawList(view_matrix);
+			for ( auto d : drawList ) {
 				// Bind shader program
 				// Bind material properties
 				// Bind Geometry
 				// Then render
 
 
-				material_ptr m = drawable->getMaterial();
+				material_ptr m = d->material();
 				m->shader->bind();
-				m->bind();
-				drawable->draw(view_matrix, proj_matrix);
+				m->bind(proj_matrix);
+				d->draw();
+				delete d;
 			}
 
 			glFinish();

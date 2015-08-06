@@ -39,8 +39,8 @@ namespace gecom {
 			m_entities.push_back(e);
 		}
 
-		std::vector< entity_draw_ptr > getDrawList( ) {
-			return m_drawableSystem->getDrawList();
+		std::vector<Drawable::drawcall *> getDrawList(i3d::mat4d view) {
+			return m_drawableSystem->getDrawList(view);
 		}
 
 	private:

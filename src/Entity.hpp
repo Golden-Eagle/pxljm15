@@ -106,28 +106,48 @@ namespace gecom {
 	//
 	class Drawable : public EntityComponent {
 	public:
-		Drawable();
 
-		virtual void draw(i3d::mat4f, i3d::mat4f) = 0;
-		virtual material_ptr getMaterial() = 0;
+		// Draw call data
+		//
+		class drawcall {
+		public:
+			virtual void draw() = 0;
+			material_ptr material();
+			bool operator< (const drawcall& rhs) const;
+
+		protected:
+			material_ptr m_mat;
+		};
+
+		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) = 0;
 
 	protected:
 		virtual void registerTo(DrawableSystem *) override final;
-
 	};
 
 	// Mesh Drawable
 	//
 	class MeshDrawable :  public Drawable {
 	public:
+
+		// Mesh draw call data
+		//
+		class mesh_drawcall : public Drawable::drawcall {
+		public:
+			mesh_drawcall(i3d::mat4d, material_ptr, mesh_ptr);
+			virtual void draw();
+
+		private:
+			i3d::mat4f m_mv;
+			mesh_ptr m_mesh;
+		};
+
 		MeshDrawable();
 
-		virtual material_ptr getMaterial();
-		virtual void draw(i3d::mat4f, i3d::mat4f);
+		virtual std::vector<Drawable::drawcall *> getDrawCalls(i3d::mat4d);
 
 		mesh_ptr mesh;
 		material_ptr material;
-
 	};
 
 
@@ -152,7 +172,7 @@ namespace gecom {
 		virtual void addComponent(entity_comp_ptr) override final;
 
 		void registerDrawable(entity_draw_ptr);
-		virtual std::vector< entity_draw_ptr > getDrawList();
+		virtual std::vector<Drawable::drawcall *> getDrawList(i3d::mat4d);
 
 	private:
 		std::vector<std::weak_ptr< Drawable >> m_drawables;

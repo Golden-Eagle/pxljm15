@@ -24,7 +24,7 @@ namespace gecom {
 		Material();
 		~Material();
 
-		void bind();
+		void bind(i3d::mat4d);
 
 		shader_ptr shader;
 	};

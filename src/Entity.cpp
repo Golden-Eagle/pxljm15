@@ -87,11 +87,16 @@ i3d::mat4d Transform::matrix() {
 //
 // Drawable component
 //
-Drawable::Drawable() { }
-
-
 void Drawable::registerTo(DrawableSystem *ds) {
 	ds->registerDrawable(static_pointer_cast<Drawable>(shared_from_this()));
+}
+
+
+material_ptr Drawable::drawcall::material() { return m_mat; }
+
+
+bool Drawable::drawcall::operator< (const drawcall& rhs) const {
+	return (m_mat->shader < rhs.m_mat->shader) ? true : (m_mat < rhs.m_mat);
 }
 
 
@@ -101,14 +106,22 @@ void Drawable::registerTo(DrawableSystem *ds) {
 MeshDrawable::MeshDrawable() { }
 
 
-material_ptr MeshDrawable::getMaterial() { return material; }
+vector<Drawable::drawcall *> MeshDrawable::getDrawCalls(i3d::mat4d view) {
+	vector<Drawable::drawcall *> dc;
+	Drawable::drawcall * mdc = new MeshDrawable::mesh_drawcall(view * getParent()->root()->matrix(), material, mesh);
+	dc.push_back(mdc);
+	return dc;
+}
 
 
-void MeshDrawable::draw(i3d::mat4f worldViewMat, i3d::mat4f projMat) {
-	glUniformMatrix4fv(glGetUniformLocation(material->shader->prog, "projectionMatrix"), 1, true, i3d::mat4f(projMat));
-	glUniformMatrix4fv(glGetUniformLocation(material->shader->prog, "modelViewMatrix"), 1, true, worldViewMat * getParent()->root()->matrix());
-	mesh->bind();
-	mesh->draw();
+MeshDrawable::mesh_drawcall::mesh_drawcall(i3d::mat4d mv, material_ptr mat, mesh_ptr mesh)
+	: m_mv(mv), m_mesh(mesh) { m_mat = mat; }
+
+
+void MeshDrawable::mesh_drawcall::draw() {
+	m_mesh->bind();
+	glUniformMatrix4fv(glGetUniformLocation(m_mat->shader->prog, "modelViewMatrix"), 1, true, m_mv);
+	m_mesh->draw();
 }
 
 
@@ -140,11 +153,12 @@ void DrawableSystem::registerDrawable(entity_draw_ptr d) {
 }
 
 
-vector< entity_draw_ptr > DrawableSystem::getDrawList() {
-	vector< entity_draw_ptr > drawList;
+vector<Drawable::drawcall *> DrawableSystem::getDrawList(i3d::mat4d viewMatrix) {
+	vector<Drawable::drawcall *> drawList;
 	for (auto it = m_drawables.begin() ; it != m_drawables.end(); ) {
 		if (auto drawable = (*it).lock()) {
-			drawList.push_back(drawable);
+			auto drawcalls = drawable->getDrawCalls(viewMatrix);
+			drawList.insert(drawList.end(), drawcalls.begin(), drawcalls.end());
 			++it;
 		} else {
 			it = m_drawables.erase(it);
