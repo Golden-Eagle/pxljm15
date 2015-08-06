@@ -16,6 +16,8 @@ SET(gecom_hdr
 	"Renderer.hpp"
 	"Geometry.hpp"
 	"Material.hpp"
+	"Assets.hpp"
+	"json.hpp"
 )
 
 
@@ -29,6 +31,7 @@ SET(gecom_src
 	"Entity.cpp"
 	"Geometry.cpp"
 	"Material.cpp"
+	"Assets.cpp"
 )
 
 
