@@ -2,9 +2,11 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
-#include "Material.hpp"
+#include "json.hpp"
 #include "Geometry.hpp"
+#include "Material.hpp"
 
 namespace gecom {
 	namespace assets {

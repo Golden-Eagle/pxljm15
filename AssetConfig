@@ -1,0 +1,15 @@
+{
+	
+	"meshes" : {
+		"my_first_mesh" : "./res/meshes/cube.obj"
+	},
+
+	"materials" : {
+
+	},
+
+	"shaders" : {
+
+
+	}
+}

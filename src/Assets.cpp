@@ -1,7 +1,7 @@
 #include "Assets.hpp"
 
 using namespace std;
-
+using json = nlohmann::json;
 
 namespace gecom {
 
@@ -13,7 +13,31 @@ namespace gecom {
 
 	namespace assets {
 		void init(const std::string &configPath) {
-			// TODO parse here
+			cout << "readfing file" << endl;
+			ifstream configFile(configPath);
+			if (configFile) {
+				json config;
+				config << configFile;
+				//TODO fail case
+
+				cout << " >> meshes" << endl;
+				for (auto it = config["meshes"].begin(); it != config["meshes"].end(); ++it)
+					cout << " " << it.key() << ":" << it.value() << endl;
+					// meshMap[it.key()] = make_shared(Mesh(it.value()));
+
+				cout << " >> materials" << endl;
+				for (auto it = config["materials"].begin(); it != config["materials"].end(); ++it)
+					cout << " " << it.key() << ":" << it.value() << endl;
+					// meshMap[it.key()] = make_shared(Mesh(it.value()));
+				
+				cout << " >> shaders" << endl;
+				for (auto it = config["shaders"].begin(); it != config["shaders"].end(); ++it)
+					cout << " " << it.key() << ":" << it.value() << endl;
+					// meshMap[it.key()] = make_shared(Mesh(it.value()));
+
+			}
+			cout << "finsihed readfing file" << endl;
+
 		}
 
 
