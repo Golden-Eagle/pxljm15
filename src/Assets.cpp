@@ -54,6 +54,9 @@ namespace gecom {
 					meshMap[tag] = make_shared<Mesh>(filePath);
 				}
 
+			} else {
+				cerr << "Could not find Asset Configuration file. Aborting..." << endl;
+				abort();
 			}
 			cout << "finsihed readfing file" << endl;
 

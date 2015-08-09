@@ -1,7 +1,7 @@
 {
 	
 	"meshes" : {
-		"cube" : "../res/meshes/cube.obj"
+		"cube" : "./res/meshes/cube.obj"
 	},
 
 	"materials" : {
@@ -12,6 +12,6 @@
 	},
 
 	"shaders" : {
-		"temp" : "../res/shaders/temp.glsl"
+		"temp" : "./res/shaders/temp.glsl"
 	}
 }

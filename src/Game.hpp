@@ -34,7 +34,7 @@ class Game {
 			m_renderer = new Renderer(win);
 
 			
-			gecom::assets::init("../AssetConfig");
+			gecom::assets::init("./AssetConfig");
 
 
 			//
