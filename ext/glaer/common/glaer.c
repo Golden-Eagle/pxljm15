@@ -13,10 +13,17 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-/* prevent redefinition; we don't need it anymore anyway */
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
+/* prevent redefinition */
 #undef APIENTRY
 
 #include <windows.h>
+
+#undef near
+#undef far
 
 /* https://www.opengl.org/wiki/Load_OpenGL_Functions */
 
@@ -106,15 +113,15 @@ static GlaerPFn glaerGetProcAddressGLX(const GLchar *procname) {
 static GlaerContextProvider glaer_current_context_provider;
 static GlaerErrorCallback glaer_error_callback;
 
-void glaerSetCurrentContextProvider(GlaerContextProvider p) {
+void APIENTRY glaerSetCurrentContextProvider(GlaerContextProvider p) {
 	glaer_current_context_provider = p;
 }
 
-void glaerSetErrorCallback(GlaerErrorCallback p) {
+void APIENTRY glaerSetErrorCallback(GlaerErrorCallback p) {
 	glaer_error_callback = p;
 }
 
-GlaerContext * glaerGetCurrentContext() {
+GlaerContext * APIENTRY glaerGetCurrentContext() {
 	return glaer_current_context_provider();
 }
 
