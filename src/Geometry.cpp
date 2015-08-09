@@ -26,8 +26,6 @@ Mesh::Mesh(const std::string &filepath) {
 
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
 		glEnableVertexAttribArray(0);
@@ -58,7 +56,7 @@ Mesh::~Mesh() { }
 void Mesh::generateGeometry() {
 
 	// vertex positions
-	unsigned int i[] = {
+	unsigned int idx[] = {
 		0, 1, 2,
 		3, 2, 1 
 	};
@@ -87,23 +85,37 @@ void Mesh::generateGeometry() {
 		 0.0f,  0.0f,  1.0f
 	};
 
-	glBindVertexArray(m_vao);
+
+	// for(size_t i=0 ; i < m_triangles.size(); i+=3) {
+	// 	cout << "Triangle :: " << m_triangles[i] << ", " << m_triangles[i+1] << ", " << m_triangles[i+2] << endl;
+	// } 
+
+	// for(size_t i=0 ; i < m_positions.size(); i++) {
+	// 	cout << "Position("<<i<<") = " << m_positions[i] << ", " << m_positions[i+1] << ", " << m_positions[i+2] << endl;
+	// }
+
+	// for(size_t i=0 ; i < m_normals.size(); i++) {
+	// 	cout << "Normal("<<i<<") = " << m_normals[i] << ", " << m_normals[i+1] << ", " << m_normals[i+2] << endl;
+	// }
+
+
+	// glBindVertexArray(m_vao);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(float) * m_triangles.size(), &m_triangles[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(p), p, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_positions.size(), &m_positions[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_norm);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(n), n, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_normals.size(), &m_normals[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(t), t, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_uvs.size(), &m_uvs[0], GL_STATIC_DRAW);
 
 	// Cleanup
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	// glBindVertexArray(0);
 }
 
 
@@ -113,7 +125,7 @@ void Mesh::bind() {
 
 
 void Mesh::draw() {
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, m_triangles.size(), GL_UNSIGNED_INT, nullptr);
 }
 
 
@@ -121,8 +133,8 @@ void Mesh::loadFromObj(const string &filepath) {
 	cout << "Load obj from " << filepath << endl;
 
 	// Make sure our geometry information is cleared
-	vector<vec3f> positions;
-	vector<vec3f> normals;
+	vector<float> positions;
+	vector<float> normals;
 	vector<float> uvs;
 
 
@@ -152,12 +164,16 @@ void Mesh::loadFromObj(const string &filepath) {
 			if (mode == "v") {
 				float x, y, z;
 				objLine >> x >> y >> z;
-				positions.push_back(vec3f(x, y, z));
+				positions.push_back(x);
+				positions.push_back(y);
+				positions.push_back(z);
 
 			} else if(mode == "vn") {
 				float x, y, z;
 				objLine >> x >> y >> z;
-				normals.push_back(vec3f(x, y, z));
+				normals.push_back(x);
+				normals.push_back(y);
+				normals.push_back(z);
 
 			} else if(mode == "vt") {
 				float u, v;
@@ -170,11 +186,13 @@ void Mesh::loadFromObj(const string &filepath) {
 				int i = 0;
 				while (objLine.good() && i++<3){
 					int pi,ti, ni;
-					m_triangles.push_back(m_positions.size());
+					m_triangles.push_back(m_positions.size()/3);
 
 					objLine >> pi; // position index
 					--pi;
-					m_positions.push_back(positions[pi]);
+					m_positions.push_back(positions[pi*3]);
+					m_positions.push_back(positions[pi*3+1]);
+					m_positions.push_back(positions[pi*3+2]);
 
 					if (objLine.peek() == '/') {	// Look ahead for a match
 						objLine.ignore(1);			// Ignore the '/' character
@@ -190,7 +208,9 @@ void Mesh::loadFromObj(const string &filepath) {
 							objLine.ignore(1);
 							objLine >> ni; // normal index
 							--ni;
-							m_normals.push_back(normals[ni]);
+							m_normals.push_back(normals[ni*3]);
+							m_normals.push_back(normals[ni*3+1]);
+							m_normals.push_back(normals[ni*3+2]);
 						}
 					}
 				}
@@ -200,46 +220,10 @@ void Mesh::loadFromObj(const string &filepath) {
 
 	// TODO update with new i3d at some point?
 	cout << "Reading OBJ file is DONE." << endl;
-	cout << m_positions.size() << " positions" << endl;
+	cout << m_positions.size()/3 << " positions" << endl;
 	cout << m_uvs.size()/2 << " uv coords" << endl;
-	cout << m_normals.size() << " normals" << endl;
+	cout << m_normals.size()/3 << " normals" << endl;
 	cout << m_triangles.size()/3 << " faces" << endl;
 
-
-	// If we didn't have any normals, create them
-	if (m_normals.size() <= 1) {
-		cout << "You you even have normals bro?" << endl;
-
-		// // Create the normals as 3d vectors of 0
-		// for (size_t i = 1; i < m_points.size(); i++) {
-		// 	m_normals.push_back(vec3());
-		// }
-
-		// // Add the normal for every face to each vertex-normal
-		// for (size_t i = 0; i < m_triangles.size(); i++) {
-		// 	vertex &a = m_triangles[i].v[0];
-		// 	vertex &b = m_triangles[i].v[1];
-		// 	vertex &c = m_triangles[i].v[2];
-
-		// 	a.n = a.p;
-		// 	b.n = b.p;
-		// 	c.n = c.p;
-
-		// 	vec3 ab = m_points[b.p] - m_points[a.p];
-		// 	vec3 ac = m_points[c.p] - m_points[a.p];
-
-		// 	vec3 norm = cross(ab, ac);
-		// 	if (length(norm) > 0) {
-		// 		m_normals[a.n] += normalize(norm);
-		// 		m_normals[b.n] += normalize(norm);
-		// 		m_normals[c.n] += normalize(norm);
-		// 	}
-		// }
-
-		// // Normalize the normals
-		// for (size_t i = 1; i < m_points.size(); i++) {
-		// 	m_normals[i] = normalize(m_normals[i]);
-		// }
-	}
 }
 

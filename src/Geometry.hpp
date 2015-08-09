@@ -37,8 +37,8 @@ namespace gecom {
 		GLuint m_vbo_uv = 0;
 
 
-		std::vector<i3d::vec3f> m_positions;
-		std::vector<i3d::vec3f> m_normals;
+		std::vector<float> m_positions;
+		std::vector<float> m_normals;
 		std::vector<float> m_uvs;
 		std::vector<unsigned int> m_triangles;
 	};

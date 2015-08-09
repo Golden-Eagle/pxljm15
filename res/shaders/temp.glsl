@@ -41,7 +41,7 @@ out vec3 color;
 
 void main() {
 	vec3 grey = vec3(0.8, 0.8, 0.8);
-    color = abs(v_in.normal.z) * grey;
+    color = abs((uProjectionMatrix * v_in.normal).z) * grey;
 }
 
 #endif
