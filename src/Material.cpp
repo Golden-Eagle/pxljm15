@@ -1,19 +1,18 @@
+#include "Assets.hpp"
 #include "Material.hpp"
 
 using namespace std;
 using namespace gecom;
 
 
-Material::Material() { 
-	shader = make_shared<Shader>();
-}
+Material::Material() { }
 
 
 Material::~Material() { }
 
 
 void Material::bind(i3d::mat4d projectionMatrix) {
-	glUniformMatrix4fv(glGetUniformLocation(shader->prog, "projectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
+	glUniformMatrix4fv(glGetUniformLocation(shader->prog, "uProjectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
 }
 
 
@@ -26,20 +25,26 @@ Shader::Shader() {
 		 *
 		 */
 
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
+		uniform mat4 uModelViewMatrix;
+		uniform mat4 uProjectionMatrix;
 
 		#ifdef _VERTEX_
 
-		layout(location = 0) in vec3 vertexPosition_modelspace;
-		layout(location = 1) in vec3 vertexColor;
+		layout(location = 0) in vec3 aPosition;
+		layout(location = 1) in vec3 aNormal;
+		layout(location = 2) in vec3 aUV;
 
-		out vec3 fragmentColor;
+		out VertexData {
+			vec4 pos;
+			vec4 normal;
+			vec2 uv;
+		} v_out;
 
 		void main() {
-			vec3 pos_v = (modelViewMatrix * vec4(vertexPosition_modelspace, 1.0)).xyz;
-			gl_Position = projectionMatrix * vec4(pos_v, 1.0);
-			fragmentColor = vertexColor;
+			vec4 p = (uModelViewMatrix * vec4(aPosition, 1.0));
+			gl_Position = uProjectionMatrix * p;
+			v_out.pos = p;
+			v_out.normal = (uModelViewMatrix * vec4(aNormal, 0.0));
 		}
 
 		#endif
@@ -47,17 +52,35 @@ Shader::Shader() {
 
 		#ifdef _FRAGMENT_
 
-		in vec3 fragmentColor;
+		in VertexData {
+			vec4 pos;
+			vec4 normal;
+			vec2 uv;
+		} v_in;
+
 		out vec3 color;
 
-		void main(){
-		    color = fragmentColor;
+		void main() {
+			vec3 grey = vec3(0.8, 0.8, 0.8);
+		    color = abs(v_in.normal.z) * grey;
 		}
 
 		#endif
 		)delim";
-	if (prog == 0) {
-		prog = makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
+
+	cout << "NOOOOP" << endl; 
+
+	prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
+}
+
+
+Shader::Shader(const string &filename) {
+	ifstream fileStream(filename);
+
+	if (fileStream) {
+		stringstream buffer;
+		buffer << fileStream.rdbuf();
+		prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
 	}
 }
 

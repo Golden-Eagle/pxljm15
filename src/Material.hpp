@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
 
 #include "GECom.hpp"
@@ -32,6 +34,7 @@ namespace gecom {
 	class Shader : Uncopyable, public std::enable_shared_from_this<Shader> {
 	public:
 		Shader();
+		Shader(const std::string &);
 		~Shader();
 		void bind();
 

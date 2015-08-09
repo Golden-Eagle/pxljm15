@@ -5,119 +5,117 @@ using namespace gecom;
 
 
 
-Mesh::Mesh() {
+Mesh::Mesh(const std::string &filepath) {
+	loadFromObj(filepath);
+
+
+
+
+
+	// setup the buffer!
 	if (m_vao == 0) {
 		glGenVertexArrays(1, &m_vao);
 		glBindVertexArray(m_vao);
 
-		// vertex positions
-		float pos[] = {
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f, 1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, 1.0f, -1.0f,
-			1.0f, -1.0f, 1.0f,
-			-1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f, 1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, -1.0f,
-			1.0f, -1.0f, 1.0f,
-			-1.0f, -1.0f, 1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, 1.0f, 1.0f,
-			-1.0f, -1.0f, 1.0f,
-			1.0f, -1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f, 1.0f, -1.0f,
-			1.0f, -1.0f, -1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, -1.0f,
-			-1.0f, 1.0f, -1.0f,
-			1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, -1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f, 1.0f,
-			-1.0f, 1.0f, 1.0f,
-			1.0f, -1.0f, 1.0f
-		};
+		glGenBuffers(1, &m_ibo);
+		glGenBuffers(1, &m_vbo_pos);
+		glGenBuffers(1, &m_vbo_norm);
+		glGenBuffers(1, &m_vbo_uv);
 
-		GLuint vbo_pos;
-		glGenBuffers(1, &vbo_pos);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_pos);
-		glBufferData(GL_ARRAY_BUFFER, 3 * 36 * sizeof(float), pos, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-		float col[] = {
-			0.583f, 0.771f, 0.014f,
-			0.609f, 0.115f, 0.436f,
-			0.327f, 0.483f, 0.844f,
-			0.822f, 0.569f, 0.201f,
-			0.435f, 0.602f, 0.223f,
-			0.310f, 0.747f, 0.185f,
-			0.597f, 0.770f, 0.761f,
-			0.559f, 0.436f, 0.730f,
-			0.359f, 0.583f, 0.152f,
-			0.483f, 0.596f, 0.789f,
-			0.559f, 0.861f, 0.639f,
-			0.195f, 0.548f, 0.859f,
-			0.014f, 0.184f, 0.576f,
-			0.771f, 0.328f, 0.970f,
-			0.406f, 0.615f, 0.116f,
-			0.676f, 0.977f, 0.133f,
-			0.971f, 0.572f, 0.833f,
-			0.140f, 0.616f, 0.489f,
-			0.997f, 0.513f, 0.064f,
-			0.945f, 0.719f, 0.592f,
-			0.543f, 0.021f, 0.978f,
-			0.279f, 0.317f, 0.505f,
-			0.167f, 0.620f, 0.077f,
-			0.347f, 0.857f, 0.137f,
-			0.055f, 0.953f, 0.042f,
-			0.714f, 0.505f, 0.345f,
-			0.783f, 0.290f, 0.734f,
-			0.722f, 0.645f, 0.174f,
-			0.302f, 0.455f, 0.848f,
-			0.225f, 0.587f, 0.040f,
-			0.517f, 0.713f, 0.338f,
-			0.053f, 0.959f, 0.120f,
-			0.393f, 0.621f, 0.362f,
-			0.673f, 0.211f, 0.457f,
-			0.820f, 0.883f, 0.371f,
-			0.982f, 0.099f, 0.879f
-		};
-
-		GLuint vbo_col;
-		glGenBuffers(1, &vbo_col);
-
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_col);
-		glBufferData(GL_ARRAY_BUFFER, 3 * 36 * sizeof(float), col, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_norm);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+
+		// Cleanup
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+
+		// Fill in the geometry
+		generateGeometry();
 	}
 }
 
-Mesh::~Mesh() {}
+
+Mesh::~Mesh() { }
+
+
+void Mesh::generateGeometry() {
+
+	// vertex positions
+	uint i[] = {
+		0, 1, 2,
+		3, 2, 1 
+	};
+
+	// vertex positions
+	float p[] = {
+		-1.0f, -1.0f,  0.0f,
+		 1.0f, -1.0f,  0.0f,
+		-1.0f,  1.0f,  0.0f,
+		 1.0f,  1.0f, -0.0f
+	};
+
+	// vertex normals
+	float n[] = {
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f
+	};
+
+	// vertex texture
+	float t[] = {
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f,
+		 0.0f,  0.0f,  1.0f
+	};
+
+	glBindVertexArray(m_vao);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(i), i, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(p), p, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_norm);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(n), n, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(t), t, GL_STATIC_DRAW);
+
+	// Cleanup
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 
 void Mesh::bind() {
 	glBindVertexArray(m_vao);
 }
 
+
 void Mesh::draw() {
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+}
+
+
+void Mesh::loadFromObj(const string &filepath) {
+	cout << "Load obj from " << filepath << endl;
 }

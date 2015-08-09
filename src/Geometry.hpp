@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "GECom.hpp"
@@ -16,15 +17,23 @@ namespace gecom {
 
 	using mesh_ptr = std::shared_ptr<Mesh>;
 
-	class Mesh {
+	class Mesh : Uncopyable, public std::enable_shared_from_this<Mesh> {
 	public:
-		Mesh();
+		Mesh(const std::string &);
 		~Mesh();
 
 		void bind();
 
 		void draw();
+
 	private:
+		void generateGeometry();
+		void loadFromObj(const std::string &);
+
 		GLuint m_vao = 0;
+		GLuint m_ibo = 0;
+		GLuint m_vbo_pos = 0;
+		GLuint m_vbo_norm = 0;
+		GLuint m_vbo_uv = 0;
 	};
 }

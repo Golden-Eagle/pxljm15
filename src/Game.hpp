@@ -3,6 +3,7 @@
 #include <stdexcept>
 #include <thread>
 
+#include "Assets.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
 #include "GLOW.hpp"
@@ -32,6 +33,9 @@ class Game {
 			//
 			m_renderer = new Renderer(win);
 
+			
+			gecom::assets::init("../AssetConfig");
+
 
 			//
 			// HACKY scene creation and population code here
@@ -41,8 +45,8 @@ class Game {
 			m_scene = std::make_shared<Scene>();
 			entity_ptr e = std::make_shared<Entity>();
 			entity_mesh_ptr md = std::make_shared<MeshDrawable>();
-			md->mesh = std::make_shared<Mesh>();
-			md->material = std::make_shared<Material>();
+			md->mesh = gecom::assets::getMesh("cube");
+			md->material = gecom::assets::getMaterial("basic");
 			e->addComponent(md);
 			m_scene->add(e);
 

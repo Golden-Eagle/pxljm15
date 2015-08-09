@@ -120,7 +120,7 @@ MeshDrawable::mesh_drawcall::mesh_drawcall(i3d::mat4d mv, material_ptr mat, mesh
 
 void MeshDrawable::mesh_drawcall::draw() {
 	m_mesh->bind();
-	glUniformMatrix4fv(glGetUniformLocation(m_mat->shader->prog, "modelViewMatrix"), 1, true, m_mv);
+	glUniformMatrix4fv(glGetUniformLocation(m_mat->shader->prog, "uModelViewMatrix"), 1, true, m_mv);
 	m_mesh->draw();
 }
 

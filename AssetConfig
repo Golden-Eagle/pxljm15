@@ -1,15 +1,17 @@
 {
 	
 	"meshes" : {
-		"my_first_mesh" : "./res/meshes/cube.obj"
+		"cube" : "../res/meshes/cube.obj"
 	},
 
 	"materials" : {
+		"basic" : {
+			"shader" : "temp"
+		}
 
 	},
 
 	"shaders" : {
-
-
+		"temp" : "../res/shaders/temp.glsl"
 	}
 }
