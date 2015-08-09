@@ -4,7 +4,8 @@ using namespace std;
 using namespace gecom;
 using namespace i3d;
 
-
+// @josh fix this shit
+using uint = unsigned;
 
 Mesh::Mesh(const std::string &filepath) {
 	loadFromObj(filepath);

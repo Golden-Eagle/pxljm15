@@ -41,3 +41,5 @@ target_link_libraries(gecom glfw ${GLFW_LIBRARIES})
 
 add_definitions(${GLAER_DEFINITIONS})
 target_link_libraries(gecom glaer ${GLAER_LIBRARIES})
+
+target_link_libraries(gecom BulletCollision BulletDynamics BulletSoftBody)

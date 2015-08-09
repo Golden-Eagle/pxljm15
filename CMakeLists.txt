@@ -15,6 +15,9 @@ include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.0.3/include")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glaer" "${PROJECT_BINARY_DIR}/ext/glaer")
 include_directories("${GLAER_BINARY_DIR}/src/include")
 
+# Bullet
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/bullet-2.83.5" "${PROJECT_BINARY_DIR}/ext/bullet")
+
 # compiler flags
 if(MSVC)
 	# Force to always compile with W4
