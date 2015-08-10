@@ -18,6 +18,7 @@ namespace gecom {
 	class Scene : public std::enable_shared_from_this<Scene> {
 	public:
 		Scene() {
+			m_lightingSystem = new LightingSystem();
 			m_drawableSystem = new DrawableSystem();
 			m_systems.push_back(m_drawableSystem);
 		}
@@ -29,10 +30,8 @@ namespace gecom {
 		}
 
 		void add( entity_ptr e ){
-			std::cout << "add entity" << std::endl;
 			for (ComponentSystem *s : m_systems) {
 				for ( entity_comp_ptr c : e->getComponents() ) {
-					std::cout << "Try adding component" << std::endl;
 					s->addComponent(c);
 				}
 			}
@@ -47,6 +46,7 @@ namespace gecom {
 		std::vector<entity_ptr> m_entities;
 		std::vector<ComponentSystem  *> m_systems;
 
+		LightingSystem *m_lightingSystem;
 		DrawableSystem *m_drawableSystem;
 	};
 

@@ -40,9 +40,8 @@ in VertexData {
 out vec3 color;
 
 void main() {
-	// vec3 grey = vec3(0.8, 0.8, 0.8);
-    // color = abs(normalize(v_in.normal).z) * grey;
-    color = abs(normalize(v_in.normal));
+    color = abs(normalize(v_in.normal).z) * vec3(0.4) + vec3(0.4);
+    // color = abs(normalize(v_in.normal));
 }
 
 #endif

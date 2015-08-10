@@ -74,6 +74,9 @@ void EntityComponent::registerTo(ComponentSystem *) { }
 void EntityComponent::registerTo(DrawableSystem *) { }
 
 
+void EntityComponent::registerTo(LightingSystem *) { }
+
+
 void EntityComponent::update(Scene &) { }
 
 
@@ -170,6 +173,37 @@ void MeshDrawable::mesh_drawcall::draw() {
 
 
 
+//
+// Light component
+//
+Light::~Light() { }
+
+
+
+void Light::registerTo(LightingSystem *ds) {
+	ds->registerLight(static_pointer_cast<Light>(shared_from_this()));
+}
+
+
+
+// Directional Light
+//
+DirectionalLight::DirectionalLight() { }
+
+
+
+// Point Light
+//
+PointLight::PointLight() { }
+
+
+
+// Spot Light
+//
+SpotLight::SpotLight() { }
+
+
+
 // 
 // ComponentSystem
 // 
@@ -209,4 +243,38 @@ vector<Drawable::drawcall *> DrawableSystem::getDrawList(mat4d viewMatrix) {
 		}
 	}
 	return drawList;
+}
+
+
+
+// 
+// LightingSystem
+// 
+LightingSystem::LightingSystem() { }
+
+
+LightingSystem::~LightingSystem() { }
+
+
+void LightingSystem::addComponent(entity_comp_ptr c){
+	c->registerTo(static_cast<LightingSystem *>(this));
+}
+
+
+void LightingSystem::registerLight(light_ptr light) {
+	m_lights.push_back(light);
+}
+
+
+vector<light_ptr> LightingSystem::getLights() {
+	vector<light_ptr> lightList;
+	for (auto it = m_lights.begin() ; it != m_lights.end(); ) {
+		if (auto light = (*it).lock()) {
+			lightList.push_back(light);
+			++it;
+		} else {
+			it = m_lights.erase(it);
+		}
+	}
+	return lightList;
 }

@@ -23,19 +23,31 @@ namespace gecom {
 	using entity_ptr = std::shared_ptr<Entity>;
 
 	class EntityComponent;
+	using entity_comp_ptr = std::shared_ptr<EntityComponent>;
+
 	class Drawable;
 	class MeshDrawable;
-	class Transform;
-	class EntityTransform;
-	using entity_comp_ptr = std::shared_ptr<EntityComponent>;
 	using entity_draw_ptr = std::shared_ptr<Drawable>;
 	using entity_mesh_ptr = std::shared_ptr<MeshDrawable>;
+
+	class Transform;
+	class EntityTransform;
 	using transform_ptr = std::shared_ptr<Transform>;
 	using entity_transform_ptr = std::shared_ptr<EntityTransform>;
+
+	class Light;
+	class DirectionalLight;
+	class PointLight;
+	class SpotLight;
+	using light_ptr = std::shared_ptr<Light>;
+	using directional_light_ptr = std::shared_ptr<DirectionalLight>;
+	using point_light_ptr = std::shared_ptr<PointLight>;
+	using spot_light_ptr = std::shared_ptr<SpotLight>;
 
 	class Scene;
 	class ComponentSystem;
 	class DrawableSystem;
+	class LightingSystem;
 
 
 	//
@@ -81,8 +93,10 @@ namespace gecom {
 	protected:
 		virtual void registerTo(ComponentSystem *);
 		virtual void registerTo(DrawableSystem *);
+		virtual void registerTo(LightingSystem *);
 		friend class ComponentSystem;
 		friend class DrawableSystem;
+		friend class LightingSystem;
 		
 	private:
 		std::weak_ptr<Entity> m_parent;
@@ -173,6 +187,39 @@ namespace gecom {
 
 
 	//
+	// Light component
+	//
+	class Light : public EntityComponent {
+	public:
+		virtual ~Light();
+	protected:
+		virtual void registerTo(LightingSystem *);
+	};
+
+	// Directional Light component
+	//
+	class DirectionalLight : public Light {
+	public:
+		DirectionalLight();
+	};
+
+	// Directional Light component
+	//
+	class PointLight : public Light {
+	public:
+		PointLight();
+	};
+
+	// Directional Light component
+	//
+	class SpotLight : public Light {
+	public:
+		SpotLight();
+	};
+
+
+
+	//
 	// Component System base class
 	//
 	class ComponentSystem {
@@ -195,7 +242,23 @@ namespace gecom {
 		virtual std::vector<Drawable::drawcall *> getDrawList(i3d::mat4d);
 
 	private:
-		std::vector<std::weak_ptr< Drawable >> m_drawables;
+		std::vector<std::weak_ptr<Drawable>> m_drawables;
 	};
 
+
+	//
+	// Component System for Light Components
+	//
+	class LightingSystem : public ComponentSystem {
+	public:
+		LightingSystem();
+		virtual ~LightingSystem();
+		virtual void addComponent(entity_comp_ptr) override final;
+
+		void registerLight(light_ptr);
+		virtual std::vector<light_ptr> getLights();
+
+	private:
+		std::vector<std::weak_ptr<Light>> m_lights;
+	};
 }
