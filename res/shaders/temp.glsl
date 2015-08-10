@@ -40,7 +40,8 @@ in VertexData {
 out vec3 color;
 
 void main() {
-    color = abs(normalize(v_in.normal).z) * vec3(0.4) + vec3(0.4);
+	vec3 eye = normalize(-v_in.pos);
+    color = abs(dot(normalize(v_in.normal), eye)) * vec3(0.4) + vec3(0.4);
     // color = abs(normalize(v_in.normal));
 }
 
