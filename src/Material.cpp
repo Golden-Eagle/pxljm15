@@ -12,7 +12,7 @@ Material::~Material() { }
 
 
 void Material::bind(i3d::mat4d projectionMatrix) {
-	glUniformMatrix4fv(glGetUniformLocation(shader->prog, "uProjectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
+	glUniformMatrix4fv(shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
 }
 
 
@@ -70,7 +70,7 @@ Shader::Shader() {
 
 	cout << "NOOOOP" << endl; 
 
-	prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
+	m_prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
 }
 
 
@@ -80,7 +80,7 @@ Shader::Shader(const string &filename) {
 	if (fileStream) {
 		stringstream buffer;
 		buffer << fileStream.rdbuf();
-		prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
+		m_prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
 	}
 }
 
@@ -89,5 +89,23 @@ Shader::~Shader() { }
 
 
 void Shader::bind() {
-	glUseProgram(prog);
+	glUseProgram(m_prog);
+}
+
+
+GLuint Shader::uniformLocation(const string &name) {
+	try {
+		return m_uniformLocationCache.at(name);
+	} catch (const std::out_of_range& oor) {
+		GLuint location = glGetUniformLocation(m_prog, name.c_str());
+		if (location == GLuint(-1)) 
+			throw runtime_error("Error :: Tried to access invalid uniform name.");
+		m_uniformLocationCache[name] = location;
+		return location;
+	}
+}
+
+
+GLuint Shader::program() const {
+	return m_prog;
 }

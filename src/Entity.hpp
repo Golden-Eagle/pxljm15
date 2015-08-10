@@ -26,10 +26,12 @@ namespace gecom {
 	class Drawable;
 	class MeshDrawable;
 	class Transform;
+	class EntityTransform;
 	using entity_comp_ptr = std::shared_ptr<EntityComponent>;
 	using entity_draw_ptr = std::shared_ptr<Drawable>;
 	using entity_mesh_ptr = std::shared_ptr<MeshDrawable>;
-	using entity_tran_ptr = std::shared_ptr<Transform>;
+	using transform_ptr = std::shared_ptr<Transform>;
+	using entity_transform_ptr = std::shared_ptr<EntityTransform>;
 
 	class Scene;
 	class ComponentSystem;
@@ -41,12 +43,15 @@ namespace gecom {
 	//
 	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
 	public:
-		Entity();
+		Entity(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
+		Entity(i3d::quatd);
+		// Entity(entity_ptr, const i3d::vec3d &, const i3d::quatd &);
+		// Entity(entity_ptr, const i3d::quatd &);
 		~Entity();
 
 		void addComponent( entity_comp_ptr ec );
 
-		entity_tran_ptr root() const;
+		entity_transform_ptr root() const;
 		const std::vector<entity_comp_ptr> & getComponents() const;
 
 		template<typename T>
@@ -54,7 +59,7 @@ namespace gecom {
 
 
 	private:
-		entity_tran_ptr m_root = std::make_shared<Transform>();
+		entity_transform_ptr m_root;
 		std::vector<entity_comp_ptr> m_components;
 	};
 
@@ -91,12 +96,26 @@ namespace gecom {
 	//
 	class Transform : public EntityComponent {
 	public:
-		Transform();
+		virtual ~Transform() = 0;
+		virtual i3d::mat4d matrix() = 0;
+	};
 
-		i3d::mat4d matrix();
 
-	private:
-		i3d::mat4d m_transform;
+
+	//
+	// Entity Tranform component
+	//
+	class EntityTransform : public EntityComponent {
+	public:
+		EntityTransform();
+		EntityTransform(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
+		EntityTransform(i3d::quatd);
+		virtual ~EntityTransform();
+		virtual i3d::mat4d matrix();
+		virtual i3d::mat4d localMatrix();
+
+		i3d::vec3d position;
+		i3d::quatd rotation;
 	};
 
 
@@ -111,6 +130,7 @@ namespace gecom {
 		//
 		class drawcall {
 		public:
+			virtual ~drawcall();
 			virtual void draw() = 0;
 			material_ptr material();
 			bool operator< (const drawcall& rhs) const;
@@ -142,7 +162,7 @@ namespace gecom {
 			mesh_ptr m_mesh;
 		};
 
-		MeshDrawable();
+		MeshDrawable(mesh_ptr, material_ptr);
 
 		virtual std::vector<Drawable::drawcall *> getDrawCalls(i3d::mat4d);
 

@@ -72,8 +72,8 @@ namespace gecom {
 
 	class FPSCamera : public Camera {
 	public:
-		FPSCamera(gecom::Window *win, const initial3d::vec3d &pos, double rot_h = 0, double rot_v = 0) :
-			m_window(win), m_pos(pos), m_ori(), m_rot_v(rot_v), m_mouse_captured(false) {
+		FPSCamera(gecom::Window *win, const initial3d::vec3d &pos) :
+			m_window(win), m_pos(pos), m_ori(), m_rot_v(0), m_mouse_captured(false) {
 			m_time_last = std::chrono::steady_clock::now();
 			m_speed = 2.5;
 		}

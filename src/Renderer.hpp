@@ -16,7 +16,7 @@ namespace gecom {
 	public:
 		Renderer( Window *win ) : m_win(win) {
 			m_projection = new Projection();
-			m_camera = new FPSCamera(win, i3d::vec3d(0, 0, 3), 0, 0);
+			m_camera = new FPSCamera(win, i3d::vec3d(0, 0, 3));
 		}
 		~Renderer();
 
@@ -57,7 +57,6 @@ namespace gecom {
 				// Bind material properties
 				// Bind Geometry
 				// Then render
-
 
 				material_ptr m = d->material();
 				m->shader->bind();

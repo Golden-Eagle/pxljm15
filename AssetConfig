@@ -1,14 +1,15 @@
 {
 	
 	"meshes" : {
-		"cube" : "./res/meshes/cube.obj"
+		"cube" : "./res/meshes/cube.obj",
+		"plane" : "./res/meshes/plane.obj",
+		"sphere" : "./res/meshes/sphere.obj"
 	},
 
 	"materials" : {
 		"basic" : {
 			"shader" : "temp"
 		}
-
 	},
 
 	"shaders" : {

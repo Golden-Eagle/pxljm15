@@ -2,11 +2,23 @@
 
 using namespace std;
 using namespace gecom;
+using namespace i3d;
+
+
 
 //
 // Entity
 //
-Entity::Entity() { m_components.push_back(m_root); }
+Entity::Entity(vec3d pos, quatd rot) {
+	m_root = std::make_shared<EntityTransform>(pos, rot);
+	m_components.push_back(m_root);
+}
+
+
+Entity::Entity(quatd rot) {
+	m_root = std::make_shared<EntityTransform>(vec3d(), rot);
+	m_components.push_back(m_root);
+}
 
 
 Entity::~Entity() {}
@@ -26,7 +38,7 @@ void Entity::addComponent( entity_comp_ptr ec ) {
 }
 
 
-entity_tran_ptr Entity::root() const {
+entity_transform_ptr Entity::root() const {
 	return m_root;
 }
 
@@ -56,13 +68,13 @@ EntityComponent::EntityComponent() { }
 EntityComponent::~EntityComponent() { }
 
 
-void EntityComponent::registerTo(ComponentSystem *cs) { }
+void EntityComponent::registerTo(ComponentSystem *) { }
 
 
-void EntityComponent::registerTo(DrawableSystem *ds) { }
+void EntityComponent::registerTo(DrawableSystem *) { }
 
 
-void EntityComponent::update(Scene &s) { }
+void EntityComponent::update(Scene &) { }
 
 
 bool EntityComponent::hasParent() { return bool(m_parent.lock()); }
@@ -75,11 +87,40 @@ entity_ptr EntityComponent::getParent() const { return m_parent.lock(); }
 //
 // Tranform component
 //
-Transform::Transform() : m_transform(i3d::mat4d()) { }
 
 
-i3d::mat4d Transform::matrix() {
-	return m_transform;
+
+// Nothing here
+
+
+
+//
+// Entity Tranform component
+//
+EntityTransform::EntityTransform() { }
+
+
+EntityTransform::EntityTransform(vec3d pos, quatd rot) : position(pos), rotation(rot) { }
+
+
+EntityTransform::EntityTransform(quatd rot) : position(vec3d()), rotation(rot) { }
+
+
+EntityTransform::~EntityTransform() { }
+
+
+mat4d EntityTransform::matrix() {
+	return mat4d::translate(position) * mat4d::rotate(rotation);
+}
+
+
+mat4d EntityTransform::localMatrix() {
+	//TODO 
+	// entity_ptr p = getParent();
+	// if (p){
+	// 	return 
+	// }
+	return mat4d::translate(position) * mat4d::rotate(rotation);
 }
 
 
@@ -92,21 +133,24 @@ void Drawable::registerTo(DrawableSystem *ds) {
 }
 
 
+Drawable::drawcall::~drawcall() { }
+
+
 material_ptr Drawable::drawcall::material() { return m_mat; }
 
 
 bool Drawable::drawcall::operator< (const drawcall& rhs) const {
-	return (m_mat->shader < rhs.m_mat->shader) ? true : (m_mat < rhs.m_mat);
+	return m_mat->shader < rhs.m_mat->shader || m_mat < rhs.m_mat;
 }
 
 
 
 // Mesh Drawable
 //
-MeshDrawable::MeshDrawable() { }
+MeshDrawable::MeshDrawable(mesh_ptr m, material_ptr mat) : mesh(m), material(mat) { }
 
 
-vector<Drawable::drawcall *> MeshDrawable::getDrawCalls(i3d::mat4d view) {
+vector<Drawable::drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 	vector<Drawable::drawcall *> dc;
 	Drawable::drawcall * mdc = new MeshDrawable::mesh_drawcall(view * getParent()->root()->matrix(), material, mesh);
 	dc.push_back(mdc);
@@ -114,13 +158,13 @@ vector<Drawable::drawcall *> MeshDrawable::getDrawCalls(i3d::mat4d view) {
 }
 
 
-MeshDrawable::mesh_drawcall::mesh_drawcall(i3d::mat4d mv, material_ptr mat, mesh_ptr mesh)
+MeshDrawable::mesh_drawcall::mesh_drawcall(mat4d mv, material_ptr mat, mesh_ptr mesh)
 	: m_mv(mv), m_mesh(mesh) { m_mat = mat; }
 
 
 void MeshDrawable::mesh_drawcall::draw() {
 	m_mesh->bind();
-	glUniformMatrix4fv(glGetUniformLocation(m_mat->shader->prog, "uModelViewMatrix"), 1, true, m_mv);
+	glUniformMatrix4fv(m_mat->shader->uniformLocation("uModelViewMatrix"), 1, true, m_mv);
 	m_mesh->draw();
 }
 
@@ -153,7 +197,7 @@ void DrawableSystem::registerDrawable(entity_draw_ptr d) {
 }
 
 
-vector<Drawable::drawcall *> DrawableSystem::getDrawList(i3d::mat4d viewMatrix) {
+vector<Drawable::drawcall *> DrawableSystem::getDrawList(mat4d viewMatrix) {
 	vector<Drawable::drawcall *> drawList;
 	for (auto it = m_drawables.begin() ; it != m_drawables.end(); ) {
 		if (auto drawable = (*it).lock()) {

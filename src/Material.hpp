@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <stdexcept>
+#include <map>
 
 #include "GECom.hpp"
 #include "GLOW.hpp"
@@ -38,7 +40,13 @@ namespace gecom {
 		~Shader();
 		void bind();
 
-		GLuint prog = 0;
+		GLuint uniformLocation(const std::string &);
+		GLuint program() const;
+
+	
+	private:
+		std::map<std::string, GLuint> m_uniformLocationCache;
+		GLuint m_prog = 0;
 	};
 
 }

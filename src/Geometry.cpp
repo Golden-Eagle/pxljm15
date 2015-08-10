@@ -55,51 +55,6 @@ Mesh::~Mesh() { }
 
 
 void Mesh::generateGeometry() {
-
-	// vertex positions
-	unsigned int idx[] = {
-		0, 1, 2,
-		3, 2, 1 
-	};
-
-	// vertex positions
-	float p[] = {
-		-1.0f, -1.0f,  0.0f,
-		 1.0f, -1.0f,  0.0f,
-		-1.0f,  1.0f,  0.0f,
-		 1.0f,  1.0f, -0.0f
-	};
-
-	// vertex normals
-	float n[] = {
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f
-	};
-
-	// vertex texture
-	float t[] = {
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f,
-		 0.0f,  0.0f,  1.0f
-	};
-
-
-	// for(size_t i=0 ; i < m_triangles.size(); i+=3) {
-	// 	cout << "Triangle :: " << m_triangles[i] << ", " << m_triangles[i+1] << ", " << m_triangles[i+2] << endl;
-	// } 
-
-	// for(size_t i=0 ; i < m_positions.size(); i++) {
-	// 	cout << "Position("<<i<<") = " << m_positions[i] << ", " << m_positions[i+1] << ", " << m_positions[i+2] << endl;
-	// }
-
-	// for(size_t i=0 ; i < m_normals.size(); i++) {
-	// 	cout << "Normal("<<i<<") = " << m_normals[i] << ", " << m_normals[i+1] << ", " << m_normals[i+2] << endl;
-	// }
-
-
 	// glBindVertexArray(m_vao);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
