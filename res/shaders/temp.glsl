@@ -41,8 +41,7 @@ out vec3 color;
 
 void main() {
 	vec3 eye = normalize(-v_in.pos);
-    color = abs(dot(normalize(v_in.normal), eye)) * vec3(0.4) + vec3(0.4);
-    // color = abs(normalize(v_in.normal));
+    color = abs(dot(normalize(v_in.normal), eye)) * vec3(0.7) + vec3(0.1);
 }
 
 #endif
