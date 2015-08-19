@@ -11,7 +11,7 @@ namespace gecom {
 		BoxMove() {}
 
 		virtual void update() {
-			getParent()->root()->position += i3d::vec3d(0.005, 0, 0);
+			entity()->root()->position += i3d::vec3d(0.005, 0, 0);
 		}
 		
 	};

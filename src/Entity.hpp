@@ -6,6 +6,8 @@
 #include <queue>
 #include <vector>
 
+#include <btBulletDynamicsCommon.h>
+
 #include "GECom.hpp"
 #include "GLOW.hpp"
 #include "Initial3D.hpp"
@@ -60,11 +62,11 @@ namespace gecom {
 
 		virtual void registerWith(Scene &);
 
-		bool hasParent();
-		entity_ptr getParent() const;
+		bool hasEntity();
+		entity_ptr entity() const;
 		
 	private:
-		std::weak_ptr<Entity> m_parent;
+		std::weak_ptr<Entity> m_entity;
 		friend class Entity;
 	};
 
@@ -164,6 +166,23 @@ namespace gecom {
 
 
 	//
+	// Physical component
+	//
+	class PhysicalComponent : public virtual EntityComponent {
+	public:
+		PhysicalComponent();
+		virtual ~PhysicalComponent();
+
+		virtual void registerWith(Scene &) override;
+		virtual void updateTransform();
+
+
+		btRigidBody* rigidBody;
+	};
+
+
+
+	//
 	// Light component
 	//
 	class LightComponent : public virtual EntityComponent {
@@ -225,7 +244,7 @@ namespace gecom {
 			m_dynamicComponents.push_back(std::move(ec));
 			m_components.push_back(ecp);
 
-			ecp->m_parent = shared_from_this();
+			ecp->m_entity = shared_from_this();
 
 			if (m_scene)
 				ecp->registerWith(*m_scene);
@@ -285,6 +304,32 @@ namespace gecom {
 
 	private:
 		std::vector<DrawableComponent *> m_drawables;
+	};
+
+
+	// 
+	// Component System for Physcial Components
+	// 
+	class PhysicalSystem : public ComponentSystem {
+	public:
+		PhysicalSystem();
+		virtual ~PhysicalSystem();
+
+		void addPhysics(PhysicalComponent *);
+		void removePhysics(PhysicalComponent *);
+
+		void tick();
+
+	private:
+		std::vector<PhysicalComponent *> m_rigidbodies;
+
+		btBroadphaseInterface* broadphase;
+		btDefaultCollisionConfiguration* collisionConfiguration;
+		btCollisionDispatcher* dispatcher;
+		btSequentialImpulseConstraintSolver* solver;
+
+		btDiscreteDynamicsWorld* dynamicsWorld;
+
 	};
 
 

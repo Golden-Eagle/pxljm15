@@ -62,10 +62,10 @@ const std::vector<EntityComponent *> & Entity::getAllComponents() const {
 EntityComponent::~EntityComponent() { }
 
 
-bool EntityComponent::hasParent() { return bool(m_parent.lock()); }
+bool EntityComponent::hasEntity() { return bool(m_entity.lock()); }
 
 
-entity_ptr EntityComponent::getParent() const { return m_parent.lock(); }
+entity_ptr EntityComponent::entity() const { return m_entity.lock(); }
 
 
 void EntityComponent::registerWith(Scene &) { }
@@ -103,7 +103,7 @@ mat4d EntityTransform::matrix() {
 
 
 mat4d EntityTransform::localMatrix() {
-	if (auto p = getParent())
+	if (auto p = entity())
 		return p->root()->matrix() * matrix();
 	return matrix();
 }
@@ -152,11 +152,53 @@ MeshDrawable::~MeshDrawable() { }
 
 vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 	vector<drawcall *> drawcallList;
-	m_cachedDrawcall = mesh_drawcall(view * getParent()->root()->matrix(), material, mesh);
+	m_cachedDrawcall = mesh_drawcall(view * entity()->root()->matrix(), material, mesh);
 	drawcallList.push_back(&m_cachedDrawcall);
 	return drawcallList;
 }
 
+
+
+//
+// Physical component
+//
+PhysicalComponent::PhysicalComponent() {
+
+}
+
+
+PhysicalComponent::~PhysicalComponent() {
+
+}
+
+
+void PhysicalComponent::registerWith(Scene &s) {
+	vec3d pos = entity()->root()->position;
+
+	// Shape
+	btCollisionShape* shape = new btSphereShape(1);
+
+	// Motion state
+	btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(pos.x(), pos.y(), pos.z())));
+
+	// Specifics
+	btScalar mass = 1;
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(mass, inertia);
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, shape, inertia);
+	rigidBody = new btRigidBody(rigidBodyCI);
+
+	s.registerPhysicalComponent(this);
+}
+
+
+void PhysicalComponent::updateTransform() {
+	btTransform trans;
+	rigidBody->getMotionState()->getWorldTransform(trans);
+	btVector3 pos = trans.getOrigin();
+	entity()->root()->position = vec3d(pos.getX(), pos.getY(), pos.getZ());
+	cout << "Position now at " << entity()->root()->position << endl;
+}
 
 
 
@@ -164,7 +206,6 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 // Light component
 //
 LightComponent::~LightComponent() { }
-
 
 
 void LightComponent::registerWith(Scene &s) {
@@ -224,6 +265,61 @@ priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
 			drawQueue.push(draw);
 	}
 	return drawQueue;
+}
+
+
+
+// 
+// Drawable System
+// 
+PhysicalSystem::PhysicalSystem() {
+
+	broadphase = new btDbvtBroadphase();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	solver = new btSequentialImpulseConstraintSolver();
+
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+
+	// TODO make it realitive?
+	// If not configurable
+	// HACK
+	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+
+
+	// HACK
+	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -5);
+	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	dynamicsWorld->addRigidBody(groundRigidBody);
+
+}
+
+
+PhysicalSystem::~PhysicalSystem() {
+	delete dynamicsWorld;
+
+	delete solver;
+	delete dispatcher;
+	delete collisionConfiguration;
+	delete broadphase;
+}
+
+
+void PhysicalSystem::addPhysics(PhysicalComponent * d) {
+	m_rigidbodies.push_back(d);
+	dynamicsWorld->addRigidBody(d->rigidBody);
+}
+
+//TODO
+void PhysicalSystem::removePhysics(PhysicalComponent *) { }
+
+
+void PhysicalSystem::tick() {
+	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+	for (PhysicalComponent *pc : m_rigidbodies)
+		pc->updateTransform();
 }
 
 

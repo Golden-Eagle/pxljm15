@@ -51,10 +51,11 @@ namespace gecom {
 
 			// Sphere
 			//
-			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(2, 0, 2));
+			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(2, 40, 2));
 			sphere->emplaceComponent<MeshDrawable>(
 				gecom::assets::getMesh("sphere"),
 				gecom::assets::getMaterial("basic"));
+			sphere->emplaceComponent<PhysicalComponent>();
 			m_scene->add(sphere);
 
 

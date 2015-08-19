@@ -24,6 +24,7 @@ namespace gecom {
 
 		LightSystem *m_lightSystem;
 		DrawableSystem *m_drawableSystem;
+		PhysicalSystem *m_physicalSystem;
 
 		std::vector<UpdateComponent *> m_updateComponents;
 
@@ -39,6 +40,7 @@ namespace gecom {
 			m_renderer = new Renderer(win);
 			m_lightSystem = new LightSystem();
 			m_drawableSystem = new DrawableSystem();
+			m_physicalSystem = new PhysicalSystem();
 
 			m_projection = new Projection();
 			m_camera = new FPSCamera(win, i3d::vec3d(0, 0, 3));
@@ -49,6 +51,7 @@ namespace gecom {
 			delete m_renderer;
 			delete m_lightSystem;
 			delete m_drawableSystem;
+			delete m_physicalSystem;
 			delete m_projection;
 			delete m_camera;
 		}
@@ -59,6 +62,7 @@ namespace gecom {
 			// 
 				//Bullet update
 				// 
+				m_physicalSystem->tick();
 
 				//Fixed update
 				// 
@@ -100,20 +104,15 @@ namespace gecom {
 		}
 
 
-		void registerDrawableComponent(DrawableComponent *ec) {
-			m_drawableSystem->addDrawable(ec);
-		}
-
-		void deregisterDrawableComponent(DrawableComponent *ec) {
-			m_drawableSystem->removeDrawable(ec);
-		}
+		// Drawable System
+		//
+		void registerDrawableComponent(DrawableComponent *ec) { m_drawableSystem->addDrawable(ec); }
+		void deregisterDrawableComponent(DrawableComponent *ec) { m_drawableSystem->removeDrawable(ec);	}
 
 
-
-		void registerUpdateComponent(UpdateComponent *ec) {
-			m_updateComponents.push_back(ec);
-		}
-
+		// Update System
+		//
+		void registerUpdateComponent(UpdateComponent *ec) { m_updateComponents.push_back(ec); }
 		void deregisterUpdateComponent(UpdateComponent *ec) {
 			for (auto it = m_updateComponents.begin(); it != m_updateComponents.end(); it++)
 				if (*it == ec)
@@ -121,13 +120,15 @@ namespace gecom {
 		}
 
 
+		// Physics System
+		//
+		void registerPhysicalComponent(PhysicalComponent *ec) { m_physicalSystem->addPhysics(ec); }
+		void deregisterPhysicalComponent(PhysicalComponent *ec) { m_physicalSystem->removePhysics(ec);	}
 
-		void registerLightComponent(LightComponent *ec) {
-			m_lightSystem->addLight(ec);
-		}
 
-		void deregisterLightComponent(LightComponent *ec) {
-			m_lightSystem->removeLight(ec);
-		}
+		// Light System
+		//
+		void registerLightComponent(LightComponent *ec) { m_lightSystem->addLight(ec); }
+		void deregisterLightComponent(LightComponent *ec) {	m_lightSystem->removeLight(ec);	}
 	};
 }
