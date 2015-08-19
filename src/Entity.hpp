@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 #include <iostream>
+#include <queue>
 #include <vector>
 
 #include "GECom.hpp"
@@ -19,84 +20,48 @@ namespace gecom {
 	// Forward decleration
 	//
 
+	// Entity
+	// 
 	class Entity;
 	using entity_ptr = std::shared_ptr<Entity>;
 
+	// Components
+	// 
 	class EntityComponent;
-	using entity_comp_ptr = std::shared_ptr<EntityComponent>;
 
-	class Drawable;
-	class MeshDrawable;
-	using entity_draw_ptr = std::shared_ptr<Drawable>;
-	using entity_mesh_ptr = std::shared_ptr<MeshDrawable>;
+	class UpdateComponent;
 
-	class Transform;
+	class TransformComponent;
 	class EntityTransform;
-	using transform_ptr = std::shared_ptr<Transform>;
-	using entity_transform_ptr = std::shared_ptr<EntityTransform>;
 
-	class Light;
+	class DrawableComponent;
+	class MeshDrawable;
+
+	class LightComponent;
 	class DirectionalLight;
 	class PointLight;
 	class SpotLight;
-	using light_ptr = std::shared_ptr<Light>;
-	using directional_light_ptr = std::shared_ptr<DirectionalLight>;
-	using point_light_ptr = std::shared_ptr<PointLight>;
-	using spot_light_ptr = std::shared_ptr<SpotLight>;
 
+	// Systems
+	// 
 	class Scene;
 	class ComponentSystem;
 	class DrawableSystem;
-	class LightingSystem;
-
-
-	//
-	// Entity
-	//
-	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
-	public:
-		Entity(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
-		Entity(i3d::quatd);
-		// Entity(entity_ptr, const i3d::vec3d &, const i3d::quatd &);
-		// Entity(entity_ptr, const i3d::quatd &);
-		~Entity();
-
-		void addComponent( entity_comp_ptr ec );
-
-		entity_transform_ptr root() const;
-		const std::vector<entity_comp_ptr> & getComponents() const;
-
-		template<typename T>
-		std::vector<std::shared_ptr<T>> getComponent() const;
-
-
-	private:
-		entity_transform_ptr m_root;
-		std::vector<entity_comp_ptr> m_components;
-	};
+	class LightSystem;
 
 
 
 	//
 	// Entity component
 	//
-	class EntityComponent : Uncopyable, public std::enable_shared_from_this<EntityComponent> {
+	class EntityComponent {
 	public:
-
-		EntityComponent();
 		virtual ~EntityComponent();
-		virtual void update(Scene &sc);
+
+		virtual void registerWith(Scene &);
 
 		bool hasParent();
 		entity_ptr getParent() const;
-
-	protected:
-		virtual void registerTo(ComponentSystem *);
-		virtual void registerTo(DrawableSystem *);
-		virtual void registerTo(LightingSystem *);
-		friend class ComponentSystem;
-		friend class DrawableSystem;
-		friend class LightingSystem;
 		
 	private:
 		std::weak_ptr<Entity> m_parent;
@@ -106,11 +71,24 @@ namespace gecom {
 
 
 	//
+	// Update component
+	//
+	class UpdateComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+
+		virtual void update() = 0;
+	};
+
+
+
+	//
 	// Tranform component
 	//
-	class Transform : public EntityComponent {
+	class TransformComponent : public virtual EntityComponent {
 	public:
-		virtual ~Transform() = 0;
+		virtual void registerWith(Scene &) override;
+
 		virtual i3d::mat4d matrix() = 0;
 	};
 
@@ -119,14 +97,14 @@ namespace gecom {
 	//
 	// Entity Tranform component
 	//
-	class EntityTransform : public EntityComponent {
+	class EntityTransform : public virtual TransformComponent {
 	public:
-		EntityTransform();
 		EntityTransform(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
 		EntityTransform(i3d::quatd);
-		virtual ~EntityTransform();
+
 		virtual i3d::mat4d matrix();
 		virtual i3d::mat4d localMatrix();
+
 
 		i3d::vec3d position;
 		i3d::quatd rotation;
@@ -137,51 +115,50 @@ namespace gecom {
 	//
 	// Drawable component
 	//
-	class Drawable : public EntityComponent {
+	class drawcall {
 	public:
+		virtual ~drawcall();
+		virtual void draw() = 0;
+		material_ptr material();
+		bool operator< (const drawcall& rhs) const;
 
-		// Draw call data
-		//
-		class drawcall {
-		public:
-			virtual ~drawcall();
-			virtual void draw() = 0;
-			material_ptr material();
-			bool operator< (const drawcall& rhs) const;
+	protected:
+		material_ptr m_mat;
+	};
 
-		protected:
-			material_ptr m_mat;
-		};
+	class DrawableComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
 
 		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) = 0;
 
-	protected:
-		virtual void registerTo(DrawableSystem *) override final;
 	};
+
 
 	// Mesh Drawable
 	//
-	class MeshDrawable :  public Drawable {
+	class mesh_drawcall : public drawcall {
 	public:
+		mesh_drawcall(i3d::mat4d, material_ptr, mesh_ptr);
+		virtual void draw();
 
-		// Mesh draw call data
-		//
-		class mesh_drawcall : public Drawable::drawcall {
-		public:
-			mesh_drawcall(i3d::mat4d, material_ptr, mesh_ptr);
-			virtual void draw();
+	private:
+		i3d::mat4f m_mv;
+		mesh_ptr m_mesh;
+	};
 
-		private:
-			i3d::mat4f m_mv;
-			mesh_ptr m_mesh;
-		};
-
+	class MeshDrawable :  public virtual DrawableComponent {
+	public:
 		MeshDrawable(mesh_ptr, material_ptr);
+		virtual ~MeshDrawable();
 
-		virtual std::vector<Drawable::drawcall *> getDrawCalls(i3d::mat4d);
+		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d);
 
 		mesh_ptr mesh;
 		material_ptr material;
+
+	private:
+		mesh_drawcall m_cachedDrawcall;
 	};
 
 
@@ -189,33 +166,99 @@ namespace gecom {
 	//
 	// Light component
 	//
-	class Light : public EntityComponent {
+	class LightComponent : public virtual EntityComponent {
 	public:
-		virtual ~Light();
-	protected:
-		virtual void registerTo(LightingSystem *);
+		virtual ~LightComponent();
+
+		virtual void registerWith(Scene &) override;
 	};
 
 	// Directional Light component
 	//
-	class DirectionalLight : public Light {
+	class DirectionalLight : public virtual LightComponent {
 	public:
 		DirectionalLight();
 	};
 
 	// Directional Light component
 	//
-	class PointLight : public Light {
+	class PointLight : public virtual LightComponent {
 	public:
 		PointLight();
 	};
 
 	// Directional Light component
 	//
-	class SpotLight : public Light {
+	class SpotLight : public virtual LightComponent {
 	public:
 		SpotLight();
 	};
+
+
+
+
+
+	//
+	// Entity
+	//
+	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
+	private:
+		Scene *m_scene = nullptr;
+		EntityTransform m_root;
+		std::vector<std::unique_ptr<EntityComponent>> m_dynamicComponents;
+
+	protected:
+		std::vector<EntityComponent *> m_components;
+
+	public:
+		Entity(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
+		Entity(i3d::quatd);
+		virtual ~Entity();
+
+		void registerWith(Scene &);
+
+		template<typename T, typename... Args>
+		T * emplaceComponent(Args&&... args)  {
+			std::unique_ptr<T> ec = std::make_unique<T>(std::forward<Args>(args)...);
+			T *ecp = ec.get();
+
+			m_dynamicComponents.push_back(std::move(ec));
+			m_components.push_back(ecp);
+
+			ecp->m_parent = shared_from_this();
+
+			if (m_scene)
+				ecp->registerWith(*m_scene);
+
+			return ecp;
+		}
+		void removeComponent(EntityComponent *);
+
+		EntityTransform * root();
+		const std::vector<EntityComponent *> & getAllComponents() const;
+
+		//TODO need to make this depth first search?
+		template<typename T>
+		T * getComponent() const {
+			for (EntityComponent * c : m_components)
+				if (auto i = std::dynamic_pointer_cast<T>(c))
+					return i;
+			return nullptr;
+		}
+
+		//TODO need to make this depth first search?
+		template<typename T>
+		std::vector<T *> getComponents() const {
+			std::vector<T *> componentList;
+			for (EntityComponent * c : m_components)
+				if (auto i = std::dynamic_pointer_cast<T>(c))
+					componentList.push_back(i);
+			return componentList;
+		}
+
+	};
+
+
 
 
 
@@ -225,7 +268,6 @@ namespace gecom {
 	class ComponentSystem {
 	public:
 		virtual ~ComponentSystem();
-		virtual void addComponent(entity_comp_ptr) = 0;
 	};
 
 
@@ -236,29 +278,29 @@ namespace gecom {
 	public:
 		DrawableSystem();
 		virtual ~DrawableSystem();
-		virtual void addComponent(entity_comp_ptr) override final;
 
-		void registerDrawable(entity_draw_ptr);
-		virtual std::vector<Drawable::drawcall *> getDrawList(i3d::mat4d);
+		void addDrawable(DrawableComponent *);
+		void removeDrawable(DrawableComponent *);
+		std::priority_queue<drawcall *> getDrawQueue(i3d::mat4d);
 
 	private:
-		std::vector<std::weak_ptr<Drawable>> m_drawables;
+		std::vector<DrawableComponent *> m_drawables;
 	};
 
 
 	//
 	// Component System for Light Components
 	//
-	class LightingSystem : public ComponentSystem {
+	class LightSystem : public ComponentSystem {
 	public:
-		LightingSystem();
-		virtual ~LightingSystem();
-		virtual void addComponent(entity_comp_ptr) override final;
+		LightSystem();
+		virtual ~LightSystem();
 
-		void registerLight(light_ptr);
-		virtual std::vector<light_ptr> getLights();
+		void addLight(LightComponent *);
+		void removeLight(LightComponent *);
+		std::vector<LightComponent *> getLights();
 
 	private:
-		std::vector<std::weak_ptr<Light>> m_lights;
+		std::vector<LightComponent *> m_lights;
 	};
 }

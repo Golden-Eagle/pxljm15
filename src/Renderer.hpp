@@ -1,31 +1,29 @@
+#pragma once
 
 #include <iostream>
+#include <queue>
 #include <vector>
 
-#include "Camera.hpp"
 #include "GECom.hpp"
 #include "Entity.hpp"
 #include "GLOW.hpp"
 #include "Initial3D.hpp"
 #include "SimpleShader.hpp"
+#include "Material.hpp"
+#include "Geometry.hpp"
 #include "Window.hpp"
 
 
 namespace gecom {
 	class Renderer {
 	public:
-		Renderer( Window *win ) : m_win(win) {
-			m_projection = new Projection();
-			m_camera = new FPSCamera(win, i3d::vec3d(0, 0, 3));
-		}
-		~Renderer();
+		Renderer( Window *win ) : m_win(win) { }
+		~Renderer() { }
 
-		void renderScene(scene_ptr s) {
+		void renderScene(i3d::mat4d proj, std::priority_queue<drawcall *> drawList) {
 
 			glClearColor(1.f, 1.f, 1.f, 1.f); // default background color
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			double zfar = 200.0;
 
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
@@ -43,16 +41,8 @@ namespace gecom {
 			//
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-
-			m_projection->setPerspectiveProjection(i3d::math::pi() / 3, double(w) / h, 0.1, zfar);
-			m_camera->update();
-
-			i3d::mat4d proj_matrix = m_projection->getProjectionTransform();
-			i3d::mat4d view_matrix = m_camera->getViewTransform();
-
-
-			std::vector<Drawable::drawcall *> drawList = s->getDrawList(view_matrix);
-			for ( auto d : drawList ) {
+			for (; !drawList.empty(); drawList.pop()) {
+				auto d = drawList.top();
 				// Bind shader program
 				// Bind material properties
 				// Bind Geometry
@@ -60,9 +50,8 @@ namespace gecom {
 
 				material_ptr m = d->material();
 				m->shader->bind();
-				m->bind(proj_matrix);
+				m->bind(proj);
 				d->draw();
-				delete d;
 			}
 
 			glFinish();
@@ -70,7 +59,5 @@ namespace gecom {
 
 	private:
 		Window *m_win;
-		Projection *m_projection;
-		FPSCamera *m_camera;
 	};
 }
