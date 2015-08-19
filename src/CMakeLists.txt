@@ -10,6 +10,7 @@ SET(gecom_hdr
 	"Window.hpp"
 	"Concurrent.hpp"
 	"SimpleShader.hpp"
+	"ComponentTest.hpp"
 	"Scene.hpp"
 	"Entity.hpp"
 	"Game.hpp"

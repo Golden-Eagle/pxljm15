@@ -22,61 +22,43 @@ namespace gecom {
 	private:
 		std::vector<entity_ptr> m_entities;
 
-		LightSystem *m_lightSystem;
-		DrawableSystem *m_drawableSystem;
-		PhysicalSystem *m_physicalSystem;
-
-		std::vector<UpdateComponent *> m_updateComponents;
+		UpdateSystem   m_updateSystem;
+		DrawableSystem m_drawableSystem;
+		// PhysicalSystem m_physicalSystem;
+		LightSystem    m_lightSystem;
 
 		//TEMP TODO needs to be moved into a component
-		Projection *m_projection;
-		FPSCamera *m_camera;
+		Projection m_projection;
+		FPSCamera m_camera;
+		Renderer m_renderer;
 		Window *m_window;
-		Renderer *m_renderer;
 
 	public:
-		Scene(Window *win) : m_window(win) {
-			m_window = win;
-			m_renderer = new Renderer(win);
-			m_lightSystem = new LightSystem();
-			m_drawableSystem = new DrawableSystem();
-			m_physicalSystem = new PhysicalSystem();
-
-			m_projection = new Projection();
-			m_camera = new FPSCamera(win, i3d::vec3d(0, 0, 3));
-		}
+		Scene(Window *win) : m_camera(win, i3d::vec3d(0, 0, 3)), m_renderer(win), m_window(win) { }
 
 
-		~Scene() {
-			delete m_renderer;
-			delete m_lightSystem;
-			delete m_drawableSystem;
-			delete m_physicalSystem;
-			delete m_projection;
-			delete m_camera;
-		}
+		~Scene() { }
+
 
 		void tick() {
 
-			//Physics Loop
+			// Input Update
 			// 
-				//Bullet update
-				// 
-				m_physicalSystem->tick();
+			m_updateSystem.inputUpdate();
 
-				//Fixed update
-				// 
-
-			//Update
+			// Physics
 			// 
-			m_camera->update();
-			for (UpdateComponent * uc : m_updateComponents)
-				uc->update();
+			// m_physicalSystem->tick();
 
-			//Animation
+			// Update
+			// 
+			m_camera.update();
+			m_updateSystem.update();
+
+			// Animation
 			// 
 
-			//Render
+			// Render
 			// 
 			double zfar = 200.0;
 			auto size = m_window->size();
@@ -85,50 +67,25 @@ namespace gecom {
 
 			if (w != 0 && h != 0) {
 
-				m_projection->setPerspectiveProjection(i3d::math::pi() / 3, double(w) / h, 0.1, zfar);
-				i3d::mat4d proj_matrix = m_projection->getProjectionTransform();
-				i3d::mat4d view_matrix = m_camera->getViewTransform();
+				m_projection.setPerspectiveProjection(i3d::math::pi() / 3, double(w) / h, 0.1, zfar);
+				i3d::mat4d proj_matrix = m_projection.getProjectionTransform();
+				i3d::mat4d view_matrix = m_camera.getViewTransform();
 
-				std::priority_queue<drawcall *> drawQueue = m_drawableSystem->getDrawQueue(view_matrix);
-				m_renderer->renderScene(proj_matrix, drawQueue);
+				std::priority_queue<drawcall *> drawQueue = m_drawableSystem.getDrawQueue(view_matrix);
+				m_renderer.renderScene(proj_matrix, drawQueue);
 			}
 		}
 
 
 		void add( entity_ptr e){
 			e->registerWith(*this);
-			for ( EntityComponent *ec : e->getAllComponents() )
-				ec->registerWith(*this);
-
 			m_entities.push_back(e);
 		}
 
 
-		// Drawable System
-		//
-		void registerDrawableComponent(DrawableComponent *ec) { m_drawableSystem->addDrawable(ec); }
-		void deregisterDrawableComponent(DrawableComponent *ec) { m_drawableSystem->removeDrawable(ec);	}
-
-
-		// Update System
-		//
-		void registerUpdateComponent(UpdateComponent *ec) { m_updateComponents.push_back(ec); }
-		void deregisterUpdateComponent(UpdateComponent *ec) {
-			for (auto it = m_updateComponents.begin(); it != m_updateComponents.end(); it++)
-				if (*it == ec)
-					m_updateComponents.erase(it);
-		}
-
-
-		// Physics System
-		//
-		void registerPhysicalComponent(PhysicalComponent *ec) { m_physicalSystem->addPhysics(ec); }
-		void deregisterPhysicalComponent(PhysicalComponent *ec) { m_physicalSystem->removePhysics(ec);	}
-
-
-		// Light System
-		//
-		void registerLightComponent(LightComponent *ec) { m_lightSystem->addLight(ec); }
-		void deregisterLightComponent(LightComponent *ec) {	m_lightSystem->removeLight(ec);	}
+		DrawableSystem & drawableSystem() { return m_drawableSystem; }
+		// PhysicalSystem & physicalSystem() { return m_physicalSystem; }
+		UpdateSystem & updateSystem() { return m_updateSystem; }
+		LightSystem & lightSystem() { return m_lightSystem; }
 	};
 }

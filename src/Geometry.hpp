@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <btBulletDynamicsCommon.h>
+
 #include "GECom.hpp"
 #include "GLOW.hpp"
 #include "Initial3D.hpp"

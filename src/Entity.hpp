@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <memory>
+#include <chrono>
 #include <iostream>
 #include <queue>
+#include <unordered_set>
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
@@ -52,20 +54,24 @@ namespace gecom {
 	class LightSystem;
 
 
-
+	///////////////////
 	//
 	// Entity component
 	//
+	///////////////////
 	class EntityComponent {
 	public:
 		virtual ~EntityComponent();
-
-		virtual void registerWith(Scene &);
 
 		bool hasEntity();
 		entity_ptr entity() const;
 		
 	private:
+		
+		virtual void start(); // After attaching to entity
+		virtual void registerWith(Scene &);
+		virtual void deregisterWith(Scene &);
+
 		std::weak_ptr<Entity> m_entity;
 		friend class Entity;
 	};
@@ -78,9 +84,37 @@ namespace gecom {
 	class UpdateComponent : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
 		virtual void update() = 0;
+		virtual std::chrono::duration<double> updateInterval();
 	};
+
+
+
+	//
+	// Input Update component
+	//
+	class InputUpdateComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
+
+		virtual void inputUpdate() = 0;
+	};
+
+
+
+	// //
+	// // Physics Update component
+	// //
+	// class PhysicsUpdateComponent : public virtual EntityComponent {
+	// public:
+	// 	virtual void registerWith(Scene &) override;
+	// 	virtual void deregisterWith(Scene &) override;
+
+	// 	virtual void physicsUpdate() = 0;
+	// };
 
 
 
@@ -90,6 +124,7 @@ namespace gecom {
 	class TransformComponent : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
 		virtual i3d::mat4d matrix() = 0;
 	};
@@ -131,6 +166,7 @@ namespace gecom {
 	class DrawableComponent : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
 		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) = 0;
 
@@ -165,20 +201,34 @@ namespace gecom {
 
 
 
-	//
-	// Physical component
-	//
-	class PhysicalComponent : public virtual EntityComponent {
-	public:
-		PhysicalComponent();
-		virtual ~PhysicalComponent();
+	// //
+	// // Physical component
+	// //
+	// class PhysicalComponent : public virtual EntityComponent {
+	// public:
+	// 	virtual ~PhysicalComponent();
 
-		virtual void registerWith(Scene &) override;
-		virtual void updateTransform();
+	// 	virtual void registerWith(Scene &) override;
+	// 	virtual void deregisterWith(Scene &) override;
+
+	// 	virtual void updateTransform() = 0;
 
 
-		btRigidBody* rigidBody;
-	};
+	// 	btRigidBody* rigidBody;
+	// };
+
+
+	// // Rigid Body component
+	// //
+	// class RigidBody {
+	// public:
+	// 	RigidBody();
+	// 	virtual ~RigidBody();
+	// 	virtual void start();
+
+	// private:
+	// 	Collider * m_collider;
+	// };
 
 
 
@@ -190,6 +240,7 @@ namespace gecom {
 		virtual ~LightComponent();
 
 		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 	};
 
 	// Directional Light component
@@ -216,10 +267,11 @@ namespace gecom {
 
 
 
-
+	/////////
 	//
 	// Entity
 	//
+	/////////
 	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
 	private:
 		Scene *m_scene = nullptr;
@@ -235,6 +287,7 @@ namespace gecom {
 		virtual ~Entity();
 
 		void registerWith(Scene &);
+		void deregister();
 
 		template<typename T, typename... Args>
 		T * emplaceComponent(Args&&... args)  {
@@ -252,6 +305,7 @@ namespace gecom {
 			return ecp;
 		}
 		void removeComponent(EntityComponent *);
+
 
 		EntityTransform * root();
 		const std::vector<EntityComponent *> & getAllComponents() const;
@@ -280,13 +334,35 @@ namespace gecom {
 
 
 
-
+	//////////////////////////////
 	//
 	// Component System base class
 	//
+	//////////////////////////////
 	class ComponentSystem {
 	public:
 		virtual ~ComponentSystem();
+	};
+
+
+	// 
+	// Component System for Update and InputUpdate Components
+	// 
+	class UpdateSystem : public ComponentSystem {
+	public:
+		UpdateSystem();
+
+		void registerUpdateComponent(UpdateComponent *);
+		void deregisterUpdateComponent(UpdateComponent *);
+		void update();
+
+		void registerInputUpdateComponent(InputUpdateComponent *);
+		void deregisterInputUpdateComponent(InputUpdateComponent *);
+		void inputUpdate();
+
+	private:
+		std::unordered_set<UpdateComponent *> m_updatables;
+		std::unordered_set<InputUpdateComponent *> m_inputUpdatables;
 	};
 
 
@@ -296,41 +372,41 @@ namespace gecom {
 	class DrawableSystem : public ComponentSystem {
 	public:
 		DrawableSystem();
-		virtual ~DrawableSystem();
 
-		void addDrawable(DrawableComponent *);
-		void removeDrawable(DrawableComponent *);
+		void registerDrawableComponent(DrawableComponent *);
+		void deregisterDrawableComponent(DrawableComponent *);
+
 		std::priority_queue<drawcall *> getDrawQueue(i3d::mat4d);
 
 	private:
-		std::vector<DrawableComponent *> m_drawables;
+		std::unordered_set<DrawableComponent *> m_drawables;
 	};
 
 
-	// 
-	// Component System for Physcial Components
-	// 
-	class PhysicalSystem : public ComponentSystem {
-	public:
-		PhysicalSystem();
-		virtual ~PhysicalSystem();
+	// // 
+	// // Component System for Physcial Components
+	// // 
+	// class PhysicalSystem : public ComponentSystem {
+	// public:
+	// 	PhysicalSystem();
+	// 	virtual ~PhysicalSystem();
 
-		void addPhysics(PhysicalComponent *);
-		void removePhysics(PhysicalComponent *);
+	// 	void registerPhysics(PhysicalComponent *);
+	// 	void deregisterPhysics(PhysicalComponent *);
 
-		void tick();
+	// 	void tick();
 
-	private:
-		std::vector<PhysicalComponent *> m_rigidbodies;
+	// private:
+	// 	std::unordered_set<PhysicalComponent *> m_rigidbodies;
 
-		btBroadphaseInterface* broadphase;
-		btDefaultCollisionConfiguration* collisionConfiguration;
-		btCollisionDispatcher* dispatcher;
-		btSequentialImpulseConstraintSolver* solver;
+	// 	btBroadphaseInterface* broadphase;
+	// 	btDefaultCollisionConfiguration* collisionConfiguration;
+	// 	btCollisionDispatcher* dispatcher;
+	// 	btSequentialImpulseConstraintSolver* solver;
 
-		btDiscreteDynamicsWorld* dynamicsWorld;
+	// 	btDiscreteDynamicsWorld* dynamicsWorld;
 
-	};
+	// };
 
 
 	//
@@ -339,13 +415,13 @@ namespace gecom {
 	class LightSystem : public ComponentSystem {
 	public:
 		LightSystem();
-		virtual ~LightSystem();
 
-		void addLight(LightComponent *);
-		void removeLight(LightComponent *);
-		std::vector<LightComponent *> getLights();
+		void registerLightComponent(LightComponent *);
+		void deregisterLightComponent(LightComponent *);
+
+		const std::unordered_set<LightComponent *> & getLights();
 
 	private:
-		std::vector<LightComponent *> m_lights;
+		std::unordered_set<LightComponent *> m_lights;
 	};
 }

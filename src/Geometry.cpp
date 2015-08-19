@@ -182,4 +182,3 @@ void Mesh::loadFromObj(const string &filepath) {
 	cout << m_triangles.size()/3 << " faces" << endl;
 
 }
-

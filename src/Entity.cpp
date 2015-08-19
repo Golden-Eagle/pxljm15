@@ -4,7 +4,7 @@
 using namespace std;
 using namespace gecom;
 using namespace i3d;
-
+using namespace std::chrono_literals;
 
 
 //
@@ -24,25 +24,33 @@ Entity::Entity(quatd rot) {
 
 Entity::~Entity() {
 	// Remove all compoenents from scene
-	// if (m_scene)
-	// 	for (EntityComponent *ec : m_components)
-
-	// 		m_scene.deregisterComponent(ec);
+	if (m_scene)
+		for (EntityComponent *c : m_components)
+			c->deregisterWith(*m_scene);
 }
 
 
 void Entity::registerWith(Scene &s) {
 	m_scene = &s;
+
+	for (EntityComponent *c : m_components)
+		c->registerWith(s);
+}
+
+void Entity::deregister() {
+	for (EntityComponent *c : m_components)
+		c->deregisterWith(*m_scene);
+	m_scene = nullptr;
 }
 
 
-void Entity::removeComponent(EntityComponent *) {
-	// auto it = find(m_components.begin(), m_components.end(), ecp);
-	// if (it == m_components.end()) {
-	// 	if (m_scene)
-	// 		(*it).registerWith(m_scene);
-	// 	m_components.erase();
-	// }
+void Entity::removeComponent(EntityComponent *c) {
+	auto it = find(m_components.begin(), m_components.end(), c);
+	if (it == m_components.end()) {
+		if (m_scene)
+			(*it)->deregisterWith(*m_scene);
+		m_components.erase(it);
+	}
 }
 
 
@@ -68,16 +76,45 @@ bool EntityComponent::hasEntity() { return bool(m_entity.lock()); }
 entity_ptr EntityComponent::entity() const { return m_entity.lock(); }
 
 
+void EntityComponent::start() { }
+
+
 void EntityComponent::registerWith(Scene &) { }
+
+
+void EntityComponent::deregisterWith(Scene &) { }
 
 
 
 //
 // Update component
 //
-void UpdateComponent::registerWith(Scene &s) {
-	s.registerUpdateComponent(this);
-}
+void UpdateComponent::registerWith(Scene &s) { s.updateSystem().registerUpdateComponent(this); }
+
+
+void UpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregisterUpdateComponent(this); }
+
+
+chrono::duration<double> UpdateComponent::updateInterval() { return 0s; }
+
+
+
+//
+// Input Update component
+//
+void InputUpdateComponent::registerWith(Scene &s) { s.updateSystem().registerInputUpdateComponent(this); }
+
+
+void InputUpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregisterInputUpdateComponent(this); }
+
+
+
+// //
+// // Physics Update component
+// //
+// void PhysicsUpdateComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysicalComponent(this); }
+
+// void PhysicsUpdateComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicalComponent(this); }
 
 
 
@@ -85,6 +122,9 @@ void UpdateComponent::registerWith(Scene &s) {
 // Transform component
 //
 void TransformComponent::registerWith(Scene &) { }
+
+
+void TransformComponent::deregisterWith(Scene &) { }
 
 
 
@@ -103,8 +143,6 @@ mat4d EntityTransform::matrix() {
 
 
 mat4d EntityTransform::localMatrix() {
-	if (auto p = entity())
-		return p->root()->matrix() * matrix();
 	return matrix();
 }
 
@@ -124,9 +162,10 @@ bool drawcall::operator< (const drawcall& rhs) const {
 }
 
 
-void DrawableComponent::registerWith(Scene &s) {
-	s.registerDrawableComponent(this);
-}
+void DrawableComponent::registerWith(Scene &s) { s.drawableSystem().registerDrawableComponent(this); }
+
+
+void DrawableComponent::deregisterWith(Scene &s) { s.drawableSystem().deregisterDrawableComponent(this); }
 
 
 
@@ -159,46 +198,58 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 
 
 
-//
-// Physical component
-//
-PhysicalComponent::PhysicalComponent() {
-
-}
+// //
+// // Physical component
+// //
+// PhysicalComponent::~PhysicalComponent() { }
 
 
-PhysicalComponent::~PhysicalComponent() {
-
-}
-
-
-void PhysicalComponent::registerWith(Scene &s) {
-	vec3d pos = entity()->root()->position;
-
-	// Shape
-	btCollisionShape* shape = new btSphereShape(1);
-
-	// Motion state
-	btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(pos.x(), pos.y(), pos.z())));
-
-	// Specifics
-	btScalar mass = 1;
-	btVector3 inertia(0, 0, 0);
-	shape->calculateLocalInertia(mass, inertia);
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, shape, inertia);
-	rigidBody = new btRigidBody(rigidBodyCI);
-
-	s.registerPhysicalComponent(this);
-}
+// void PhysicalComponent::registerWith(Scene &s) {
+// 	s.registerPhysicalComponent(this);
+// }
 
 
-void PhysicalComponent::updateTransform() {
-	btTransform trans;
-	rigidBody->getMotionState()->getWorldTransform(trans);
-	btVector3 pos = trans.getOrigin();
-	entity()->root()->position = vec3d(pos.getX(), pos.getY(), pos.getZ());
-	cout << "Position now at " << entity()->root()->position << endl;
-}
+// void PhysicalComponent::updateTransform() {
+// 	btTransform trans;
+// 	rigidBody->getMotionState()->getWorldTransform(trans);
+// 	btVector3 pos = trans.getOrigin();
+// 	entity()->root()->position = vec3d(pos.getX(), pos.getY(), pos.getZ());
+// 	cout << "Position now at " << entity()->root()->position << endl;
+// }
+
+
+// // Rigid Body component
+// //
+// RigidBody::RigidBody() { }
+
+
+// RigidBody::~RigidBody() { }
+
+// void PhysicalComponent::registerWith(Scene &s) {
+// 	vec3d pos = entity()->root()->position;
+// 	quatd rot = entity()->root()->rotation;
+
+// 	// Shape
+// 	btCollisionShape *shape = m_collider.collisionShape();
+
+// 	// Motion state
+// 	btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(
+// 		btQuaternion(rot.x(), rot.y(), rot.z(), rot.w()), btVector3(pos.x(), pos.y(), pos.z())));
+
+// 	// Specifics
+// 	btScalar mass = 1;
+// 	btVector3 inertia(0, 0, 0);
+// 	shape->calculateLocalInertia(mass, inertia);
+// 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, shape, inertia);
+// 	rigidBody = new btRigidBody(rigidBodyCI);
+
+// 	s.registerPhysicalComponent(this);
+// }
+
+
+// void RigidBody::updateTransform() {
+
+// }
 
 
 
@@ -208,9 +259,10 @@ void PhysicalComponent::updateTransform() {
 LightComponent::~LightComponent() { }
 
 
-void LightComponent::registerWith(Scene &s) {
-	s.registerLightComponent(this);
-}
+void LightComponent::registerWith(Scene &s) { s.lightSystem().registerLightComponent(this); }
+
+
+void LightComponent::deregisterWith(Scene &s) { s.lightSystem().deregisterLightComponent(this); }
 
 
 
@@ -240,20 +292,58 @@ ComponentSystem::~ComponentSystem() { }
 
 
 // 
+// UpdateComponent System
+// 
+UpdateSystem::UpdateSystem() { }
+
+
+void UpdateSystem::registerUpdateComponent(UpdateComponent *c) {
+	m_updatables.insert(c);
+}
+
+
+void UpdateSystem::deregisterUpdateComponent(UpdateComponent *c) {
+	m_updatables.erase(c);
+}
+
+
+void UpdateSystem::update() { //TODO change this to update queue stuff
+	for (UpdateComponent *c : m_updatables)
+		c->update();
+}
+
+
+void UpdateSystem::registerInputUpdateComponent(InputUpdateComponent *c) {
+	m_inputUpdatables.insert(c);
+}
+
+
+void UpdateSystem::deregisterInputUpdateComponent(InputUpdateComponent *c) {
+	m_inputUpdatables.erase(c);
+}
+
+
+void UpdateSystem::inputUpdate() {
+	for (InputUpdateComponent *c : m_inputUpdatables)
+		c->inputUpdate();
+}
+
+
+
+// 
 // Drawable System
 // 
 DrawableSystem::DrawableSystem() { }
 
 
-DrawableSystem::~DrawableSystem() { }
-
-
-void DrawableSystem::addDrawable(DrawableComponent * d) {
-	m_drawables.push_back(d);
+void DrawableSystem::registerDrawableComponent(DrawableComponent *c) {
+	m_drawables.insert(c);
 }
 
-//TODO
-void DrawableSystem::removeDrawable(DrawableComponent *) { }
+
+void DrawableSystem::deregisterDrawableComponent(DrawableComponent *c) {
+	m_drawables.erase(c);
+}
 
 
 priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
@@ -269,58 +359,58 @@ priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
 
 
 
-// 
-// Drawable System
-// 
-PhysicalSystem::PhysicalSystem() {
+// // 
+// // Physical System
+// // 
+// PhysicalSystem::PhysicalSystem() {
 
-	broadphase = new btDbvtBroadphase();
-	collisionConfiguration = new btDefaultCollisionConfiguration();
-	dispatcher = new btCollisionDispatcher(collisionConfiguration);
-	solver = new btSequentialImpulseConstraintSolver();
+// 	broadphase = new btDbvtBroadphase();
+// 	collisionConfiguration = new btDefaultCollisionConfiguration();
+// 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+// 	solver = new btSequentialImpulseConstraintSolver();
 
-	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+// 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 
-	// TODO make it realitive?
-	// If not configurable
-	// HACK
-	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
-
-
-	// HACK
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -5);
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
-	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-	dynamicsWorld->addRigidBody(groundRigidBody);
-
-}
+// 	// TODO make it realitive?
+// 	// If not configurable
+// 	// HACK
+// 	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
 
 
-PhysicalSystem::~PhysicalSystem() {
-	delete dynamicsWorld;
+// 	// HACK
+// 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -5);
+// 	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+// 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+// 	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+// 	dynamicsWorld->addRigidBody(groundRigidBody);
 
-	delete solver;
-	delete dispatcher;
-	delete collisionConfiguration;
-	delete broadphase;
-}
-
-
-void PhysicalSystem::addPhysics(PhysicalComponent * d) {
-	m_rigidbodies.push_back(d);
-	dynamicsWorld->addRigidBody(d->rigidBody);
-}
-
-//TODO
-void PhysicalSystem::removePhysics(PhysicalComponent *) { }
+// }
 
 
-void PhysicalSystem::tick() {
-	dynamicsWorld->stepSimulation(1 / 60.f, 10);
-	for (PhysicalComponent *pc : m_rigidbodies)
-		pc->updateTransform();
-}
+// PhysicalSystem::~PhysicalSystem() {
+// 	delete dynamicsWorld;
+
+// 	delete solver;
+// 	delete dispatcher;
+// 	delete collisionConfiguration;
+// 	delete broadphase;
+// }
+
+
+// void PhysicalSystem::addPhysics(PhysicalComponent * d) {
+// 	m_rigidbodies.push_back(d);
+// 	dynamicsWorld->addRigidBody(d->rigidBody);
+// }
+
+// //TODO
+// void PhysicalSystem::removePhysics(PhysicalComponent *) { }
+
+
+// void PhysicalSystem::tick() {
+// 	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+// 	for (PhysicalComponent *pc : m_rigidbodies)
+// 		pc->updateTransform();
+// }
 
 
 
@@ -330,20 +420,16 @@ void PhysicalSystem::tick() {
 LightSystem::LightSystem() { }
 
 
-LightSystem::~LightSystem() { }
-
-
-void LightSystem::addLight(LightComponent *light) {
-	m_lights.push_back(light);
+void LightSystem::registerLightComponent(LightComponent *c) {
+	m_lights.insert(c);
 }
 
-//TODO
-void LightSystem::removeLight(LightComponent *) { }
+
+void LightSystem::deregisterLightComponent(LightComponent *c) {
+	m_lights.erase(c);
+}
 
 
-vector<LightComponent *> LightSystem::getLights() {
-	vector<LightComponent *> lightList;
-	for (LightComponent *light : m_lights)
-		lightList.push_back(light);
-	return lightList;
+const unordered_set<LightComponent *> & LightSystem::getLights() {
+	return m_lights;
 }
