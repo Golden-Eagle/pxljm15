@@ -105,16 +105,16 @@ namespace gecom {
 
 
 
-	// //
-	// // Physics Update component
-	// //
-	// class PhysicsUpdateComponent : public virtual EntityComponent {
-	// public:
-	// 	virtual void registerWith(Scene &) override;
-	// 	virtual void deregisterWith(Scene &) override;
+	//
+	// Physics Update component
+	//
+	class PhysicsUpdateComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
-	// 	virtual void physicsUpdate() = 0;
-	// };
+		virtual void physicsUpdate() = 0;
+	};
 
 
 
@@ -134,7 +134,7 @@ namespace gecom {
 	//
 	// Entity Tranform component
 	//
-	class EntityTransform : public virtual TransformComponent {
+	class EntityTransform : public TransformComponent {
 	public:
 		EntityTransform(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
 		EntityTransform(i3d::quatd);
@@ -185,7 +185,7 @@ namespace gecom {
 		mesh_ptr m_mesh;
 	};
 
-	class MeshDrawable :  public virtual DrawableComponent {
+	class MeshDrawable :  public DrawableComponent {
 	public:
 		MeshDrawable(mesh_ptr, material_ptr);
 		virtual ~MeshDrawable();
@@ -201,21 +201,20 @@ namespace gecom {
 
 
 
-	// //
-	// // Physical component
-	// //
-	// class PhysicalComponent : public virtual EntityComponent {
-	// public:
-	// 	virtual ~PhysicalComponent();
+	//
+	// Physics component
+	//
+	class PhysicsComponent : public virtual EntityComponent {
+	public:
+		virtual ~PhysicsComponent();
 
-	// 	virtual void registerWith(Scene &) override;
-	// 	virtual void deregisterWith(Scene &) override;
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
-	// 	virtual void updateTransform() = 0;
-
-
-	// 	btRigidBody* rigidBody;
-	// };
+		virtual void addToDynamicsWorld(btDynamicsWorld *) = 0;
+		virtual void removeFromDynamicsWorld() = 0;
+		virtual void updateEntityRoot() = 0;
+	};
 
 
 	// // Rigid Body component
@@ -223,8 +222,12 @@ namespace gecom {
 	// class RigidBody {
 	// public:
 	// 	RigidBody();
-	// 	virtual ~RigidBody();
-	// 	virtual void start();
+	// 	virtual void addToDynamicsWorld(btDynamicsWorld *);
+	// 	virtual void removeFromDynamicsWorld();
+	// 	virtual void updateEntityRoot();
+
+	// 	void setCollider(collider);
+	// 	const colider & getCollider();
 
 	// private:
 	// 	Collider * m_collider;
@@ -245,21 +248,21 @@ namespace gecom {
 
 	// Directional Light component
 	//
-	class DirectionalLight : public virtual LightComponent {
+	class DirectionalLight : public LightComponent {
 	public:
 		DirectionalLight();
 	};
 
 	// Directional Light component
 	//
-	class PointLight : public virtual LightComponent {
+	class PointLight : public LightComponent {
 	public:
 		PointLight();
 	};
 
 	// Directional Light component
 	//
-	class SpotLight : public virtual LightComponent {
+	class SpotLight : public LightComponent {
 	public:
 		SpotLight();
 	};
@@ -383,30 +386,36 @@ namespace gecom {
 	};
 
 
-	// // 
-	// // Component System for Physcial Components
-	// // 
-	// class PhysicalSystem : public ComponentSystem {
-	// public:
-	// 	PhysicalSystem();
-	// 	virtual ~PhysicalSystem();
+	// 
+	// Component System for Physcial Components
+	// 
+	class PhysicsSystem : public ComponentSystem {
+	public:
+		PhysicsSystem();
+		virtual ~PhysicsSystem();
 
-	// 	void registerPhysics(PhysicalComponent *);
-	// 	void deregisterPhysics(PhysicalComponent *);
+		void registerPhysicsUpdateComponent(PhysicsUpdateComponent *);
+		void deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *);
 
-	// 	void tick();
+		void registerPhysicsComponent(PhysicsComponent *);
+		void deregisterPhysicsComponent(PhysicsComponent *);
 
-	// private:
-	// 	std::unordered_set<PhysicalComponent *> m_rigidbodies;
+		void tick();
 
-	// 	btBroadphaseInterface* broadphase;
-	// 	btDefaultCollisionConfiguration* collisionConfiguration;
-	// 	btCollisionDispatcher* dispatcher;
-	// 	btSequentialImpulseConstraintSolver* solver;
+		void processPhysicsCallback(btScalar);
 
-	// 	btDiscreteDynamicsWorld* dynamicsWorld;
+	private:
+		std::unordered_set<PhysicsUpdateComponent *> m_physicsUpdatables;
+		std::unordered_set<PhysicsComponent *> m_rigidbodies;
 
-	// };
+		btBroadphaseInterface* broadphase;
+		btDefaultCollisionConfiguration* collisionConfiguration;
+		btCollisionDispatcher* dispatcher;
+		btSequentialImpulseConstraintSolver* solver;
+
+		btDiscreteDynamicsWorld* dynamicsWorld;
+
+	};
 
 
 	//

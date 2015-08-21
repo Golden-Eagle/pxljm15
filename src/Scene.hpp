@@ -24,7 +24,7 @@ namespace gecom {
 
 		UpdateSystem   m_updateSystem;
 		DrawableSystem m_drawableSystem;
-		// PhysicalSystem m_physicalSystem;
+		PhysicsSystem  m_physicsSystem;
 		LightSystem    m_lightSystem;
 
 		//TEMP TODO needs to be moved into a component
@@ -34,7 +34,7 @@ namespace gecom {
 		Window *m_window;
 
 	public:
-		Scene(Window *win) : m_camera(win, i3d::vec3d(0, 0, 3)), m_renderer(win), m_window(win) { }
+		Scene(Window *win) : m_camera(win, i3d::vec3d(0, 10, 3)), m_renderer(win), m_window(win) { }
 
 
 		~Scene() { }
@@ -48,7 +48,7 @@ namespace gecom {
 
 			// Physics
 			// 
-			// m_physicalSystem->tick();
+			m_physicsSystem.tick();
 
 			// Update
 			// 
@@ -84,7 +84,7 @@ namespace gecom {
 
 
 		DrawableSystem & drawableSystem() { return m_drawableSystem; }
-		// PhysicalSystem & physicalSystem() { return m_physicalSystem; }
+		PhysicsSystem & physicsSystem() { return m_physicsSystem; }
 		UpdateSystem & updateSystem() { return m_updateSystem; }
 		LightSystem & lightSystem() { return m_lightSystem; }
 	};

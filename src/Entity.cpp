@@ -109,12 +109,12 @@ void InputUpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregiste
 
 
 
-// //
-// // Physics Update component
-// //
-// void PhysicsUpdateComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysicalComponent(this); }
+//
+// Physics Update component
+//
+void PhysicsUpdateComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysicsUpdateComponent(this); }
 
-// void PhysicsUpdateComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicalComponent(this); }
+void PhysicsUpdateComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicsUpdateComponent(this); }
 
 
 
@@ -198,18 +198,19 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 
 
 
-// //
-// // Physical component
-// //
-// PhysicalComponent::~PhysicalComponent() { }
+//
+// Physics component
+//
+PhysicsComponent::~PhysicsComponent() { }
 
 
-// void PhysicalComponent::registerWith(Scene &s) {
-// 	s.registerPhysicalComponent(this);
-// }
+void PhysicsComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysicsComponent(this); }
 
 
-// void PhysicalComponent::updateTransform() {
+void PhysicsComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicsComponent(this); }
+
+
+// void PhysicsComponent::updateTransform() {
 // 	btTransform trans;
 // 	rigidBody->getMotionState()->getWorldTransform(trans);
 // 	btVector3 pos = trans.getOrigin();
@@ -225,7 +226,7 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 
 // RigidBody::~RigidBody() { }
 
-// void PhysicalComponent::registerWith(Scene &s) {
+// void PhysicsComponent::registerWith(Scene &s) {
 // 	vec3d pos = entity()->root()->position;
 // 	quatd rot = entity()->root()->rotation;
 
@@ -243,7 +244,7 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 // 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, shape, inertia);
 // 	rigidBody = new btRigidBody(rigidBodyCI);
 
-// 	s.registerPhysicalComponent(this);
+// 	s.registerPhysicsComponent(this);
 // }
 
 
@@ -359,58 +360,87 @@ priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
 
 
 
-// // 
-// // Physical System
-// // 
-// PhysicalSystem::PhysicalSystem() {
-
-// 	broadphase = new btDbvtBroadphase();
-// 	collisionConfiguration = new btDefaultCollisionConfiguration();
-// 	dispatcher = new btCollisionDispatcher(collisionConfiguration);
-// 	solver = new btSequentialImpulseConstraintSolver();
-
-// 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-
-// 	// TODO make it realitive?
-// 	// If not configurable
-// 	// HACK
-// 	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+// 
+// Physical System
+//
+static void physicsSystemTickCallback(btDynamicsWorld *world, btScalar timeStep) {
+    PhysicsSystem *w = static_cast<PhysicsSystem *>(world->getWorldUserInfo());
+    w->processPhysicsCallback(timeStep);
+}
 
 
-// 	// HACK
-// 	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), -5);
-// 	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
-// 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-// 	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-// 	dynamicsWorld->addRigidBody(groundRigidBody);
+PhysicsSystem::PhysicsSystem() {
 
-// }
+	broadphase = new btDbvtBroadphase();
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	solver = new btSequentialImpulseConstraintSolver();
 
+	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 
-// PhysicalSystem::~PhysicalSystem() {
-// 	delete dynamicsWorld;
+	// Callback
+	dynamicsWorld->setInternalTickCallback(physicsSystemTickCallback, static_cast<void *>(this));
 
-// 	delete solver;
-// 	delete dispatcher;
-// 	delete collisionConfiguration;
-// 	delete broadphase;
-// }
+	// TODO make it realitive?
+	// If not configurable
+	// HACK
+	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
 
 
-// void PhysicalSystem::addPhysics(PhysicalComponent * d) {
-// 	m_rigidbodies.push_back(d);
-// 	dynamicsWorld->addRigidBody(d->rigidBody);
-// }
+	// SUPER HACK
+	// Hard limit for the ground to be at y=0
+	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	dynamicsWorld->addRigidBody(groundRigidBody);
 
-// //TODO
-// void PhysicalSystem::removePhysics(PhysicalComponent *) { }
+}
 
 
-// void PhysicalSystem::tick() {
-// 	dynamicsWorld->stepSimulation(1 / 60.f, 10);
-// 	for (PhysicalComponent *pc : m_rigidbodies)
-// 		pc->updateTransform();
-// }
+PhysicsSystem::~PhysicsSystem() {
+	delete dynamicsWorld;
+	delete solver;
+	delete dispatcher;
+	delete collisionConfiguration;
+	delete broadphase;
+}
+
+
+void PhysicsSystem::registerPhysicsUpdateComponent(PhysicsUpdateComponent * c) {
+	m_physicsUpdatables.insert(c);
+}
+
+
+void PhysicsSystem::deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *c) {
+	m_physicsUpdatables.erase(c);
+}
+
+
+void PhysicsSystem::registerPhysicsComponent(PhysicsComponent * c) {
+	m_rigidbodies.insert(c);
+	c->addToDynamicsWorld(dynamicsWorld);
+}
+
+
+void PhysicsSystem::deregisterPhysicsComponent(PhysicsComponent *c) {
+	c->removeFromDynamicsWorld();
+	m_rigidbodies.erase(c);
+}
+
+
+void PhysicsSystem::tick() {
+	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+	for (PhysicsComponent *pc : m_rigidbodies)
+		pc->updateEntityRoot();
+}
+
+
+void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
+	printf("It is like a clock inside my head: %i\n", timeStep);
+	for (PhysicsUpdateComponent *pc : m_physicsUpdatables)
+		pc->physicsUpdate();
+}
 
 
 

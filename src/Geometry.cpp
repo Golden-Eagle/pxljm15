@@ -10,10 +10,6 @@ using uint = unsigned;
 Mesh::Mesh(const std::string &filepath) {
 	loadFromObj(filepath);
 
-
-
-
-
 	// setup the buffer!
 	if (m_vao == 0) {
 		glGenVertexArrays(1, &m_vao);
@@ -101,7 +97,7 @@ void Mesh::loadFromObj(const string &filepath) {
 		throw runtime_error("Error :: could not open file.");
 	}
 
-	cout << "Reading file " << filepath << endl;
+	// cout << "Reading file " << filepath << endl;
 	
 	// good() means that failbit, badbit and eofbit are all not set
 	while(objFile.good()) {
@@ -175,10 +171,10 @@ void Mesh::loadFromObj(const string &filepath) {
 	}
 
 	// TODO update with new i3d at some point?
-	cout << "Reading OBJ file is DONE." << endl;
-	cout << m_positions.size()/3 << " positions" << endl;
-	cout << m_uvs.size()/2 << " uv coords" << endl;
-	cout << m_normals.size()/3 << " normals" << endl;
-	cout << m_triangles.size()/3 << " faces" << endl;
+	// cout << "Reading OBJ file is DONE." << endl;
+	// cout << m_positions.size()/3 << " positions" << endl;
+	// cout << m_uvs.size()/2 << " uv coords" << endl;
+	// cout << m_normals.size()/3 << " normals" << endl;
+	// cout << m_triangles.size()/3 << " faces" << endl;
 
 }
