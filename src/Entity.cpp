@@ -44,6 +44,21 @@ void Entity::deregister() {
 }
 
 
+void Entity::addComponent(std::unique_ptr<EntityComponent> ec) {
+	EntityComponent *ecp = ec.get();
+
+	m_dynamicComponents.push_back(std::move(ec));
+	m_components.push_back(ecp);
+
+	ecp->m_entity = shared_from_this();
+
+	ecp->start();
+
+	if (m_scene)
+		ecp->registerWith(*m_scene);
+}
+
+
 void Entity::removeComponent(EntityComponent *c) {
 	auto it = find(m_components.begin(), m_components.end(), c);
 	if (it == m_components.end()) {

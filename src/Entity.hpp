@@ -248,6 +248,7 @@ namespace gecom {
 		virtual void getWorldTransform (btTransform &) const;
 		virtual void setWorldTransform (const btTransform &);
 
+		std::unique_ptr<btRigidBody> m_rigidBody;
 	private:
 
 		void regenerateRigidBody();
@@ -255,7 +256,6 @@ namespace gecom {
 		//rigid body stuff
 		btScalar m_mass = 1;
 
-		std::unique_ptr<btRigidBody> m_rigidBody;
 
 		collider_ptr m_collider = nullptr;
 		btDynamicsWorld * m_world = nullptr;
@@ -309,7 +309,6 @@ namespace gecom {
 		EntityTransform m_root;
 		std::vector<std::unique_ptr<EntityComponent>> m_dynamicComponents;
 
-	protected:
 		std::vector<EntityComponent *> m_components;
 
 	public:
@@ -320,22 +319,12 @@ namespace gecom {
 		void registerWith(Scene &);
 		void deregister();
 
+		void addComponent(std::unique_ptr<EntityComponent>);
 		template<typename T, typename... Args>
 		T * emplaceComponent(Args&&... args)  {
 			std::unique_ptr<T> ec = std::make_unique<T>(std::forward<Args>(args)...);
-			T *ecp = ec.get();
-
-			m_dynamicComponents.push_back(std::move(ec));
-			m_components.push_back(ecp);
-
-			ecp->m_entity = shared_from_this();
-
-			ecp->start();
-
-			if (m_scene)
-				ecp->registerWith(*m_scene);
-
-			return ecp;
+			addComponent(std::move(ec));
+			return ec.get();
 		}
 		void removeComponent(EntityComponent *);
 
@@ -347,7 +336,7 @@ namespace gecom {
 		template<typename T>
 		T * getComponent() const {
 			for (EntityComponent * c : m_components)
-				if (auto i = std::dynamic_pointer_cast<T>(c))
+				if (auto i = dynamic_cast<T*>(c))
 					return i;
 			return nullptr;
 		}
@@ -357,7 +346,7 @@ namespace gecom {
 		std::vector<T *> getComponents() const {
 			std::vector<T *> componentList;
 			for (EntityComponent * c : m_components)
-				if (auto i = std::dynamic_pointer_cast<T>(c))
+				if (auto i = dynamic_cast<T*>(c))
 					componentList.push_back(i);
 			return componentList;
 		}

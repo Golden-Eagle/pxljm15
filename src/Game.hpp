@@ -58,6 +58,8 @@ namespace gecom {
 
 			sphere->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(1));
 
+			sphere->emplaceComponent<SphereBounce>();
+
 			m_scene->add(sphere);
 
 
