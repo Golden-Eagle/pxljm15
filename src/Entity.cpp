@@ -302,16 +302,16 @@ collider_ptr RigidBody::getCollider() {
 void RigidBody::getWorldTransform (btTransform &centerOfMassWorldTrans) const {
 	vec3d pos = entity()->root()->getPosition();
 	quatd rot = entity()->root()->getRotation();
-	centerOfMassWorldTrans.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
-	centerOfMassWorldTrans.setRotation(btQuaternion(rot.x(), rot.y(), rot.z(), rot.w()));
+	centerOfMassWorldTrans.setOrigin(i3d2bt(pos));
+	centerOfMassWorldTrans.setRotation(i3d2bt(rot));
 }
 
 
 void RigidBody::setWorldTransform (const btTransform &centerOfMassWorldTrans) {
 	btVector3 pos = centerOfMassWorldTrans.getOrigin();
 	btQuaternion rot = centerOfMassWorldTrans.getRotation();
-	entity()->root()->setPosition(vec3d(pos.getX(), pos.getY(), pos.getZ()));
-	entity()->root()->setRotation(quatd(rot.getW(), rot.getX(), rot.getY(), rot.getZ()));
+	entity()->root()->setPosition(bt2i3d(pos));
+	entity()->root()->setRotation(bt2i3d(rot));
 }
 
 

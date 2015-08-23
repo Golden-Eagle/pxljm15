@@ -12,12 +12,13 @@ namespace gecom {
 		BoxMove() { }
 
 		virtual void update() {
-			entity()->root()->position += i3d::vec3d(0.005, 0, 0);
+			i3d::vec3d pos = entity()->root()->getPosition();
+			entity()->root()->setPosition(pos + i3d::vec3d(0.005, 0, 0));
 		}
 		
 	};
 
-	class SphereBounce : public virtual UpdateComponent {
+	class SphereBounce : public virtual PhysicsUpdateComponent {
 	private:
 		RigidBody * rigidbody = nullptr;
 
@@ -28,10 +29,10 @@ namespace gecom {
 			rigidbody = entity()->getComponent<RigidBody>();
 		}
 
-		virtual void update() {
+		virtual void physicsUpdate() {
 			i3d::vec3d pos = entity()->root()->getPosition();
 			if (entity()->root()->getPosition().y() < 0.1) {
-				rigidbody->m_rigidBody->applyImpulse(btVector3(0,1,0), btVector3(pos.x(), pos.y(), pos.z()));
+				rigidbody->m_rigidBody->applyImpulse(btVector3(0,1,0), i3d2bt(pos));
 			}
 		}
 		

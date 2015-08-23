@@ -12,12 +12,20 @@
 #include <memory>
 #include <utility>
 
+#include <btBulletDynamicsCommon.h>
+
 #include "Initial3D.hpp"
 
 // this alias will be available by default in new i3d
 namespace i3d = initial3d;
 
 namespace gecom {
+
+	inline i3d::vec3d bt2i3d(btVector3 v) { return i3d::vec3d(v.getX(), v.getY(), v.getZ()); }
+	inline i3d::quatd bt2i3d(btQuaternion q) { return i3d::quatd(q.getW(), q.getX(), q.getY(), q.getZ()); }
+
+	inline btVector3 i3d2bt(i3d::vec3d v) { return btVector3(v.x(), v.y(), v.z()); }
+	inline btQuaternion i3d2bt(i3d::quatd q) { return btQuaternion(q.x(), q.y(), q.z(), q.w()); }
 
 	class Uncopyable {
 	private:

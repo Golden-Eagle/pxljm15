@@ -153,7 +153,7 @@ namespace gecom {
 		virtual void setPosition(i3d::vec3d);
 		virtual void setRotation(i3d::quatd);
 
-		// virtual i3d::mat4d localMatrix();
+	private:
 
 		i3d::vec3d position;
 		i3d::quatd rotation;
