@@ -40,7 +40,7 @@ namespace gecom {
 
 			// Cube
 			//
-			entity_ptr cube = std::make_shared<Entity>(i3d::vec3d(0, 10, 0));
+			entity_ptr cube = std::make_shared<Entity>(i3d::vec3d(2, 10, 2));
 			cube->emplaceComponent<MeshDrawable>(
 				gecom::assets::getMesh("cube"),
 				gecom::assets::getMaterial("basic"));
@@ -51,10 +51,13 @@ namespace gecom {
 
 			// Sphere
 			//
-			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(2, 10, 2));
+			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(0, 20, -10));
 			sphere->emplaceComponent<MeshDrawable>(
 				gecom::assets::getMesh("sphere"),
 				gecom::assets::getMaterial("basic"));
+
+			sphere->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(1));
+
 			m_scene->add(sphere);
 
 

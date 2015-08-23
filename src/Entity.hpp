@@ -127,6 +127,12 @@ namespace gecom {
 		virtual void deregisterWith(Scene &) override;
 
 		virtual i3d::mat4d matrix() = 0;
+
+		virtual i3d::vec3d getPosition() const = 0;
+		virtual i3d::quatd getRotation() const = 0;
+
+		virtual void setPosition(i3d::vec3d) = 0;
+		virtual void setRotation(i3d::quatd) = 0;
 	};
 
 
@@ -140,8 +146,14 @@ namespace gecom {
 		EntityTransform(i3d::quatd);
 
 		virtual i3d::mat4d matrix();
-		virtual i3d::mat4d localMatrix();
 
+		virtual i3d::vec3d getPosition() const;
+		virtual i3d::quatd getRotation() const;
+
+		virtual void setPosition(i3d::vec3d);
+		virtual void setRotation(i3d::quatd);
+
+		// virtual i3d::mat4d localMatrix();
 
 		i3d::vec3d position;
 		i3d::quatd rotation;
@@ -213,25 +225,41 @@ namespace gecom {
 
 		virtual void addToDynamicsWorld(btDynamicsWorld *) = 0;
 		virtual void removeFromDynamicsWorld() = 0;
-		virtual void updateEntityRoot() = 0;
 	};
 
 
-	// // Rigid Body component
-	// //
-	// class RigidBody {
-	// public:
-	// 	RigidBody();
-	// 	virtual void addToDynamicsWorld(btDynamicsWorld *);
-	// 	virtual void removeFromDynamicsWorld();
-	// 	virtual void updateEntityRoot();
+	// Rigid Body component
+	//
+	class RigidBody: public PhysicsComponent, btMotionState  {
+	public:
+		RigidBody();
+		RigidBody(collider_ptr);
 
-	// 	void setCollider(collider);
-	// 	const colider & getCollider();
+		virtual void start();
 
-	// private:
-	// 	Collider * m_collider;
-	// };
+		virtual void addToDynamicsWorld(btDynamicsWorld *);
+		virtual void removeFromDynamicsWorld();
+
+		void setCollider(collider_ptr);
+		collider_ptr getCollider();
+
+
+		// Bullet Physics related methods btMotionState
+		virtual void getWorldTransform (btTransform &) const;
+		virtual void setWorldTransform (const btTransform &);
+
+	private:
+
+		void regenerateRigidBody();
+
+		//rigid body stuff
+		btScalar m_mass = 1;
+
+		std::unique_ptr<btRigidBody> m_rigidBody;
+
+		collider_ptr m_collider = nullptr;
+		btDynamicsWorld * m_world = nullptr;
+	};
 
 
 
@@ -301,6 +329,8 @@ namespace gecom {
 			m_components.push_back(ecp);
 
 			ecp->m_entity = shared_from_this();
+
+			ecp->start();
 
 			if (m_scene)
 				ecp->registerWith(*m_scene);

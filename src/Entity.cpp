@@ -142,9 +142,29 @@ mat4d EntityTransform::matrix() {
 }
 
 
-mat4d EntityTransform::localMatrix() {
-	return matrix();
+vec3d EntityTransform::getPosition() const {
+	return position;
 }
+
+
+quatd EntityTransform::getRotation() const {
+	return rotation;
+}
+
+
+void EntityTransform::setPosition(vec3d pos) {
+	position = pos;
+}
+
+
+void EntityTransform::setRotation(quatd rot) {
+	rotation = rot;
+}
+
+
+// mat4d EntityTransform::localMatrix() {
+// 	return matrix();
+// }
 
 
 
@@ -210,47 +230,83 @@ void PhysicsComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysic
 void PhysicsComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicsComponent(this); }
 
 
-// void PhysicsComponent::updateTransform() {
-// 	btTransform trans;
-// 	rigidBody->getMotionState()->getWorldTransform(trans);
-// 	btVector3 pos = trans.getOrigin();
-// 	entity()->root()->position = vec3d(pos.getX(), pos.getY(), pos.getZ());
-// 	cout << "Position now at " << entity()->root()->position << endl;
-// }
+
+// Rigid Body component
+//
+RigidBody::RigidBody() {
+	abort(); // LOL wut u doin?!?!
+}
+
+RigidBody::RigidBody(collider_ptr c) {
+	m_collider = c;
+}
+
+void RigidBody::start() {
+	regenerateRigidBody();
+}
 
 
-// // Rigid Body component
-// //
-// RigidBody::RigidBody() { }
+void RigidBody::addToDynamicsWorld(btDynamicsWorld * world) {
+	removeFromDynamicsWorld();
+	m_world = world;
+	m_world->addRigidBody(m_rigidBody.get());
+}
 
 
-// RigidBody::~RigidBody() { }
-
-// void PhysicsComponent::registerWith(Scene &s) {
-// 	vec3d pos = entity()->root()->position;
-// 	quatd rot = entity()->root()->rotation;
-
-// 	// Shape
-// 	btCollisionShape *shape = m_collider.collisionShape();
-
-// 	// Motion state
-// 	btDefaultMotionState* motionState = new btDefaultMotionState(btTransform(
-// 		btQuaternion(rot.x(), rot.y(), rot.z(), rot.w()), btVector3(pos.x(), pos.y(), pos.z())));
-
-// 	// Specifics
-// 	btScalar mass = 1;
-// 	btVector3 inertia(0, 0, 0);
-// 	shape->calculateLocalInertia(mass, inertia);
-// 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, shape, inertia);
-// 	rigidBody = new btRigidBody(rigidBodyCI);
-
-// 	s.registerPhysicsComponent(this);
-// }
+void RigidBody::removeFromDynamicsWorld() {
+	if (m_world) {
+		m_world->removeRigidBody(m_rigidBody.get());
+		m_world = nullptr;
+	}
+}
 
 
-// void RigidBody::updateTransform() {
+void RigidBody::setCollider(collider_ptr col) {
+	if (m_world)
+		m_world->removeRigidBody(m_rigidBody.get());
 
-// }
+	m_collider = col;
+
+	btCollisionShape *shape = m_collider->getCollisionShape();
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(m_mass, inertia);
+
+	m_rigidBody->setMassProps(m_mass, inertia);
+	m_rigidBody->updateInertiaTensor();
+
+	if (m_world)
+		m_world->addRigidBody(m_rigidBody.get());
+}
+
+
+collider_ptr RigidBody::getCollider() {
+	return m_collider;
+}
+
+
+void RigidBody::getWorldTransform (btTransform &centerOfMassWorldTrans) const {
+	vec3d pos = entity()->root()->getPosition();
+	quatd rot = entity()->root()->getRotation();
+	centerOfMassWorldTrans.setOrigin(btVector3(pos.x(), pos.y(), pos.z()));
+	centerOfMassWorldTrans.setRotation(btQuaternion(rot.x(), rot.y(), rot.z(), rot.w()));
+}
+
+
+void RigidBody::setWorldTransform (const btTransform &centerOfMassWorldTrans) {
+	btVector3 pos = centerOfMassWorldTrans.getOrigin();
+	btQuaternion rot = centerOfMassWorldTrans.getRotation();
+	entity()->root()->setPosition(vec3d(pos.getX(), pos.getY(), pos.getZ()));
+	entity()->root()->setRotation(quatd(rot.getW(), rot.getX(), rot.getY(), rot.getZ()));
+}
+
+
+void RigidBody::regenerateRigidBody() {
+	btCollisionShape *shape = m_collider->getCollisionShape();
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(m_mass, inertia);
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_mass, this, shape, inertia);
+	m_rigidBody = make_unique<btRigidBody>(rigidBodyCI);
+}
 
 
 
@@ -431,13 +487,10 @@ void PhysicsSystem::deregisterPhysicsComponent(PhysicsComponent *c) {
 
 void PhysicsSystem::tick() {
 	dynamicsWorld->stepSimulation(1 / 60.f, 10);
-	for (PhysicsComponent *pc : m_rigidbodies)
-		pc->updateEntityRoot();
 }
 
 
 void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
-	printf("It is like a clock inside my head: %i\n", timeStep);
 	for (PhysicsUpdateComponent *pc : m_physicsUpdatables)
 		pc->physicsUpdate();
 }

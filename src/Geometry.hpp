@@ -16,8 +16,15 @@
 namespace gecom {
 
 	class Mesh;
-
 	using mesh_ptr = std::shared_ptr<Mesh>;
+
+	class ColliderShape;
+	using collider_ptr = std::shared_ptr<ColliderShape>;
+
+	class SphereCollider;
+	class BoxCollider;
+	using sphere_collider_ptr = std::shared_ptr<SphereCollider>;
+	using box_collider_ptr = std::shared_ptr<BoxCollider>;
 
 	class Mesh : Uncopyable, public std::enable_shared_from_this<Mesh> {
 	public:
@@ -43,5 +50,32 @@ namespace gecom {
 		std::vector<float> m_normals;
 		std::vector<float> m_uvs;
 		std::vector<unsigned int> m_triangles;
+	};
+
+
+	class ColliderShape : Uncopyable, public std::enable_shared_from_this<ColliderShape> {
+	public:
+		virtual ~ColliderShape();
+		virtual btCollisionShape * getCollisionShape() = 0;
+	};
+
+
+	class SphereCollider : public ColliderShape {
+	public:
+		SphereCollider(btScalar);
+		virtual btCollisionShape * getCollisionShape();
+
+	private:
+		btSphereShape m_shape;
+	};
+
+
+	class BoxCollider : public ColliderShape {
+	public:
+		BoxCollider(btVector3);
+		virtual btCollisionShape * getCollisionShape();
+
+	private:
+		btBoxShape m_shape;
 	};
 }
