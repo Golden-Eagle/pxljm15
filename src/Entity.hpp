@@ -6,6 +6,8 @@
 #include <iostream>
 #include <queue>
 #include <unordered_set>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <btBulletDynamicsCommon.h>
@@ -106,19 +108,6 @@ namespace gecom {
 
 
 	//
-	// Physics Update component
-	//
-	class PhysicsUpdateComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void physicsUpdate() = 0;
-	};
-
-
-
-	//
 	// Tranform component
 	//
 	class TransformComponent : public virtual EntityComponent {
@@ -140,7 +129,7 @@ namespace gecom {
 	//
 	// Entity Tranform component
 	//
-	class EntityTransform : public TransformComponent {
+	class EntityTransform : public virtual TransformComponent {
 	public:
 		EntityTransform(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
 		EntityTransform(i3d::quatd);
@@ -197,7 +186,7 @@ namespace gecom {
 		mesh_ptr m_mesh;
 	};
 
-	class MeshDrawable :  public DrawableComponent {
+	class MeshDrawable :  public virtual DrawableComponent {
 	public:
 		MeshDrawable(mesh_ptr, material_ptr);
 		virtual ~MeshDrawable();
@@ -214,15 +203,23 @@ namespace gecom {
 
 
 	//
+	// Physics Update component
+	//
+	class PhysicsUpdateComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
+
+		virtual void physicsUpdate() = 0;
+	};
+
+
+
+	//
 	// Physics component
 	//
 	class PhysicsComponent : public virtual EntityComponent {
 	public:
-		virtual ~PhysicsComponent();
-
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
 		virtual void addToDynamicsWorld(btDynamicsWorld *) = 0;
 		virtual void removeFromDynamicsWorld() = 0;
 	};
@@ -230,36 +227,55 @@ namespace gecom {
 
 	// Rigid Body component
 	//
-	class RigidBody: public PhysicsComponent, btMotionState  {
+	class RigidBody: public virtual PhysicsComponent, private btMotionState  {
 	public:
 		RigidBody();
 		RigidBody(collider_ptr);
 
 		virtual void start();
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 
 		virtual void addToDynamicsWorld(btDynamicsWorld *);
 		virtual void removeFromDynamicsWorld();
 
 		void setCollider(collider_ptr);
 		collider_ptr getCollider();
-
+		btRigidBody * getRigidBody();
 
 		// Bullet Physics related methods btMotionState
 		virtual void getWorldTransform (btTransform &) const;
 		virtual void setWorldTransform (const btTransform &);
 
-		std::unique_ptr<btRigidBody> m_rigidBody;
 	private:
 
 		void regenerateRigidBody();
 
-		//rigid body stuff
+		// Rigid body stuff
 		btScalar m_mass = 1;
-
-
 		collider_ptr m_collider = nullptr;
+		std::unique_ptr<btRigidBody> m_rigidBody;
+
+		// World attached to
 		btDynamicsWorld * m_world = nullptr;
 	};
+
+
+
+
+	//
+	// Physics Collision Callback component
+	//
+	class CollisionCallbackComponent : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
+
+		virtual void onCollisionEnter(PhysicsComponent *);
+		virtual void onCollision(PhysicsComponent *);
+		virtual void onCollisionExit(PhysicsComponent *);
+	};
+
 
 
 
@@ -268,29 +284,27 @@ namespace gecom {
 	//
 	class LightComponent : public virtual EntityComponent {
 	public:
-		virtual ~LightComponent();
-
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 	};
 
 	// Directional Light component
 	//
-	class DirectionalLight : public LightComponent {
+	class DirectionalLight : public virtual LightComponent {
 	public:
 		DirectionalLight();
 	};
 
 	// Directional Light component
 	//
-	class PointLight : public LightComponent {
+	class PointLight : public virtual LightComponent {
 	public:
 		PointLight();
 	};
 
 	// Directional Light component
 	//
-	class SpotLight : public LightComponent {
+	class SpotLight : public virtual LightComponent {
 	public:
 		SpotLight();
 	};
@@ -416,17 +430,28 @@ namespace gecom {
 		void registerPhysicsUpdateComponent(PhysicsUpdateComponent *);
 		void deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *);
 
-		void registerPhysicsComponent(PhysicsComponent *);
-		void deregisterPhysicsComponent(PhysicsComponent *);
+		void registerRigidBody(RigidBody *);
+		void deregisterRigidBody(RigidBody *);
+
+		void registerCollisionCallbackComponent(CollisionCallbackComponent *);
+		void deregisterCollisionCallbackComponent(CollisionCallbackComponent *);
 
 		void tick();
 
 		void processPhysicsCallback(btScalar);
 
 	private:
-		std::unordered_set<PhysicsUpdateComponent *> m_physicsUpdatables;
-		std::unordered_set<PhysicsComponent *> m_rigidbodies;
 
+		std::unordered_set<PhysicsUpdateComponent *> m_physicsUpdatables;
+		std::unordered_set<RigidBody *> m_rigidbodies;
+		std::unordered_map<Entity *, std::unordered_set<CollisionCallbackComponent *>> m_collisionCallbacks;
+
+		// internal collision sets
+		bool m_collisionsA_isCurrent = true;
+		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_currentFrame;
+		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_lastFrame;
+
+		// physics internals
 		btBroadphaseInterface* broadphase;
 		btDefaultCollisionConfiguration* collisionConfiguration;
 		btCollisionDispatcher* dispatcher;

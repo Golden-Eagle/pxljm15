@@ -34,7 +34,7 @@ namespace gecom {
 		Window *m_window;
 
 	public:
-		Scene(Window *win) : m_camera(win, i3d::vec3d(0, 10, 3)), m_renderer(win), m_window(win) { }
+		Scene(Window *win) : m_camera(win, i3d::vec3d(0, 2, 3)), m_renderer(win), m_window(win) { }
 
 
 		~Scene() { }

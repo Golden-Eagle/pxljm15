@@ -1,3 +1,6 @@
+
+#include <utility>
+
 #include "Entity.hpp"
 #include "Scene.hpp"
 
@@ -236,18 +239,14 @@ vector<drawcall *> MeshDrawable::getDrawCalls(mat4d view) {
 //
 // Physics component
 //
-PhysicsComponent::~PhysicsComponent() { }
-
-
-void PhysicsComponent::registerWith(Scene &s) { s.physicsSystem().registerPhysicsComponent(this); }
-
-
-void PhysicsComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterPhysicsComponent(this); }
-
-
-
 // Rigid Body component
 //
+void RigidBody::registerWith(Scene &s) { s.physicsSystem().registerRigidBody(this); }
+
+
+void RigidBody::deregisterWith(Scene &s) { s.physicsSystem().deregisterRigidBody(this); }
+
+
 RigidBody::RigidBody() {
 	abort(); // LOL wut u doin?!?!
 }
@@ -299,6 +298,11 @@ collider_ptr RigidBody::getCollider() {
 }
 
 
+btRigidBody * RigidBody::getRigidBody() {
+	return m_rigidBody.get();
+}
+
+
 void RigidBody::getWorldTransform (btTransform &centerOfMassWorldTrans) const {
 	vec3d pos = entity()->root()->getPosition();
 	quatd rot = entity()->root()->getRotation();
@@ -316,21 +320,45 @@ void RigidBody::setWorldTransform (const btTransform &centerOfMassWorldTrans) {
 
 
 void RigidBody::regenerateRigidBody() {
+	// Create rigid body
 	btCollisionShape *shape = m_collider->getCollisionShape();
 	btVector3 inertia(0, 0, 0);
 	shape->calculateLocalInertia(m_mass, inertia);
 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_mass, this, shape, inertia);
 	m_rigidBody = make_unique<btRigidBody>(rigidBodyCI);
+
+	// Set Attributes
+	// static cast to physics component pointer be cause the type needs to be
+	// exactly what we reinterpret_cast it as, in the collision handler
+	m_rigidBody->setUserPointer(static_cast<PhysicsComponent *>(this)); // ben figured this out.. ask him why
 }
+
+
+
+
+//
+// Collision Callback component
+//
+void CollisionCallbackComponent::registerWith(Scene &s) { s.physicsSystem().registerCollisionCallbackComponent(this); }
+
+
+void CollisionCallbackComponent::deregisterWith(Scene &s) { s.physicsSystem().deregisterCollisionCallbackComponent(this); }
+
+
+void CollisionCallbackComponent::onCollisionEnter(PhysicsComponent *) { }
+
+
+void CollisionCallbackComponent::onCollision(PhysicsComponent *) { }
+
+
+void CollisionCallbackComponent::onCollisionExit(PhysicsComponent *) { }
+
 
 
 
 //
 // Light component
 //
-LightComponent::~LightComponent() { }
-
-
 void LightComponent::registerWith(Scene &s) { s.lightSystem().registerLightComponent(this); }
 
 
@@ -435,8 +463,8 @@ priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
 // Physical System
 //
 static void physicsSystemTickCallback(btDynamicsWorld *world, btScalar timeStep) {
-    PhysicsSystem *w = static_cast<PhysicsSystem *>(world->getWorldUserInfo());
-    w->processPhysicsCallback(timeStep);
+	PhysicsSystem *w = reinterpret_cast<PhysicsSystem *>(world->getWorldUserInfo());
+	w->processPhysicsCallback(timeStep);
 }
 
 
@@ -488,15 +516,29 @@ void PhysicsSystem::deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *c) 
 }
 
 
-void PhysicsSystem::registerPhysicsComponent(PhysicsComponent * c) {
+void PhysicsSystem::registerRigidBody(RigidBody * c) {
 	m_rigidbodies.insert(c);
 	c->addToDynamicsWorld(dynamicsWorld);
 }
 
 
-void PhysicsSystem::deregisterPhysicsComponent(PhysicsComponent *c) {
+void PhysicsSystem::deregisterRigidBody(RigidBody *c) {
 	c->removeFromDynamicsWorld();
 	m_rigidbodies.erase(c);
+}
+
+
+void PhysicsSystem::registerCollisionCallbackComponent(CollisionCallbackComponent *c) {
+	m_collisionCallbacks[c->entity().get()].insert(c);
+}
+
+
+void PhysicsSystem::deregisterCollisionCallbackComponent(CollisionCallbackComponent *c) {
+	unordered_set<CollisionCallbackComponent *> &cset = m_collisionCallbacks[c->entity().get()];
+	cset.erase(c);
+	if (cset.empty()) {
+		m_collisionCallbacks.erase(c->entity().get());
+	}
 }
 
 
@@ -506,6 +548,85 @@ void PhysicsSystem::tick() {
 
 
 void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
+
+	// Process collisions
+	//
+	swap(m_currentFrame, m_lastFrame);
+	m_currentFrame.clear();
+
+	int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
+	for (int i = 0; i < numManifolds; ++i) {
+		btPersistentManifold* contactManifold =  dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+		const btCollisionObject *obA = contactManifold->getBody0();
+		const btCollisionObject *obB = contactManifold->getBody1();
+
+		auto collisionPair = make_pair(obA, obB);
+
+		PhysicsComponent * physicsA = reinterpret_cast<PhysicsComponent *>(obA->getUserPointer());
+		PhysicsComponent * physicsB = reinterpret_cast<PhysicsComponent *>(obB->getUserPointer());
+
+		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
+		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
+
+		int numContacts = contactManifold->getNumContacts();
+		for (int j = 0; j<numContacts; ++j) {
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+
+			// Actual contact
+			if (pt.getDistance() < 0.f) {
+				m_currentFrame.insert(collisionPair);
+				auto it  = m_lastFrame.find(collisionPair);
+				if(it != m_lastFrame.end()) {
+					//existing collision
+					
+					if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+						for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityA))
+							callback->onCollision(physicsB);
+
+					if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+						for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityB))
+							callback->onCollision(physicsA);
+
+					m_lastFrame.erase(it);
+				} else {
+					//new collision
+					
+					if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+						for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityA))
+							callback->onCollisionEnter(physicsB);
+
+					if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+						for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityB))
+							callback->onCollisionEnter(physicsA);
+
+				}
+
+				break; //break out of btManifoldPoint iteration
+			}
+		}
+	}
+
+	for (auto collisionExitPair : m_lastFrame) {
+		PhysicsComponent * physicsA = reinterpret_cast<PhysicsComponent *>(collisionExitPair.first->getUserPointer());
+		PhysicsComponent * physicsB = reinterpret_cast<PhysicsComponent *>(collisionExitPair.second->getUserPointer());
+
+		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
+		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
+
+
+		if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+			for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityA))
+				callback->onCollisionExit(physicsB);
+
+		if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+			for (CollisionCallbackComponent *callback : m_collisionCallbacks.at(entityB))
+				callback->onCollisionExit(physicsA);
+	}
+
+
+
+	// Process physics updates
+	//
 	for (PhysicsUpdateComponent *pc : m_physicsUpdatables)
 		pc->physicsUpdate();
 }
