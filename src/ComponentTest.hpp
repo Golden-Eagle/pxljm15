@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "Scene.hpp"
 #include "Initial3D.hpp"
 #include "GECom.hpp"
 
@@ -15,8 +15,8 @@ namespace gecom {
 			i3d::vec3d pos = entity()->root()->getPosition();
 			entity()->root()->setPosition(pos + i3d::vec3d(0.005, 0, 0));
 		}
-		
 	};
+
 
 	class SphereBounce : public virtual PhysicsUpdateComponent {
 	private:
@@ -35,8 +35,8 @@ namespace gecom {
 				rigidbody->getRigidBody()->applyImpulse(btVector3(0,1,0), i3d2bt(pos));
 			}
 		}
-		
 	};
+
 
 	class CollisionCallbackTest  : public virtual CollisionCallbackComponent {
 	public:
@@ -52,6 +52,5 @@ namespace gecom {
 		virtual void onCollisionExit(PhysicsComponent *c) {
 			std::cout << "Colliding (EXIT) with :: " << c << std::endl;
 		} 
-
 	};
 }

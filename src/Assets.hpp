@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "json.hpp"
-#include "Geometry.hpp"
+#include "Mesh.hpp"
 #include "Material.hpp"
 
 namespace gecom {

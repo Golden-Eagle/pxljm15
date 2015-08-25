@@ -1,4 +1,4 @@
-#include "Geometry.hpp"
+#include "Mesh.hpp"
 
 using namespace std;
 using namespace gecom;
@@ -178,21 +178,3 @@ void Mesh::loadFromObj(const string &filepath) {
 	// cout << m_triangles.size()/3 << " faces" << endl;
 
 }
-
-
-
-ColliderShape::~ColliderShape() { }
-
-
-
-SphereCollider::SphereCollider(btScalar radius) : m_shape(radius) { }
-
-
-btCollisionShape * SphereCollider::getCollisionShape() { return &m_shape; }
-
-
-
-BoxCollider::BoxCollider(btVector3 halfBox) : m_shape(halfBox) { }
-
-
-btCollisionShape * BoxCollider::getCollisionShape() { return &m_shape; }

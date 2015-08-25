@@ -10,7 +10,7 @@
 #include "Initial3D.hpp"
 #include "SimpleShader.hpp"
 #include "Material.hpp"
-#include "Geometry.hpp"
+#include "Mesh.hpp"
 #include "Window.hpp"
 
 

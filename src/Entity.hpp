@@ -2,110 +2,13 @@
 
 #include <algorithm>
 #include <memory>
-#include <chrono>
-#include <iostream>
-#include <queue>
-#include <unordered_set>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
-#include <btBulletDynamicsCommon.h>
-
+#include "ComponentSystem.hpp"
 #include "GECom.hpp"
-#include "GLOW.hpp"
 #include "Initial3D.hpp"
-#include "SimpleShader.hpp"
-#include "Geometry.hpp"
-#include "Material.hpp"
-
 
 namespace gecom {
-
-	//
-	// Forward decleration
-	//
-
-	// Entity
-	// 
-	class Entity;
-	using entity_ptr = std::shared_ptr<Entity>;
-
-	// Components
-	// 
-	class EntityComponent;
-
-	class UpdateComponent;
-
-	class TransformComponent;
-	class EntityTransform;
-
-	class DrawableComponent;
-	class MeshDrawable;
-
-	class LightComponent;
-	class DirectionalLight;
-	class PointLight;
-	class SpotLight;
-
-	// Systems
-	// 
-	class Scene;
-	class ComponentSystem;
-	class DrawableSystem;
-	class LightSystem;
-
-
-	///////////////////
-	//
-	// Entity component
-	//
-	///////////////////
-	class EntityComponent {
-	public:
-		virtual ~EntityComponent();
-
-		bool hasEntity();
-		entity_ptr entity() const;
-		
-	private:
-		
-		virtual void start(); // After attaching to entity
-		virtual void registerWith(Scene &);
-		virtual void deregisterWith(Scene &);
-
-		std::weak_ptr<Entity> m_entity;
-		friend class Entity;
-	};
-
-
-
-	//
-	// Update component
-	//
-	class UpdateComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void update() = 0;
-		virtual std::chrono::duration<double> updateInterval();
-	};
-
-
-
-	//
-	// Input Update component
-	//
-	class InputUpdateComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void inputUpdate() = 0;
-	};
-
-
 
 	//
 	// Tranform component
@@ -123,8 +26,6 @@ namespace gecom {
 		virtual void setPosition(i3d::vec3d) = 0;
 		virtual void setRotation(i3d::quatd) = 0;
 	};
-
-
 
 	//
 	// Entity Tranform component
@@ -148,175 +49,9 @@ namespace gecom {
 		i3d::quatd rotation;
 	};
 
-
-
-	//
-	// Drawable component
-	//
-	class drawcall {
-	public:
-		virtual ~drawcall();
-		virtual void draw() = 0;
-		material_ptr material();
-		bool operator< (const drawcall& rhs) const;
-
-	protected:
-		material_ptr m_mat;
-	};
-
-	class DrawableComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) = 0;
-
-	};
-
-
-	// Mesh Drawable
-	//
-	class mesh_drawcall : public drawcall {
-	public:
-		mesh_drawcall(i3d::mat4d, material_ptr, mesh_ptr);
-		virtual void draw();
-
-	private:
-		i3d::mat4f m_mv;
-		mesh_ptr m_mesh;
-	};
-
-	class MeshDrawable :  public virtual DrawableComponent {
-	public:
-		MeshDrawable(mesh_ptr, material_ptr);
-		virtual ~MeshDrawable();
-
-		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d);
-
-		mesh_ptr mesh;
-		material_ptr material;
-
-	private:
-		mesh_drawcall m_cachedDrawcall;
-	};
-
-
-
-	//
-	// Physics Update component
-	//
-	class PhysicsUpdateComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void physicsUpdate() = 0;
-	};
-
-
-
-	//
-	// Physics component
-	//
-	class PhysicsComponent : public virtual EntityComponent {
-	public:
-		virtual void addToDynamicsWorld(btDynamicsWorld *) = 0;
-		virtual void removeFromDynamicsWorld() = 0;
-	};
-
-
-	// Rigid Body component
-	//
-	class RigidBody: public virtual PhysicsComponent, private btMotionState  {
-	public:
-		RigidBody();
-		RigidBody(collider_ptr);
-
-		virtual void start();
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void addToDynamicsWorld(btDynamicsWorld *);
-		virtual void removeFromDynamicsWorld();
-
-		void setCollider(collider_ptr);
-		collider_ptr getCollider();
-		btRigidBody * getRigidBody();
-
-		// Bullet Physics related methods btMotionState
-		virtual void getWorldTransform (btTransform &) const;
-		virtual void setWorldTransform (const btTransform &);
-
-	private:
-
-		void regenerateRigidBody();
-
-		// Rigid body stuff
-		btScalar m_mass = 1;
-		collider_ptr m_collider = nullptr;
-		std::unique_ptr<btRigidBody> m_rigidBody;
-
-		// World attached to
-		btDynamicsWorld * m_world = nullptr;
-	};
-
-
-
-
-	//
-	// Physics Collision Callback component
-	//
-	class CollisionCallbackComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-
-		virtual void onCollisionEnter(PhysicsComponent *);
-		virtual void onCollision(PhysicsComponent *);
-		virtual void onCollisionExit(PhysicsComponent *);
-	};
-
-
-
-
-	//
-	// Light component
-	//
-	class LightComponent : public virtual EntityComponent {
-	public:
-		virtual void registerWith(Scene &) override;
-		virtual void deregisterWith(Scene &) override;
-	};
-
-	// Directional Light component
-	//
-	class DirectionalLight : public virtual LightComponent {
-	public:
-		DirectionalLight();
-	};
-
-	// Directional Light component
-	//
-	class PointLight : public virtual LightComponent {
-	public:
-		PointLight();
-	};
-
-	// Directional Light component
-	//
-	class SpotLight : public virtual LightComponent {
-	public:
-		SpotLight();
-	};
-
-
-
-
-	/////////
 	//
 	// Entity
 	//
-	/////////
 	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
 	private:
 		Scene *m_scene = nullptr;
@@ -332,6 +67,7 @@ namespace gecom {
 
 		void registerWith(Scene &);
 		void deregister();
+
 
 		void addComponent(std::unique_ptr<EntityComponent>);
 		template<typename T, typename... Args>
@@ -364,117 +100,5 @@ namespace gecom {
 					componentList.push_back(i);
 			return componentList;
 		}
-
-	};
-
-
-
-
-	//////////////////////////////
-	//
-	// Component System base class
-	//
-	//////////////////////////////
-	class ComponentSystem {
-	public:
-		virtual ~ComponentSystem();
-	};
-
-
-	// 
-	// Component System for Update and InputUpdate Components
-	// 
-	class UpdateSystem : public ComponentSystem {
-	public:
-		UpdateSystem();
-
-		void registerUpdateComponent(UpdateComponent *);
-		void deregisterUpdateComponent(UpdateComponent *);
-		void update();
-
-		void registerInputUpdateComponent(InputUpdateComponent *);
-		void deregisterInputUpdateComponent(InputUpdateComponent *);
-		void inputUpdate();
-
-	private:
-		std::unordered_set<UpdateComponent *> m_updatables;
-		std::unordered_set<InputUpdateComponent *> m_inputUpdatables;
-	};
-
-
-	// 
-	// Component System for Drawable Components
-	// 
-	class DrawableSystem : public ComponentSystem {
-	public:
-		DrawableSystem();
-
-		void registerDrawableComponent(DrawableComponent *);
-		void deregisterDrawableComponent(DrawableComponent *);
-
-		std::priority_queue<drawcall *> getDrawQueue(i3d::mat4d);
-
-	private:
-		std::unordered_set<DrawableComponent *> m_drawables;
-	};
-
-
-	// 
-	// Component System for Physcial Components
-	// 
-	class PhysicsSystem : public ComponentSystem {
-	public:
-		PhysicsSystem();
-		virtual ~PhysicsSystem();
-
-		void registerPhysicsUpdateComponent(PhysicsUpdateComponent *);
-		void deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *);
-
-		void registerRigidBody(RigidBody *);
-		void deregisterRigidBody(RigidBody *);
-
-		void registerCollisionCallbackComponent(CollisionCallbackComponent *);
-		void deregisterCollisionCallbackComponent(CollisionCallbackComponent *);
-
-		void tick();
-
-		void processPhysicsCallback(btScalar);
-
-	private:
-
-		std::unordered_set<PhysicsUpdateComponent *> m_physicsUpdatables;
-		std::unordered_set<RigidBody *> m_rigidbodies;
-		std::unordered_map<Entity *, std::unordered_set<CollisionCallbackComponent *>> m_collisionCallbacks;
-
-		// internal collision sets
-		bool m_collisionsA_isCurrent = true;
-		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_currentFrame;
-		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_lastFrame;
-
-		// physics internals
-		btBroadphaseInterface* broadphase;
-		btDefaultCollisionConfiguration* collisionConfiguration;
-		btCollisionDispatcher* dispatcher;
-		btSequentialImpulseConstraintSolver* solver;
-
-		btDiscreteDynamicsWorld* dynamicsWorld;
-
-	};
-
-
-	//
-	// Component System for Light Components
-	//
-	class LightSystem : public ComponentSystem {
-	public:
-		LightSystem();
-
-		void registerLightComponent(LightComponent *);
-		void deregisterLightComponent(LightComponent *);
-
-		const std::unordered_set<LightComponent *> & getLights();
-
-	private:
-		std::unordered_set<LightComponent *> m_lights;
 	};
 }

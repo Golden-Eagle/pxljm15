@@ -13,6 +13,12 @@
 #include "SimpleShader.hpp"
 #include "ComponentTest.hpp"
 
+// Inclusions for compoenets
+
+#include "Mesh.hpp"
+#include "Collider.hpp"
+
+
 
 namespace gecom {
 
