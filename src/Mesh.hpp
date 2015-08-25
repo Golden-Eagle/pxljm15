@@ -54,13 +54,13 @@ namespace pxljm {
 
 	// Mesh Drawable
 	//
-	class mesh_drawcall : public drawcall {
+	class MeshDrawCall : public DrawCall {
 	private:
 		i3d::mat4f m_mv;
 		mesh_ptr m_mesh;
 	public:
 		//TODO clean up
-		mesh_drawcall(i3d::mat4d mv, material_ptr mat, mesh_ptr mesh)
+		MeshDrawCall(i3d::mat4d mv, material_ptr mat, mesh_ptr mesh)
 			: m_mv(mv), m_mesh(mesh) { m_mat = mat; }
 		virtual void draw() {
 			m_mesh->bind();
@@ -71,20 +71,20 @@ namespace pxljm {
 
 	class MeshDrawable :  public virtual DrawableComponent {
 	private:
-		mesh_drawcall m_cachedDrawcall;
+		MeshDrawCall m_cachedDrawCall;
 
 	public:
 		mesh_ptr mesh;
 		material_ptr material;
 
 		MeshDrawable(mesh_ptr m, material_ptr mat)
-			: m_cachedDrawcall(i3d::mat4d(), mat, m), mesh(m), material(mat) {  }
+			: m_cachedDrawCall(i3d::mat4d(), mat, m), mesh(m), material(mat) {  }
 
-		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d view) {
-			std::vector<drawcall *> drawcallList;
-			m_cachedDrawcall = mesh_drawcall(view * entity()->root()->matrix(), material, mesh);
-			drawcallList.push_back(&m_cachedDrawcall);
-			return drawcallList;
+		virtual std::vector<DrawCall *> getDrawCalls(i3d::mat4d view) {
+			std::vector<DrawCall *> drawCallList;
+			m_cachedDrawCall = MeshDrawCall(view * entity()->root()->matrix(), material, mesh);
+			drawCallList.push_back(&m_cachedDrawCall);
+			return drawCallList;
 		}
 	};
 }

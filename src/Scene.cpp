@@ -43,7 +43,7 @@ void Scene::tick() {
 		i3d::mat4d proj_matrix = m_projection.getProjectionTransform();
 		i3d::mat4d view_matrix = m_camera.getViewTransform();
 
-		std::priority_queue<drawcall *> drawQueue = m_drawableSystem.getDrawQueue(view_matrix);
+		std::priority_queue<DrawCall *> drawQueue = m_drawableSystem.getDrawQueue(view_matrix);
 		m_renderer.renderScene(proj_matrix, drawQueue);
 	}
 }

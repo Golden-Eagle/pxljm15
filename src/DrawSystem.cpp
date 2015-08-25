@@ -9,13 +9,13 @@ using namespace i3d;
 
 
 
-drawcall::~drawcall() { }
+DrawCall::~DrawCall() { }
 
 
-material_ptr drawcall::material() { return m_mat; }
+material_ptr DrawCall::material() { return m_mat; }
 
 
-bool drawcall::operator< (const drawcall& rhs) const {
+bool DrawCall::operator< (const DrawCall& rhs) const {
 	return m_mat->shader < rhs.m_mat->shader || m_mat < rhs.m_mat;
 }
 
@@ -40,12 +40,12 @@ void DrawableSystem::deregisterDrawableComponent(DrawableComponent *c) {
 }
 
 
-priority_queue<drawcall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
-	priority_queue<drawcall *> drawQueue;
+priority_queue<DrawCall *> DrawableSystem::getDrawQueue(mat4d viewMatrix) {
+	priority_queue<DrawCall *> drawQueue;
 	for (DrawableComponent *drawable : m_drawables) {
-		vector<drawcall *> drawcalls = drawable->getDrawCalls(viewMatrix);
+		vector<DrawCall *> DrawCalls = drawable->getDrawCalls(viewMatrix);
 
-		for (drawcall * draw : drawcalls)
+		for (DrawCall * draw : DrawCalls)
 			drawQueue.push(draw);
 	}
 	return drawQueue;

@@ -10,12 +10,12 @@
 
 namespace pxljm {
 
-	class drawcall {
+	class DrawCall {
 	public:
-		virtual ~drawcall();
+		virtual ~DrawCall();
 		virtual void draw() = 0;
 		material_ptr material();
-		bool operator< (const drawcall& rhs) const;
+		bool operator< (const DrawCall& rhs) const;
 
 	protected:
 		material_ptr m_mat;
@@ -26,7 +26,7 @@ namespace pxljm {
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) = 0;
+		virtual std::vector<DrawCall *> getDrawCalls(i3d::mat4d) = 0;
 
 	};
 
@@ -39,7 +39,7 @@ namespace pxljm {
 		void registerDrawableComponent(DrawableComponent *);
 		void deregisterDrawableComponent(DrawableComponent *);
 
-		std::priority_queue<drawcall *> getDrawQueue(i3d::mat4d);
+		std::priority_queue<DrawCall *> getDrawQueue(i3d::mat4d);
 
 	private:
 		std::unordered_set<DrawableComponent *> m_drawables;

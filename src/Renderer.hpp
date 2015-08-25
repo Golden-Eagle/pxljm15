@@ -20,7 +20,7 @@ namespace pxljm {
 		Renderer(gecom::Window *win) : m_win(win) { }
 		~Renderer() { }
 
-		void renderScene(i3d::mat4d proj, std::priority_queue<drawcall *> drawList) {
+		void renderScene(i3d::mat4d proj, std::priority_queue<DrawCall *> drawList) {
 
 			glClearColor(1.f, 1.f, 1.f, 1.f); // default background color
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
