@@ -80,9 +80,9 @@ namespace gecom {
 		MeshDrawable(mesh_ptr m, material_ptr mat)
 			: mesh(m), material(mat), m_cachedDrawcall(i3d::mat4d(), mat, m) {  }
 
-		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d) {
+		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d view) {
 			std::vector<drawcall *> drawcallList;
-			m_cachedDrawcall = mesh_drawcall(i3d::mat4d(), material, mesh);
+			m_cachedDrawcall = mesh_drawcall(view * entity()->root()->matrix(), material, mesh);
 			drawcallList.push_back(&m_cachedDrawcall);
 			return drawcallList;
 		}
