@@ -5,7 +5,7 @@
 #include "GECom.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 
 	class Entity;
 	using entity_ptr = std::shared_ptr<Entity>;

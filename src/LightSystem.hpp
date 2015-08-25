@@ -5,11 +5,11 @@
 #include "ComponentSystem.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 	//
 	// Light component
 	//
-	class LightComponent : public virtual EntityComponent {
+	class Light : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
@@ -17,21 +17,21 @@ namespace gecom {
 
 	// Directional Light component
 	//
-	class DirectionalLight : public virtual LightComponent {
+	class DirectionalLight : public virtual Light {
 	public:
 		DirectionalLight();
 	};
 
 	// Directional Light component
 	//
-	class PointLight : public virtual LightComponent {
+	class PointLight : public virtual Light {
 	public:
 		PointLight();
 	};
 
 	// Directional Light component
 	//
-	class SpotLight : public virtual LightComponent {
+	class SpotLight : public virtual Light {
 	public:
 		SpotLight();
 	};
@@ -45,12 +45,12 @@ namespace gecom {
 	public:
 		LightSystem();
 
-		void registerLightComponent(LightComponent *);
-		void deregisterLightComponent(LightComponent *);
+		void registerLight(Light *);
+		void deregisterLight(Light *);
 
-		const std::unordered_set<LightComponent *> & getLights();
+		const std::unordered_set<Light *> & getLights();
 
 	private:
-		std::unordered_set<LightComponent *> m_lights;
+		std::unordered_set<Light *> m_lights;
 	};
 }

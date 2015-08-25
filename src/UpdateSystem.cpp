@@ -3,7 +3,7 @@
 #include "Scene.hpp"
 
 using namespace std;
-using namespace gecom;
+using namespace pxljm;
 using namespace i3d;
 using namespace std::chrono_literals;
 
@@ -11,23 +11,23 @@ using namespace std::chrono_literals;
 //
 // Update component
 //
-void UpdateComponent::registerWith(Scene &s) { s.updateSystem().registerUpdateComponent(this); }
+void Updatable::registerWith(Scene &s) { s.updateSystem().registerUpdatable(this); }
 
 
-void UpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregisterUpdateComponent(this); }
+void Updatable::deregisterWith(Scene &s) { s.updateSystem().deregisterUpdatable(this); }
 
 
-chrono::duration<double> UpdateComponent::updateInterval() { return 0s; }
+chrono::duration<double> Updatable::updateInterval() { return 0s; }
 
 
 
 //
 // Input Update component
 //
-void InputUpdateComponent::registerWith(Scene &s) { s.updateSystem().registerInputUpdateComponent(this); }
+void InputUpdatable::registerWith(Scene &s) { s.updateSystem().registerInputUpdatable(this); }
 
 
-void InputUpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregisterInputUpdateComponent(this); }
+void InputUpdatable::deregisterWith(Scene &s) { s.updateSystem().deregisterInputUpdatable(this); }
 
 
 
@@ -37,33 +37,33 @@ void InputUpdateComponent::deregisterWith(Scene &s) { s.updateSystem().deregiste
 UpdateSystem::UpdateSystem() { }
 
 
-void UpdateSystem::registerUpdateComponent(UpdateComponent *c) {
+void UpdateSystem::registerUpdatable(Updatable *c) {
 	m_updatables.insert(c);
 }
 
 
-void UpdateSystem::deregisterUpdateComponent(UpdateComponent *c) {
+void UpdateSystem::deregisterUpdatable(Updatable *c) {
 	m_updatables.erase(c);
 }
 
 
 void UpdateSystem::update() { //TODO change this to update queue stuff
-	for (UpdateComponent *c : m_updatables)
+	for (Updatable *c : m_updatables)
 		c->update();
 }
 
 
-void UpdateSystem::registerInputUpdateComponent(InputUpdateComponent *c) {
+void UpdateSystem::registerInputUpdatable(InputUpdatable *c) {
 	m_inputUpdatables.insert(c);
 }
 
 
-void UpdateSystem::deregisterInputUpdateComponent(InputUpdateComponent *c) {
+void UpdateSystem::deregisterInputUpdatable(InputUpdatable *c) {
 	m_inputUpdatables.erase(c);
 }
 
 
 void UpdateSystem::inputUpdate() {
-	for (InputUpdateComponent *c : m_inputUpdatables)
+	for (InputUpdatable *c : m_inputUpdatables)
 		c->inputUpdate();
 }

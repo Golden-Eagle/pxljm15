@@ -8,7 +8,7 @@
 #include "ComponentSystem.hpp"
 #include "Material.hpp"
 
-namespace gecom {
+namespace pxljm {
 
 	class drawcall {
 	public:

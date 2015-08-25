@@ -3,7 +3,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-namespace gecom {
+namespace pxljm {
 
 	namespace {
 		map<string, material_ptr> materialMap;

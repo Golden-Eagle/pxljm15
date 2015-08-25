@@ -7,7 +7,7 @@
 #include "GECom.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 
 	class ColliderShape;
 	using collider_ptr = std::shared_ptr<ColliderShape>;
@@ -17,7 +17,7 @@ namespace gecom {
 	using sphere_collider_ptr = std::shared_ptr<SphereCollider>;
 	using box_collider_ptr = std::shared_ptr<BoxCollider>;
 	
-	class ColliderShape : Uncopyable, public std::enable_shared_from_this<ColliderShape> {
+	class ColliderShape : gecom::Uncopyable, public std::enable_shared_from_this<ColliderShape> {
 	public:
 		virtual ~ColliderShape() { }
 		virtual btCollisionShape * getCollisionShape() = 0;

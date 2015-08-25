@@ -14,10 +14,10 @@
 #include "Window.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 	class Renderer {
 	public:
-		Renderer( Window *win ) : m_win(win) { }
+		Renderer(gecom::Window *win) : m_win(win) { }
 		~Renderer() { }
 
 		void renderScene(i3d::mat4d proj, std::priority_queue<drawcall *> drawList) {
@@ -58,6 +58,6 @@ namespace gecom {
 		}
 
 	private:
-		Window *m_win;
+		gecom::Window *m_win;
 	};
 }

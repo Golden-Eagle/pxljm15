@@ -2,7 +2,7 @@
 #include "Material.hpp"
 
 using namespace std;
-using namespace gecom;
+using namespace pxljm;
 
 
 Material::Material() { }
@@ -70,7 +70,7 @@ Shader::Shader() {
 
 	cout << "NOOOOP" << endl; 
 
-	m_prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
+	m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
 }
 
 
@@ -80,7 +80,7 @@ Shader::Shader(const string &filename) {
 	if (fileStream) {
 		stringstream buffer;
 		buffer << fileStream.rdbuf();
-		m_prog = makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
+		m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
 	}
 }
 

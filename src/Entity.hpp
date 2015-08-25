@@ -8,7 +8,7 @@
 #include "GECom.hpp"
 #include "Initial3D.hpp"
 
-namespace gecom {
+namespace pxljm {
 
 	//
 	// Tranform component
@@ -52,7 +52,7 @@ namespace gecom {
 	//
 	// Entity
 	//
-	class Entity : Uncopyable, public std::enable_shared_from_this<Entity> {
+	class Entity : gecom::Uncopyable, public std::enable_shared_from_this<Entity> {
 	private:
 		Scene *m_scene = nullptr;
 		EntityTransform m_root;

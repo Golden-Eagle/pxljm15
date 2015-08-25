@@ -15,7 +15,7 @@
 #include "SimpleShader.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 
 	class Material;
 	class Shader;
@@ -23,7 +23,7 @@ namespace gecom {
 	using material_ptr = std::shared_ptr<Material>;
 	using shader_ptr = std::shared_ptr<Shader>;
 
-	class Material : Uncopyable, public std::enable_shared_from_this<Material> {
+	class Material : gecom::Uncopyable, public std::enable_shared_from_this<Material> {
 	public:
 		Material();
 		~Material();
@@ -33,7 +33,7 @@ namespace gecom {
 		shader_ptr shader;
 	};
 
-	class Shader : Uncopyable, public std::enable_shared_from_this<Shader> {
+	class Shader : gecom::Uncopyable, public std::enable_shared_from_this<Shader> {
 	public:
 		Shader();
 		Shader(const std::string &);

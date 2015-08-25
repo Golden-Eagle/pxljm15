@@ -20,7 +20,7 @@
 
 
 
-namespace gecom {
+namespace pxljm {
 
 	class Game {
 	public:
@@ -36,7 +36,7 @@ namespace gecom {
 			}).forever();
 
 			
-			gecom::assets::init("./AssetConfig.json");
+			assets::init("./AssetConfig.json");
 
 
 			//
@@ -48,8 +48,8 @@ namespace gecom {
 			//
 			entity_ptr cube = std::make_shared<Entity>(i3d::vec3d(2, 10, 2));
 			cube->emplaceComponent<MeshDrawable>(
-				gecom::assets::getMesh("cube"),
-				gecom::assets::getMaterial("basic"));
+				assets::getMesh("cube"),
+				assets::getMaterial("basic"));
 
 			cube->emplaceComponent<BoxMove>();
 			m_scene->add(cube);
@@ -59,10 +59,10 @@ namespace gecom {
 			//
 			cube = std::make_shared<Entity>(i3d::vec3d(0, 10, 5));
 			cube->emplaceComponent<MeshDrawable>(
-				gecom::assets::getMesh("cube"),
-				gecom::assets::getMaterial("basic"));
+				assets::getMesh("cube"),
+				assets::getMaterial("basic"));
 
-			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(i3d2bt(i3d::vec3d::one())));
+			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d::one())));
 			m_scene->add(cube);
 
 
@@ -70,8 +70,8 @@ namespace gecom {
 			//
 			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(0, 20, -10));
 			sphere->emplaceComponent<MeshDrawable>(
-				gecom::assets::getMesh("sphere"),
-				gecom::assets::getMaterial("basic"));
+				assets::getMesh("sphere"),
+				assets::getMaterial("basic"));
 
 			sphere->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(1));
 
@@ -86,8 +86,8 @@ namespace gecom {
 			//
 			entity_ptr plane = std::make_shared<Entity>(i3d::vec3d(0, 0, 0));
 			plane->emplaceComponent<MeshDrawable>(
-				gecom::assets::getMesh("plane"),
-				gecom::assets::getMaterial("basic"));
+				assets::getMesh("plane"),
+				assets::getMaterial("basic"));
 			m_scene->add(plane);
 
 		}
@@ -127,7 +127,7 @@ namespace gecom {
 		}
 		
 	private:
-		Window *m_win;
+		gecom::Window *m_win;
 		scene_ptr m_scene;
 		Renderer *m_renderer;
 	};

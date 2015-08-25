@@ -2,6 +2,7 @@
 #include "Scene.hpp"
 
 using namespace std;
+using namespace pxljm;
 using namespace gecom;
 using namespace i3d;
 

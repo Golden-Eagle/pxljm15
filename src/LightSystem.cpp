@@ -4,16 +4,16 @@
 
 
 using namespace std;
-using namespace gecom;
+using namespace pxljm;
 using namespace i3d;
 
 
 // Light component
 //
-void LightComponent::registerWith(Scene &s) { s.lightSystem().registerLightComponent(this); }
+void Light::registerWith(Scene &s) { s.lightSystem().registerLight(this); }
 
 
-void LightComponent::deregisterWith(Scene &s) { s.lightSystem().deregisterLightComponent(this); }
+void Light::deregisterWith(Scene &s) { s.lightSystem().deregisterLight(this); }
 
 
 
@@ -42,16 +42,16 @@ SpotLight::SpotLight() { }
 LightSystem::LightSystem() { }
 
 
-void LightSystem::registerLightComponent(LightComponent *c) {
+void LightSystem::registerLight(Light *c) {
 	m_lights.insert(c);
 }
 
 
-void LightSystem::deregisterLightComponent(LightComponent *c) {
+void LightSystem::deregisterLight(Light *c) {
 	m_lights.erase(c);
 }
 
 
-const unordered_set<LightComponent *> & LightSystem::getLights() {
+const unordered_set<Light *> & LightSystem::getLights() {
 	return m_lights;
 }

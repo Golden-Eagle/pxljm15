@@ -19,12 +19,12 @@
 
 
 //TODO put mesh stuff in here?
-namespace gecom {
+namespace pxljm {
 
 	class Mesh;
 	using mesh_ptr = std::shared_ptr<Mesh>;
 
-	class Mesh : Uncopyable, public std::enable_shared_from_this<Mesh> {
+	class Mesh : gecom::Uncopyable, public std::enable_shared_from_this<Mesh> {
 	public:
 		Mesh(const std::string &);
 		~Mesh();
@@ -78,7 +78,7 @@ namespace gecom {
 		material_ptr material;
 
 		MeshDrawable(mesh_ptr m, material_ptr mat)
-			: mesh(m), material(mat), m_cachedDrawcall(i3d::mat4d(), mat, m) {  }
+			: m_cachedDrawcall(i3d::mat4d(), mat, m), mesh(m), material(mat) {  }
 
 		virtual std::vector<drawcall *> getDrawCalls(i3d::mat4d view) {
 			std::vector<drawcall *> drawcallList;

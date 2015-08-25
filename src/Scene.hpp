@@ -21,7 +21,7 @@
 #include "PhysicsSystem.hpp"
 #include "UpdateSystem.hpp"
 
-namespace gecom {
+namespace pxljm {
 
 	class Scene;
 	using scene_ptr = std::shared_ptr<Scene>;
@@ -40,10 +40,10 @@ namespace gecom {
 		Projection m_projection;
 		FPSCamera m_camera;
 		Renderer m_renderer;
-		Window *m_window;
+		gecom::Window *m_window;
 
 	public:
-		Scene(Window *win);
+		Scene(gecom::Window *win);
 		~Scene();
 
 		void tick();

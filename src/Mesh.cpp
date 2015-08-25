@@ -1,7 +1,7 @@
 #include "Mesh.hpp"
 
 using namespace std;
-using namespace gecom;
+using namespace pxljm;
 using namespace i3d;
 
 // @josh fix this shit

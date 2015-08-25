@@ -4,10 +4,10 @@
 #include "Initial3D.hpp"
 #include "GECom.hpp"
 
-namespace gecom {
+namespace pxljm {
 
 
-	class BoxMove : public virtual UpdateComponent {
+	class BoxMove : public virtual Updatable {
 	public:
 		BoxMove() { }
 
@@ -18,7 +18,7 @@ namespace gecom {
 	};
 
 
-	class SphereBounce : public virtual PhysicsUpdateComponent {
+	class SphereBounce : public virtual PhysicsUpdatable {
 	private:
 		RigidBody * rigidbody = nullptr;
 
@@ -32,24 +32,24 @@ namespace gecom {
 		virtual void physicsUpdate() {
 			i3d::vec3d pos = entity()->root()->getPosition();
 			if (entity()->root()->getPosition().y() < 0.1) {
-				rigidbody->getRigidBody()->applyImpulse(btVector3(0,1,0), i3d2bt(pos));
+				rigidbody->getRigidBody()->applyImpulse(btVector3(0,1,0), gecom::i3d2bt(pos));
 			}
 		}
 	};
 
 
-	class CollisionCallbackTest  : public virtual CollisionCallbackComponent {
+	class CollisionCallbackTest  : public virtual CollisionCallback {
 	public:
 		CollisionCallbackTest() { }
-		virtual void onCollisionEnter(PhysicsComponent *c) {
+		virtual void onCollisionEnter(Physical *c) {
 			std::cout << "Colliding (ENTER) with :: " << c << std::endl;
 		} 
 
-		virtual void onCollision(PhysicsComponent *c) {
+		virtual void onCollision(Physical *c) {
 			std::cout << "Colliding with :: " << c << std::endl;
 		} 
 
-		virtual void onCollisionExit(PhysicsComponent *c) {
+		virtual void onCollisionExit(Physical *c) {
 			std::cout << "Colliding (EXIT) with :: " << c << std::endl;
 		} 
 	};

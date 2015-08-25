@@ -10,13 +10,13 @@
 #include "ComponentSystem.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 
 
 	//
 	// Physics Update component
 	//
-	class PhysicsUpdateComponent : public virtual EntityComponent {
+	class PhysicsUpdatable: public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
@@ -29,7 +29,7 @@ namespace gecom {
 	//
 	// Physics component
 	//
-	class PhysicsComponent : public virtual EntityComponent {
+	class Physical : public virtual EntityComponent {
 	public:
 		virtual void addToDynamicsWorld(btDynamicsWorld *) = 0;
 		virtual void removeFromDynamicsWorld() = 0;
@@ -38,7 +38,7 @@ namespace gecom {
 
 	// Rigid Body component
 	//
-	class RigidBody: public virtual PhysicsComponent, private btMotionState  {
+	class RigidBody: public virtual Physical, private btMotionState  {
 	public:
 		RigidBody();
 		RigidBody(collider_ptr);
@@ -76,14 +76,14 @@ namespace gecom {
 	//
 	// Physics Collision Callback component
 	//
-	class CollisionCallbackComponent : public virtual EntityComponent {
+	class CollisionCallback : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual void onCollisionEnter(PhysicsComponent *);
-		virtual void onCollision(PhysicsComponent *);
-		virtual void onCollisionExit(PhysicsComponent *);
+		virtual void onCollisionEnter(Physical *);
+		virtual void onCollision(Physical *);
+		virtual void onCollisionExit(Physical *);
 	};
 
 
@@ -96,14 +96,14 @@ namespace gecom {
 		PhysicsSystem();
 		virtual ~PhysicsSystem();
 
-		void registerPhysicsUpdateComponent(PhysicsUpdateComponent *);
-		void deregisterPhysicsUpdateComponent(PhysicsUpdateComponent *);
+		void registerPhysicsUpdatable(PhysicsUpdatable *);
+		void deregisterPhysicsUpdatable(PhysicsUpdatable *);
 
 		void registerRigidBody(RigidBody *);
 		void deregisterRigidBody(RigidBody *);
 
-		void registerCollisionCallbackComponent(CollisionCallbackComponent *);
-		void deregisterCollisionCallbackComponent(CollisionCallbackComponent *);
+		void registerCollisionCallback(CollisionCallback *);
+		void deregisterCollisionCallback(CollisionCallback *);
 
 		void tick();
 
@@ -111,9 +111,9 @@ namespace gecom {
 
 	private:
 
-		std::unordered_set<PhysicsUpdateComponent *> m_physicsUpdatables;
+		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;
 		std::unordered_set<RigidBody *> m_rigidbodies;
-		std::unordered_map<Entity *, std::unordered_set<CollisionCallbackComponent *>> m_collisionCallbacks;
+		std::unordered_map<Entity *, std::unordered_set<CollisionCallback *>> m_collisionCallbacks;
 
 		// internal collision sets
 		bool m_collisionsA_isCurrent = true;

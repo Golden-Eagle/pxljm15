@@ -8,7 +8,7 @@
 #include "Mesh.hpp"
 #include "Material.hpp"
 
-namespace gecom {
+namespace pxljm {
 	namespace assets {
 		void init(const std::string &);
 		material_ptr getMaterial(const std::string &);

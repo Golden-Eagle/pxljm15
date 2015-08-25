@@ -15,7 +15,7 @@
 #include "Window.hpp"
 
 
-namespace gecom {
+namespace pxljm {
 
 	class Projection {
 	public:

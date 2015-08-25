@@ -5,12 +5,12 @@
 
 #include "ComponentSystem.hpp"
 
-namespace gecom {
+namespace pxljm {
 
 	//
 	// Update component
 	//
-	class UpdateComponent : public virtual EntityComponent {
+	class Updatable : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
@@ -23,7 +23,7 @@ namespace gecom {
 	//
 	// Input Update component
 	//
-	class InputUpdateComponent : public virtual EntityComponent {
+	class InputUpdatable : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
@@ -39,17 +39,17 @@ namespace gecom {
 	public:
 		UpdateSystem();
 
-		void registerUpdateComponent(UpdateComponent *);
-		void deregisterUpdateComponent(UpdateComponent *);
+		void registerUpdatable(Updatable *);
+		void deregisterUpdatable(Updatable *);
 		void update();
 
-		void registerInputUpdateComponent(InputUpdateComponent *);
-		void deregisterInputUpdateComponent(InputUpdateComponent *);
+		void registerInputUpdatable(InputUpdatable *);
+		void deregisterInputUpdatable(InputUpdatable *);
 		void inputUpdate();
 
 	private:
-		std::unordered_set<UpdateComponent *> m_updatables;
-		std::unordered_set<InputUpdateComponent *> m_inputUpdatables;
+		std::unordered_set<Updatable *> m_updatables;
+		std::unordered_set<InputUpdatable *> m_inputUpdatables;
 	};
 
 }

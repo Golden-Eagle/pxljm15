@@ -3,7 +3,7 @@
 #include "Scene.hpp"
 
 
-using namespace gecom;
+using namespace pxljm;
 
 
 bool EntityComponent::hasEntity() { return bool(m_entity.lock()); }
