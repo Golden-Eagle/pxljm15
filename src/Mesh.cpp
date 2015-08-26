@@ -47,7 +47,9 @@ Mesh::Mesh(const std::string &filepath) {
 }
 
 
-Mesh::~Mesh() { }
+Mesh::~Mesh() {
+	//TODO delete buffers
+}
 
 
 void Mesh::generateGeometry() {

@@ -141,6 +141,111 @@ void CollisionCallback::onCollisionExit(Physical *) { }
 
 
 
+PhysicsDebugDrawer::PhysicsDebugDrawer() {
+	// setup the buffer!
+
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+
+	glGenBuffers(1, &m_vbo_pos);
+	glGenBuffers(1, &m_vbo_col);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_col);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+	// Cleanup
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+	m_shader = assets::getShader("physics_debug");
+
+}
+
+
+void PhysicsDebugDrawer::draw(mat4d view, mat4d proj) {
+	glBindVertexArray(m_vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_position.size(), &m_position[0], GL_STREAM_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_col);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_color.size(), &m_color[0], GL_STREAM_DRAW);
+
+	m_shader->bind();
+	glUniformMatrix4fv(m_shader->uniformLocation("uModelViewMatrix"), 1, true, i3d::mat4f(view));
+	glUniformMatrix4fv(m_shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(proj));
+
+	glDrawArrays(GL_LINES, 0, m_position.size());
+
+	glBindVertexArray(0);
+	glFinish();
+
+	m_position.clear();
+	m_color.clear();
+}
+
+
+void PhysicsDebugDrawer::drawLine (const btVector3 &from, const btVector3 &to, const btVector3 &color) {
+	m_position.push_back(from.getX());
+	m_position.push_back(from.getY());
+	m_position.push_back(from.getZ());
+
+	m_color.push_back(color.getX());
+	m_color.push_back(color.getY());
+	m_color.push_back(color.getZ());
+
+	m_position.push_back(to.getX());
+	m_position.push_back(to.getY());
+	m_position.push_back(to.getZ());
+
+	m_color.push_back(color.getX());
+	m_color.push_back(color.getY());
+	m_color.push_back(color.getZ());
+}
+
+
+void PhysicsDebugDrawer::drawLine (const btVector3 &from, const btVector3 &to, const btVector3 &fromColor, const btVector3 &toColor) {
+	m_position.push_back(from.getX());
+	m_position.push_back(from.getY());
+	m_position.push_back(from.getZ());
+
+	m_color.push_back(fromColor.getX());
+	m_color.push_back(fromColor.getY());
+	m_color.push_back(fromColor.getZ());
+
+	m_position.push_back(to.getX());
+	m_position.push_back(to.getY());
+	m_position.push_back(to.getZ());
+
+	m_color.push_back(toColor.getX());
+	m_color.push_back(toColor.getY());
+	m_color.push_back(toColor.getZ());
+}
+
+
+void PhysicsDebugDrawer::drawContactPoint (const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color) { }
+
+
+void PhysicsDebugDrawer::reportErrorWarning (const char *warningString) {
+	cout << "BULLLET HAS SOME WIERD ERRORS" << warningString << endl;
+}
+
+
+void PhysicsDebugDrawer::draw3dText (const btVector3 &location, const char *textString) { }
+
+
+void PhysicsDebugDrawer::setDebugMode (int debugMode) { m_mode = debugMode; }
+
+
+int PhysicsDebugDrawer::getDebugMode () const {	return m_mode; }
+
+
+
 
 
 
@@ -171,6 +276,14 @@ PhysicsSystem::PhysicsSystem() {
 	// If not configurable
 	// HACK
 	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+
+
+
+	// Debug HACK
+	m_debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
+    dynamicsWorld->setDebugDrawer(&m_debugDrawer);
+
+
 
 
 	// SUPER HACK
@@ -231,6 +344,12 @@ void PhysicsSystem::deregisterCollisionCallback(CollisionCallback *c) {
 
 void PhysicsSystem::tick() {
 	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+}
+
+
+void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
+	dynamicsWorld->debugDrawWorld();
+	m_debugDrawer.draw(view, proj);
 }
 
 

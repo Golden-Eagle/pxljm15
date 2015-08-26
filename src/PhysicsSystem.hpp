@@ -7,6 +7,9 @@
 #include <btBulletDynamicsCommon.h>
 
 #include "Collider.hpp"
+#include "Assets.hpp"
+#include "Material.hpp"
+#include "GLOW.hpp"
 #include "ComponentSystem.hpp"
 
 
@@ -39,6 +42,15 @@ namespace pxljm {
 	// Rigid Body component
 	//
 	class RigidBody: public virtual Physical, private btMotionState  {
+	private:
+
+		void regenerateRigidBody();
+		collider_ptr m_collider = nullptr;
+		btDynamicsWorld * m_world = nullptr;
+		std::unique_ptr<btRigidBody> m_rigidBody;
+
+		double m_mass = 1.0;
+
 	public:
 		RigidBody();
 		RigidBody(collider_ptr);
@@ -50,25 +62,90 @@ namespace pxljm {
 		virtual void addToDynamicsWorld(btDynamicsWorld *);
 		virtual void removeFromDynamicsWorld();
 
+		btRigidBody * getRigidBody();
+
+
+		// void setEnable(bool);
+		// bool isEnabled();
+
+		// Properties
 		void setCollider(collider_ptr);
 		collider_ptr getCollider();
-		btRigidBody * getRigidBody();
+
+		// // Anisotropic Friction
+		// i3d::vec3d setAnisotropicFriction(i3d::vec3d);
+		// void getAnisotropicFriction();
+
+		// // Friction
+		// void setFriction(double);
+		// double getFriction();
+
+		// // Rolling Friction
+		// void setRollingFriction(double);
+		// double getRollingFriction();
+
+		// // Bounceness
+		// void setRestitution(double);
+		// double getRestitution();
+
+		// // Damping (drag)
+		// void setDamping(double, double);
+		// double getLinearDamping();
+		// double getAngularDamping();
+
+		// // Manual scale for movement
+		// void setLinearFactor(i3d::vec3d);
+		// void setAngularFactor(i3d::vec3d);
+		// i3d::vec3d getLinearFactor();
+		// i3d::vec3d getAngularFactor();
+
+		// // Kinematic / Dynamic
+		// void setKinematic(bool);
+		// bool isKinematic();
+
+		// // Mass
+		// void setMass(double);
+		// double getMass();
+
+		// //TODO
+		// //center of mass
+		// //shape offset
+
+		// // Current state
+		// void setLinearVelocity(i3d::vec3d);
+		// void setAngularVelocity(i3d::vec3d);
+		// void setLocalLinearVelocity(i3d::vec3d);
+		// void setLocalAngularVelocity(i3d::vec3d);
+
+		// i3d::vec3d getLinearVelocity();
+		// i3d::vec3d getAngularVelocity();
+		// i3d::vec3d getVelocityAtPoint(i3d::vec3d);
+		// i3d::vec3d getLocalLinearVelocity();
+		// i3d::vec3d getLocalAngularVelocity();
+		// i3d::vec3d getLocalVelocityAtPoint(i3d::vec3d);
+
+
+		// //
+		// void applyForce(i3d::vec3d);
+		// void applyImpulse(i3d::vec3d);
+		// void applyImpulse(i3d::vec3d, i3d::vec3d);
+
+		// void applyTorque(i3d::vec3d);
+		// void applyTorqueImpulse(i3d::vec3d);
+
+
+
+		// void clearForces();
+
+		// void activate();
+		// bool isActive();
+
+
 
 		// Bullet Physics related methods btMotionState
 		virtual void getWorldTransform (btTransform &) const;
 		virtual void setWorldTransform (const btTransform &);
 
-	private:
-
-		void regenerateRigidBody();
-
-		// Rigid body stuff
-		btScalar m_mass = 1;
-		collider_ptr m_collider = nullptr;
-		std::unique_ptr<btRigidBody> m_rigidBody;
-
-		// World attached to
-		btDynamicsWorld * m_world = nullptr;
 	};
 
 
@@ -85,6 +162,40 @@ namespace pxljm {
 		virtual void onCollision(Physical *);
 		virtual void onCollisionExit(Physical *);
 	};
+
+
+
+	//
+	// Physics System Debug Drawer
+	//
+	class PhysicsDebugDrawer : public btIDebugDraw {
+	private:
+		GLuint m_vao = 0;
+		GLuint m_vbo_pos = 0;
+		GLuint m_vbo_col = 0;
+
+		std::vector<float> m_position;
+		std::vector<float> m_color;
+
+		shader_ptr m_shader;
+
+		int m_mode = 0;
+
+	public:
+		PhysicsDebugDrawer();
+		~PhysicsDebugDrawer() { };
+
+		virtual void draw(i3d::mat4d, i3d::mat4d);
+
+		virtual void drawLine (const btVector3 &, const btVector3 &, const btVector3 &);
+		virtual void drawLine (const btVector3 &, const btVector3 &, const btVector3 &, const btVector3 &);
+		virtual void drawContactPoint (const btVector3 &, const btVector3 &, btScalar, int, const btVector3 &);
+		virtual void reportErrorWarning (const char *);
+		virtual void draw3dText (const btVector3 &, const char *);
+		virtual void setDebugMode (int);
+		virtual int getDebugMode () const;
+	};
+
 
 
 
@@ -107,9 +218,13 @@ namespace pxljm {
 
 		void tick();
 
+		void debugDraw(i3d::mat4d, i3d::mat4d);
+
 		void processPhysicsCallback(btScalar);
 
 	private:
+
+		PhysicsDebugDrawer m_debugDrawer;
 
 		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;
 		std::unordered_set<RigidBody *> m_rigidbodies;
@@ -129,6 +244,4 @@ namespace pxljm {
 		btDiscreteDynamicsWorld* dynamicsWorld;
 
 	};
-
-
 }

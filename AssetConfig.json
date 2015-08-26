@@ -13,6 +13,7 @@
 	},
 
 	"shaders" : {
-		"temp" : "./res/shaders/temp.glsl"
+		"temp" : "./res/shaders/temp.glsl",
+		"physics_debug" : "./res/shaders/physics_debug.glsl"
 	}
 }

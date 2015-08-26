@@ -16,10 +16,16 @@ uniform material {
 	float uMetalicity;
 	float uRoughness;
 	float uSpecular;
-} scalar;
+} value;
 
 uniform sampler2D​ uColorMap;
 uniform sampler2D​ uNormalMap;
+
+
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+//-------------------------------------------------------------
+
 
 #ifdef _VERTEX_
 
@@ -28,9 +34,9 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
 layout(location = 3) in vec3 aBiTangent;
 layout(location = 4) in vec2 aUV;
-layout(location = 5) in vec2 aUV1;
-layout(location = 6) in vec2 aUV2;
-layout(location = 7) in vec2 aUV3;
+// layout(location = 5) in vec2 aUV1;
+// layout(location = 6) in vec2 aUV2;
+// layout(location = 7) in vec2 aUV3;
 
 
 out VertexData {
@@ -39,9 +45,9 @@ out VertexData {
 	vec4 tangent;
 	vec4 bitangent;
 	vec2 uv;
-	vec2 uv1;
-	vec2 uv2;
-	vec2 uv3;
+	// vec2 uv1;
+	// vec2 uv2;
+	// vec2 uv3;
 } v_out;
 
 
@@ -51,9 +57,9 @@ void main() {
 	v_out.tangent = uModelViewMatrix * vec4(aTangent, 0.0);
 	v_out.bitangent = uModelViewMatrix * vec4(aBiTangent, 0.0);
 	v_out.uv  = aUV;
-	v_out.uv1 = aUV1;
-	v_out.uv2 = aUV2;
-	v_out.uv3 = aUV3;
+	// v_out.uv1 = aUV1;
+	// v_out.uv2 = aUV2;
+	// v_out.uv3 = aUV3;
 
 	gl_Position = uProjectionMatrix * p;
 }
@@ -75,9 +81,9 @@ in VertexData {
 	vec4 tangent;
 	vec4 bitangent;
 	vec2 uv;
-	vec2 uv1;
-	vec2 uv2;
-	vec2 uv3;
+	// vec2 uv1;
+	// vec2 uv2;
+	// vec2 uv3;
 } f_in;
 
 
@@ -107,28 +113,29 @@ void writeDepth(float depth) {
 	gl_FragDepth = log(depth * C + 1.0) * FC;
 }
 
+// Drawing subroutines
 //
-// Define subroutines
-//
-
 subroutine(drawmode) void depth_only() {
 	vec4 p = uProjectionMatrix * f_in.pos();
 	writeDepth(p.z/p.w);
 }
 subroutine(drawmode) void material() {
 	vec4 p = uProjectionMatrix * f_in.pos();
-	vec4 n = uProjectionMatrix * getNormal();
-	// n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
 	writeDepth(p.z/p.w);
-	fColor = vec4(getColor(), scalar.uMetalicity);
-	getNormal = vec4(n.xy, scalar.uRoughness, scalar.uSpecular);
+
+	vec4 n = uProjectionMatrix * getNormal();
+	n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
+	fColor = vec4(getColor(), value.uMetalicity);
+	getNormal = vec4(n.xy, value.uRoughness, value.uSpecular);
 }
 
+// Color
+//
+subroutine(colorFetch) vec3 colorFromTexture() { return texture(uColorMap, f_in.uv).rgb; }
+subroutine(colorFetch) vec3 colorFromValue() { return value.uColor; }
 
-subroutine(colorFetch) vec3 colorTexture() { return texture(uColorMap, f_in.uv).rgb; }
-subroutine(colorFetch) vec3 colorAttrib() { return scalar.uColor; }
-
-
+// Normal
+//
 subroutine(colorFetch) vec4 normalTexture() {
 	mat3 tbn = transpose(tangent.xyz, bitangent.xyz, f_in.normal.xyz);
 	return vec4(tbn * normalise(texture(uNormalMap, f_in.uv).rgb * 2.0 - 1.0), 0.0);

@@ -48,5 +48,4 @@ namespace pxljm {
 		std::map<std::string, GLuint> m_uniformLocationCache;
 		GLuint m_prog = 0;
 	};
-
 }
