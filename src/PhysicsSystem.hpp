@@ -50,10 +50,11 @@ namespace pxljm {
 		std::unique_ptr<btRigidBody> m_rigidBody;
 
 		double m_mass = 1.0;
+		bool m_enabled = true;
 
 	public:
 		RigidBody();
-		RigidBody(collider_ptr);
+		RigidBody(collider_ptr, double = 1.0);
 
 		virtual void start();
 		virtual void registerWith(Scene &) override;
@@ -65,80 +66,75 @@ namespace pxljm {
 		btRigidBody * getRigidBody();
 
 
-		// void setEnable(bool);
-		// bool isEnabled();
+		void setEnable(bool);
+		bool isEnabled();
 
 		// Properties
 		void setCollider(collider_ptr);
 		collider_ptr getCollider();
 
-		// // Anisotropic Friction
-		// i3d::vec3d setAnisotropicFriction(i3d::vec3d);
-		// void getAnisotropicFriction();
+		// Anisotropic Friction
+		void setAnisotropicFriction(i3d::vec3d);
+		i3d::vec3d getAnisotropicFriction();
 
-		// // Friction
-		// void setFriction(double);
-		// double getFriction();
+		// Friction
+		void setFriction(double);
+		double getFriction();
 
-		// // Rolling Friction
-		// void setRollingFriction(double);
-		// double getRollingFriction();
+		// Rolling Friction
+		void setRollingFriction(double);
+		double getRollingFriction();
 
-		// // Bounceness
-		// void setRestitution(double);
-		// double getRestitution();
+		// Bounceness
+		void setRestitution(double);
+		double getRestitution();
 
-		// // Damping (drag)
-		// void setDamping(double, double);
-		// double getLinearDamping();
-		// double getAngularDamping();
+		// Damping (drag)
+		void setDamping(double, double);
+		double getLinearDamping();
+		double getAngularDamping();
 
-		// // Manual scale for movement
-		// void setLinearFactor(i3d::vec3d);
-		// void setAngularFactor(i3d::vec3d);
-		// i3d::vec3d getLinearFactor();
-		// i3d::vec3d getAngularFactor();
+		// Manual scale for movement
+		void setLinearFactor(i3d::vec3d);
+		void setAngularFactor(i3d::vec3d);
+		i3d::vec3d getLinearFactor();
+		i3d::vec3d getAngularFactor();
 
-		// // Kinematic / Dynamic
-		// void setKinematic(bool);
-		// bool isKinematic();
+		// Mass, Kinematic / Dynamic
+		void setMass(double);
+		double getMass();
 
-		// // Mass
-		// void setMass(double);
-		// double getMass();
+		//TODO
+		//center of mass
+		//shape offset
 
-		// //TODO
-		// //center of mass
-		// //shape offset
-
-		// // Current state
-		// void setLinearVelocity(i3d::vec3d);
-		// void setAngularVelocity(i3d::vec3d);
+		// Current state
+		void setLinearVelocity(i3d::vec3d);
+		void setAngularVelocity(i3d::vec3d);
 		// void setLocalLinearVelocity(i3d::vec3d);
 		// void setLocalAngularVelocity(i3d::vec3d);
 
-		// i3d::vec3d getLinearVelocity();
-		// i3d::vec3d getAngularVelocity();
+		i3d::vec3d getLinearVelocity();
+		i3d::vec3d getAngularVelocity();
 		// i3d::vec3d getVelocityAtPoint(i3d::vec3d);
 		// i3d::vec3d getLocalLinearVelocity();
 		// i3d::vec3d getLocalAngularVelocity();
 		// i3d::vec3d getLocalVelocityAtPoint(i3d::vec3d);
 
 
-		// //
-		// void applyForce(i3d::vec3d);
-		// void applyImpulse(i3d::vec3d);
-		// void applyImpulse(i3d::vec3d, i3d::vec3d);
+		// Dynamic Rigid Bodies
+		void applyForce(i3d::vec3d, i3d::vec3d);
+		void applyImpulse(i3d::vec3d);
+		void applyImpulse(i3d::vec3d, i3d::vec3d);
 
-		// void applyTorque(i3d::vec3d);
-		// void applyTorqueImpulse(i3d::vec3d);
+		void applyTorque(i3d::vec3d);
+		void applyTorqueImpulse(i3d::vec3d);
 
+		void clearForces();
 
-
-		// void clearForces();
-
-		// void activate();
-		// bool isActive();
+		// Bullet active state
+		void wakeUp();
+		bool isAwake();
 
 
 

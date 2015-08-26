@@ -26,18 +26,16 @@ void PhysicsUpdatable::deregisterWith(Scene &s) { s.physicsSystem().deregisterPh
 // Rigid Body component
 //
 void RigidBody::registerWith(Scene &s) { s.physicsSystem().registerRigidBody(this); }
-
-
 void RigidBody::deregisterWith(Scene &s) { s.physicsSystem().deregisterRigidBody(this); }
 
 
 RigidBody::RigidBody() {
+	cout << "Fuck you for trying to construct something like this!" <<  endl;
 	abort(); // LOL wut u doin?!?!
 }
 
-RigidBody::RigidBody(collider_ptr c) {
-	m_collider = c;
-}
+RigidBody::RigidBody(collider_ptr c, double m) : m_collider(c), m_mass(m) {  }
+
 
 void RigidBody::start() {
 	regenerateRigidBody();
@@ -47,22 +45,21 @@ void RigidBody::start() {
 void RigidBody::addToDynamicsWorld(btDynamicsWorld * world) {
 	removeFromDynamicsWorld();
 	m_world = world;
-	m_world->addRigidBody(m_rigidBody.get());
+	if (m_enabled)
+		m_world->addRigidBody(m_rigidBody.get());
 }
 
 
 void RigidBody::removeFromDynamicsWorld() {
 	if (m_world) {
-		m_world->removeRigidBody(m_rigidBody.get());
+		if (m_enabled)
+			m_world->removeRigidBody(m_rigidBody.get());
 		m_world = nullptr;
 	}
 }
 
 
 void RigidBody::setCollider(collider_ptr col) {
-	if (m_world)
-		m_world->removeRigidBody(m_rigidBody.get());
-
 	m_collider = col;
 
 	btCollisionShape *shape = m_collider->getCollisionShape();
@@ -71,9 +68,6 @@ void RigidBody::setCollider(collider_ptr col) {
 
 	m_rigidBody->setMassProps(m_mass, inertia);
 	m_rigidBody->updateInertiaTensor();
-
-	if (m_world)
-		m_world->addRigidBody(m_rigidBody.get());
 }
 
 
@@ -85,6 +79,103 @@ collider_ptr RigidBody::getCollider() {
 btRigidBody * RigidBody::getRigidBody() {
 	return m_rigidBody.get();
 }
+
+
+void RigidBody::setEnable(bool e) {
+	m_enabled = e;
+	if (m_world) {
+		if (e) m_world->addRigidBody(m_rigidBody.get());
+		else m_world->removeRigidBody(m_rigidBody.get());
+	}
+}
+bool RigidBody::isEnabled() { return m_enabled; }
+
+
+// Anisotropic Friction
+void RigidBody::setAnisotropicFriction(i3d::vec3d f) { m_rigidBody->setAnisotropicFriction(i3d2bt(f)); }
+i3d::vec3d RigidBody::getAnisotropicFriction() { return bt2i3d(m_rigidBody->getAnisotropicFriction()); }
+
+// Friction
+void RigidBody::setFriction(double f) { m_rigidBody->setFriction(f); }
+double RigidBody::getFriction() { return m_rigidBody->getFriction(); }
+
+// Rolling Friction
+void RigidBody::setRollingFriction(double f) { m_rigidBody->setRollingFriction(f); }
+double RigidBody::getRollingFriction() { return m_rigidBody->getRollingFriction(); }
+
+// Bounceness
+void RigidBody::setRestitution(double f) { m_rigidBody->setRestitution(f); }
+double RigidBody::getRestitution() { return m_rigidBody->getRestitution(); }
+
+// Damping (drag)
+void RigidBody::setDamping(double lin, double ang) { m_rigidBody->setDamping(lin, ang); }
+double RigidBody::getLinearDamping() { return m_rigidBody->getLinearDamping(); }
+double RigidBody::getAngularDamping() { return m_rigidBody->getAngularDamping(); }
+
+// Manual scale for movement
+void RigidBody::setLinearFactor(i3d::vec3d f) { m_rigidBody->setLinearFactor(i3d2bt(f)); }
+void RigidBody::setAngularFactor(i3d::vec3d f) { m_rigidBody->setAngularFactor(i3d2bt(f)); }
+i3d::vec3d RigidBody::getLinearFactor() { return bt2i3d(m_rigidBody->getLinearFactor()); }
+i3d::vec3d RigidBody::getAngularFactor() { return bt2i3d(m_rigidBody->getAngularFactor()); }
+
+// Mass, Kinematic / Dynamic
+void RigidBody::setMass(double m) {
+	m_mass = m;
+	btCollisionShape *shape = m_collider->getCollisionShape();
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(m_mass, inertia);
+	m_rigidBody->setMassProps(m_mass, inertia);
+	m_rigidBody->updateInertiaTensor();
+}
+
+double RigidBody::getMass() {
+	return m_mass;
+}
+
+//TODO
+//center of mass
+//shape offset
+
+// Current state
+void RigidBody::setLinearVelocity(i3d::vec3d v) { m_rigidBody->setLinearVelocity(i3d2bt(v)); }
+void RigidBody::setAngularVelocity(i3d::vec3d v) { m_rigidBody->setAngularVelocity(i3d2bt(v)); }
+// void RigidBody::setLocalLinearVelocity(i3d::vec3d v) { m_rigidBody->setLinearVelocity(i3d2bt(vec3(entity()->root()->matrix() * vec4(v, 0))); }
+// void RigidBody::setLocalAngularVelocity(i3d::vec3d v) { m_rigidBody->setAngularVelocity(i3d2bt(vec3(entity()->root()->matrix() * vec4(v, 0))); }
+
+i3d::vec3d RigidBody::getLinearVelocity() { return bt2i3d(m_rigidBody->getLinearVelocity()); }
+i3d::vec3d RigidBody::getAngularVelocity() { return bt2i3d(m_rigidBody->getAngularVelocity()); }
+// i3d::vec3d RigidBody::getVelocityAtPoint(i3d::vec3d) { m_rigidBody. }
+// i3d::vec3d RigidBody::getLocalLinearVelocity() { m_rigidBody.getLinearVelocity() }
+// i3d::vec3d RigidBody::getLocalAngularVelocity() { m_rigidBody.getAngularVelocity() }
+// i3d::vec3d RigidBody::getLocalVelocityAtPoint(i3d::vec3d) { m_rigidBody. }
+
+
+// Dynamic Rigid Bodies
+void RigidBody::applyForce(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->applyForce(i3d2bt(v), i3d2bt(p)); }
+void RigidBody::applyImpulse(i3d::vec3d v) { m_rigidBody->applyCentralImpulse(i3d2bt(v)); }
+void RigidBody::applyImpulse(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->applyImpulse(i3d2bt(v), i3d2bt(p)); }
+
+void RigidBody::applyTorque(i3d::vec3d v) { m_rigidBody->applyTorque(i3d2bt(v)); }
+void RigidBody::applyTorqueImpulse(i3d::vec3d v) { m_rigidBody->applyTorqueImpulse(i3d2bt(v)); }
+
+void RigidBody::clearForces() { m_rigidBody->clearForces(); }
+
+// Bullet active state
+void RigidBody::wakeUp() { m_rigidBody->activate(); }
+bool RigidBody::isAwake() { return m_rigidBody->isActive(); }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void RigidBody::getWorldTransform (btTransform &centerOfMassWorldTrans) const {
@@ -169,21 +260,23 @@ PhysicsDebugDrawer::PhysicsDebugDrawer() {
 
 
 void PhysicsDebugDrawer::draw(mat4d view, mat4d proj) {
-	glBindVertexArray(m_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_position.size(), &m_position[0], GL_STREAM_DRAW);
+	if (m_position.size() > 0) {
+		glBindVertexArray(m_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_pos);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_position.size(), &m_position[0], GL_STREAM_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_col);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_color.size(), &m_color[0], GL_STREAM_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_col);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_color.size(), &m_color[0], GL_STREAM_DRAW);
 
-	m_shader->bind();
-	glUniformMatrix4fv(m_shader->uniformLocation("uModelViewMatrix"), 1, true, i3d::mat4f(view));
-	glUniformMatrix4fv(m_shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(proj));
+		m_shader->bind();
+		glUniformMatrix4fv(m_shader->uniformLocation("uModelViewMatrix"), 1, true, i3d::mat4f(view));
+		glUniformMatrix4fv(m_shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(proj));
 
-	glDrawArrays(GL_LINES, 0, m_position.size());
+		glDrawArrays(GL_LINES, 0, m_position.size());
 
-	glBindVertexArray(0);
-	glFinish();
+		glBindVertexArray(0);
+		glFinish();
+	}
 
 	m_position.clear();
 	m_color.clear();
