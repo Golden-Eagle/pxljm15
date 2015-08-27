@@ -18,7 +18,7 @@ out VertexData {
 } v_out;
 
 void main() {
-	vec4 p = (uModelViewMatrix * vec4(aPosition, 1.0));
+	vec4 p = (uModelViewMatrix * vec4(aPosition, 1.0)) + vec4(0, 0, 0.001, 0); // hack
 	gl_Position = uProjectionMatrix * p;
 	v_out.pos = p.xyz;
 	v_out.col = aColor;

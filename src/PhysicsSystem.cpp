@@ -38,7 +38,18 @@ RigidBody::RigidBody(collider_ptr c, double m) : m_collider(c), m_mass(m) {  }
 
 
 void RigidBody::start() {
-	regenerateRigidBody();
+	// Create rigid body
+	btCollisionShape *shape = m_collider->getCollisionShape();
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(m_mass, inertia);
+	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_mass, this, shape, inertia);
+	m_rigidBody = make_unique<btRigidBody>(rigidBodyCI);
+
+	// Set Attributes
+	// static cast to physics component pointer be cause the type needs to be
+	// exactly what we reinterpret_cast it as, in the collision handler
+	m_rigidBody->setUserPointer(static_cast<Physical *>(this)); // ben figured this out.. ask him why
+
 }
 
 
@@ -63,6 +74,7 @@ void RigidBody::setCollider(collider_ptr col) {
 	m_collider = col;
 
 	btCollisionShape *shape = m_collider->getCollisionShape();
+	m_rigidBody->setCollisionShape(shape);
 	btVector3 inertia(0, 0, 0);
 	shape->calculateLocalInertia(m_mass, inertia);
 
@@ -167,17 +179,6 @@ bool RigidBody::isAwake() { return m_rigidBody->isActive(); }
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 void RigidBody::getWorldTransform (btTransform &centerOfMassWorldTrans) const {
 	vec3d pos = entity()->root()->getPosition();
 	quatd rot = entity()->root()->getRotation();
@@ -194,22 +195,6 @@ void RigidBody::setWorldTransform (const btTransform &centerOfMassWorldTrans) {
 }
 
 
-void RigidBody::regenerateRigidBody() {
-	// Create rigid body
-	btCollisionShape *shape = m_collider->getCollisionShape();
-	btVector3 inertia(0, 0, 0);
-	shape->calculateLocalInertia(m_mass, inertia);
-	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_mass, this, shape, inertia);
-	m_rigidBody = make_unique<btRigidBody>(rigidBodyCI);
-
-	// Set Attributes
-	// static cast to physics component pointer be cause the type needs to be
-	// exactly what we reinterpret_cast it as, in the collision handler
-	m_rigidBody->setUserPointer(static_cast<Physical *>(this)); // ben figured this out.. ask him why
-}
-
-
-
 
 //
 // Collision Callback component
@@ -220,14 +205,61 @@ void CollisionCallback::registerWith(Scene &s) { s.physicsSystem().registerColli
 void CollisionCallback::deregisterWith(Scene &s) { s.physicsSystem().deregisterCollisionCallback(this); }
 
 
-void CollisionCallback::onCollisionEnter(Physical *) { }
 
 
-void CollisionCallback::onCollision(Physical *) { }
+
+void Trigger::start() {
+	m_ghostObject = make_unique<btGhostObject>();
+}
 
 
-void CollisionCallback::onCollisionExit(Physical *) { }
+void Trigger::registerWith(Scene &s) { s.physicsSystem().registerTrigger(this); }
 
+
+void Trigger::deregisterWith(Scene &s) { s.physicsSystem().deregisterTrigger(this); }
+
+
+void Trigger::addToDynamicsWorld(btDynamicsWorld *) {
+	removeFromDynamicsWorld();
+	m_world = world;
+	if (m_enabled)
+		m_world->addCollisionObject(m_ghostObject.get());
+}
+
+
+void Trigger::removeFromDynamicsWorld() {
+	if (m_world) {
+		if (m_enabled)
+			m_world->addCollisionObject(m_ghostObject.get());
+		m_world = nullptr;
+	}
+}
+
+
+void Trigger::setCollider(collider_ptr col) {
+	m_collider = col;
+	btCollisionShape *shape = m_collider->getCollisionShape();
+}
+
+
+collider_ptr Trigger::getCollider() {
+	return m_collider;
+}
+
+
+void Trigger::getWorldTransform (btTransform &) const {
+
+}
+
+
+
+//
+// Trigger Callback component
+//
+void TriggerCallback::registerWith(Scene &s) { s.physicsSystem().registerTriggerCallback(this); }
+
+
+void TriggerCallback::deregisterWith(Scene &s) { s.physicsSystem().deregisterTriggerCallback(this); }
 
 
 
@@ -321,7 +353,7 @@ void PhysicsDebugDrawer::drawLine (const btVector3 &from, const btVector3 &to, c
 }
 
 
-void PhysicsDebugDrawer::drawContactPoint (const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color) { }
+void PhysicsDebugDrawer::drawContactPoint (const btVector3 &, const btVector3 &, btScalar, int, const btVector3 &) { }
 
 
 void PhysicsDebugDrawer::reportErrorWarning (const char *warningString) {
@@ -329,7 +361,7 @@ void PhysicsDebugDrawer::reportErrorWarning (const char *warningString) {
 }
 
 
-void PhysicsDebugDrawer::draw3dText (const btVector3 &location, const char *textString) { }
+void PhysicsDebugDrawer::draw3dText (const btVector3 &, const char *) { }
 
 
 void PhysicsDebugDrawer::setDebugMode (int debugMode) { m_mode = debugMode; }
@@ -435,6 +467,32 @@ void PhysicsSystem::deregisterCollisionCallback(CollisionCallback *c) {
 }
 
 
+void PhysicsSystem::registerTrigger(Trigger *c) {
+	m_triggers.insert(c);
+	c->addToDynamicsWorld(dynamicsWorld);
+}
+
+
+void PhysicsSystem::deregisterTrigger(Trigger *c) {
+	c->removeFromDynamicsWorld();
+	m_triggers.erase(c);
+}
+
+
+void PhysicsSystem::registerTriggerCallback(TriggerCallback *c) {
+	m_triggerCallbacks[c->entity().get()].insert(c);
+}
+
+
+void PhysicsSystem::deregisterTriggerCallback(TriggerCallback *c) {
+	unordered_set<TriggerCallback *> &cset = m_triggerCallbacks[c->entity().get()];
+	cset.erase(c);
+	if (cset.empty()) {
+		m_triggerCallbacks.erase(c->entity().get());
+	}
+}
+
+
 void PhysicsSystem::tick() {
 	dynamicsWorld->stepSimulation(1 / 60.f, 10);
 }
@@ -447,11 +505,76 @@ void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
 
 
 void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
-
 	// Process collisions
 	//
+	// Swap collision buffers
 	swap(m_currentFrame, m_lastFrame);
 	m_currentFrame.clear();
+
+	auto do_callback = [&](const btCollisionObject *obA, const btCollisionObject *obB, unsigned phase) {
+
+		bool isGhostA = obA->getInternalType() & CO_GHOST_OBJECT;
+		bool isGhostB = obB->getInternalType() & CO_GHOST_OBJECT;
+
+		Physical * physicsA = reinterpret_cast<Physical *>(obA->getUserPointer());
+		Physical * physicsB = reinterpret_cast<Physical *>(obB->getUserPointer());
+
+		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
+		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
+
+		void (CollisionCallback::*collision_phase_handler)(Physical *) [] {
+			&CollisionCallback::onCollisionEnter,
+			&CollisionCallback::onCollision,
+			&CollisionCallback::onCollisionExit
+		};
+
+		void (TriggerCallback::*trigger_phase_handler)(Physical *) trigger_phase_handler [] {
+			&TriggerCallback::onTriggerEnter,
+			&TriggerCallback::onTrigger,
+			&TriggerCallback::onTriggerExit
+		};
+
+		switch ((unsigned(isGhostA) << 1) | isGhostB) {
+		case 0: // dynamicA/dynamicB collision
+			{
+				auto cca_it = m_collisionCallbacks.find(entityA);
+				if (cca_it != m_collisionCallbacks.end()) {
+					for (CollisionCallback *c : *cca_it) {
+						c->*(collision_phase_handler[phase])(physicsB);
+					}
+				}
+				auto ccb_it = m_collisionCallbacks.find(entityB);
+				if (ccb_it != m_collisionCallbacks.end()) {
+					for (CollisionCallback *c : *ccb_it) {
+						c->*(collision_phase_handler[phase])(physicsA);
+					}
+				}
+				break;
+			}
+		case 1: // dynamicA/ghostB collision
+			{
+				auto tcb_it = m_collisionCallbacks.find(entityB);
+				if (tcb_it != m_collisionCallbacks.end()) {
+					for (TriggerCallback *t : *tcb_it) {
+						t->*(trigger_phase_handler[phase])(physicsA);
+					}
+				}
+				break;
+			}
+		case 2: // ghostA/dynamicB collision
+			{
+				auto tca_it = m_collisionCallbacks.find(entityA);
+				if (tca_it != m_collisionCallbacks.end()) {
+					for (TriggerCallback *t : *tca_it) {
+						t->*(trigger_phase_handler[phase])(physicsB);
+					}
+				}
+				break;
+			}
+		default:
+			break;
+		}
+	};
 
 	int numManifolds = dynamicsWorld->getDispatcher()->getNumManifolds();
 	for (int i = 0; i < numManifolds; ++i) {
@@ -461,11 +584,11 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 
 		auto collisionPair = make_pair(obA, obB);
 
-		Physical * physicsA = reinterpret_cast<Physical *>(obA->getUserPointer());
-		Physical * physicsB = reinterpret_cast<Physical *>(obB->getUserPointer());
+		// Physical * physicsA = reinterpret_cast<Physical *>(obA->getUserPointer());
+		// Physical * physicsB = reinterpret_cast<Physical *>(obB->getUserPointer());
 
-		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
-		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
+		// Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
+		// Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
 
 		int numContacts = contactManifold->getNumContacts();
 		for (int j = 0; j<numContacts; ++j) {
@@ -478,25 +601,29 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 				if(it != m_lastFrame.end()) {
 					//existing collision
 					
-					if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-						for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-							callback->onCollision(physicsB);
+					// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
+					// 		callback->onCollision(physicsB);
 
-					if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-						for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-							callback->onCollision(physicsA);
+					// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
+					// 		callback->onCollision(physicsA);
+
+					do_callback(obA, obB, 1);
 
 					m_lastFrame.erase(it);
 				} else {
 					//new collision
 					
-					if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-						for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-							callback->onCollisionEnter(physicsB);
+					// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
+					// 		callback->onCollisionEnter(physicsB);
 
-					if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-						for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-							callback->onCollisionEnter(physicsA);
+					// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
+					// 		callback->onCollisionEnter(physicsA);
+
+					do_callback(obA, obB, 0);
 
 				}
 
@@ -506,20 +633,22 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 	}
 
 	for (auto collisionExitPair : m_lastFrame) {
-		Physical * physicsA = reinterpret_cast<Physical *>(collisionExitPair.first->getUserPointer());
-		Physical * physicsB = reinterpret_cast<Physical *>(collisionExitPair.second->getUserPointer());
+		// Physical * physicsA = reinterpret_cast<Physical *>(collisionExitPair.first->getUserPointer());
+		// Physical * physicsB = reinterpret_cast<Physical *>(collisionExitPair.second->getUserPointer());
 
-		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
-		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
+		// Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
+		// Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
 
 
-		if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-			for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-				callback->onCollisionExit(physicsB);
+		// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
+		// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
+		// 		callback->onCollisionExit(physicsB);
 
-		if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-			for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-				callback->onCollisionExit(physicsA);
+		// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
+		// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
+		// 		callback->onCollisionExit(physicsA);
+
+		do_callback(collisionExitPair.first, collisionExitPair.second, 2);
 	}
 
 

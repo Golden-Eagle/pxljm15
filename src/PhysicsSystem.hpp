@@ -5,6 +5,7 @@
 #include <utility>
 
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #include "Collider.hpp"
 #include "Assets.hpp"
@@ -44,7 +45,6 @@ namespace pxljm {
 	class RigidBody: public virtual Physical, private btMotionState  {
 	private:
 
-		void regenerateRigidBody();
 		collider_ptr m_collider = nullptr;
 		btDynamicsWorld * m_world = nullptr;
 		std::unique_ptr<btRigidBody> m_rigidBody;
@@ -145,19 +145,65 @@ namespace pxljm {
 	};
 
 
+	//
+	// Physics Trigger component
+	//
+	class Trigger : public virtual Physical, public virtual PhysicsUpdatable {
+	private:
+		collider_ptr m_collider = nullptr;
+		btDynamicsWorld * m_world = nullptr;
+		std::unique_ptr<btGhostObject> m_ghostObject;
+	public:
+		Trigger();
+		Trigger(collider_ptr);
+
+		virtual void start();
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
+
+		virtual void addToDynamicsWorld(btDynamicsWorld *);
+		virtual void removeFromDynamicsWorld();
+
+		// Bullet Physics related methods btMotionState
+		virtual void getWorldTransform (btTransform &) const;
+		virtual void setWorldTransform (const btTransform &) { }
+	};
+
+
 
 	//
-	// Physics Collision Callback component
+	// Physics Trigger Callback component
 	//
 	class CollisionCallback : public virtual EntityComponent {
 	public:
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual void onCollisionEnter(Physical *);
-		virtual void onCollision(Physical *);
-		virtual void onCollisionExit(Physical *);
+		virtual void onCollisionEnter(Physical *) { }
+		virtual void onCollision(Physical *) { }
+		virtual void onCollisionExit(Physical *) { }
 	};
+
+
+
+
+
+	//
+	// Physics Trigger Callback component
+	//
+	class TriggerCallback : public virtual EntityComponent {
+	public:
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
+
+		virtual void onTriggerEnter(Physical *) { }
+		virtual void onTrigger(Physical *) { }
+		virtual void onTriggerExit(Physical *) { }
+	};
+
+
+
+
 
 
 
@@ -212,6 +258,12 @@ namespace pxljm {
 		void registerCollisionCallback(CollisionCallback *);
 		void deregisterCollisionCallback(CollisionCallback *);
 
+		void registerTrigger(Trigger *);
+		void deregisterTrigger(Trigger *);
+
+		void registerTriggerCallback(TriggerCallback *);
+		void deregisterTriggerCallback(TriggerCallback *);
+
 		void tick();
 
 		void debugDraw(i3d::mat4d, i3d::mat4d);
@@ -222,14 +274,22 @@ namespace pxljm {
 
 		PhysicsDebugDrawer m_debugDrawer;
 
+		// Physics collections
 		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;
+
 		std::unordered_set<RigidBody *> m_rigidbodies;
 		std::unordered_map<Entity *, std::unordered_set<CollisionCallback *>> m_collisionCallbacks;
+
+		std::unordered_set<Trigger *> m_triggers;
+		std::unordered_map<Entity *, std::unordered_set<TriggerCallback *>> m_triggerCallbacks;
+
 
 		// internal collision sets
 		bool m_collisionsA_isCurrent = true;
 		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_currentFrame;
 		std::unordered_set<std::pair<const btCollisionObject *, const btCollisionObject *>> m_lastFrame;
+
+
 
 		// physics internals
 		btBroadphaseInterface* broadphase;
