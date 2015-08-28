@@ -126,7 +126,11 @@ namespace pxljm {
 
 			//TODO change this
 			if (m_window->pollKey(GLFW_KEY_GRAVE_ACCENT) || m_window->pollKey(GLFW_KEY_L)) {
-				glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				if(!m_mouse_captured)
+					glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				else
+					glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
 				m_mouse_captured = !m_mouse_captured;
 				glfwSetCursorPos(m_window->handle(), m_window->width() * 0.5, m_window->height() * 0.5);
 			}
