@@ -336,7 +336,7 @@ namespace gecom {
 			if (m_handle == nullptr) throw window_error("GLFW window handle is null");
 			initialize();
 		}
-		
+
 		GLFWwindow * handle() const {
 			return m_handle;
 		}
