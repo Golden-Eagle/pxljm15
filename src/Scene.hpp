@@ -5,11 +5,11 @@
 #include <memory>
 #include <vector>
 
-#include "GECom.hpp"
+#include <gecom/Window.hpp>
+#include <gecom/Initial3D.hpp>>
+
 #include "Camera.hpp"
 #include "Renderer.hpp"
-#include "Window.hpp"
-#include "Initial3D.hpp"
 
 // Entity Stuff
 //

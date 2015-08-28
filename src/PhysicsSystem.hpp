@@ -7,10 +7,11 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
+#include <gecom/GL.hpp>
+
 #include "Collider.hpp"
 #include "Assets.hpp"
 #include "Material.hpp"
-#include "GLOW.hpp"
 #include "ComponentSystem.hpp"
 
 

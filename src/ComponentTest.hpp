@@ -1,8 +1,8 @@
 #pragma once
 
+#include <gecom/Initial3D.hpp>
+
 #include "Scene.hpp"
-#include "Initial3D.hpp"
-#include "GECom.hpp"
 
 namespace pxljm {
 

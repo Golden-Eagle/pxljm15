@@ -1,6 +1,7 @@
 #include "PhysicsSystem.hpp"
 #include "Scene.hpp"
 
+#include "Pxljm.hpp"
 
 using namespace std;
 using namespace pxljm;
@@ -418,7 +419,7 @@ PhysicsSystem::PhysicsSystem() {
 
 	// Debug HACK
 	m_debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    dynamicsWorld->setDebugDrawer(&m_debugDrawer);
+	dynamicsWorld->setDebugDrawer(&m_debugDrawer);
 
 
 

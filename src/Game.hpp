@@ -3,13 +3,15 @@
 #include <stdexcept>
 #include <thread>
 
+#include <gecom/Window.hpp>
+#include <gecom/Initial3D.hpp>
+
+#include "Pxljm.hpp"
+
 #include "Assets.hpp"
 #include "Camera.hpp"
 #include "Scene.hpp"
-#include "GLOW.hpp"
 #include "Renderer.hpp"
-#include "Initial3D.hpp"
-#include "Window.hpp"
 #include "SimpleShader.hpp"
 #include "ComponentTest.hpp"
 #include "LevelLoader.hpp"
@@ -27,14 +29,14 @@ namespace pxljm {
 	public:
 		Game() {
 			m_win = gecom::createWindow().size(1024, 768).hint(GLFW_SAMPLES, 16).title("Pxljm 2015").visible(true);
-			m_win->makeContextCurrent();
+			m_win->makeCurrent();
 
 			m_win->onKeyPress.subscribe([&](const gecom::key_event &e) {
 				if (e.key == GLFW_KEY_TAB) {
 					}
 
 				return false;
-			}).forever();
+			})->forever();
 
 			assets::init("./AssetConfig.json");
 
@@ -67,7 +69,7 @@ namespace pxljm {
 				assets::getMesh("cube"),
 				assets::getMaterial("basic"));
 
-			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d::one())));
+			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
 			m_scene->add(cube);
 
 

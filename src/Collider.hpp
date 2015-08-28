@@ -4,7 +4,7 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#include "GECom.hpp"
+#include <gecom/Uncopyable.hpp>
 
 
 namespace pxljm {

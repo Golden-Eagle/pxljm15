@@ -1,14 +1,15 @@
 
-#pragma once
+#ifndef SKADI_SIMPLE_SHADER_HPP
+#define SKADI_SIMPLE_SHADER_HPP
 
 #include <string>
 #include <vector>
 #include <sstream>
 
-#include <gecom/GL.hpp>
-#include <gecom/Log.hpp>
+#include "GL.hpp"
+#include "Log.hpp"
 
-namespace gecom {
+namespace skadi {
 
 
 	class shader_error : public std::runtime_error {
@@ -38,7 +39,7 @@ namespace gecom {
 		if (infologLength > 1) {
 			std::vector<char> infoLog(infologLength);
 			glGetShaderInfoLog(obj, infologLength, &charsWritten, &infoLog[0]);
-			gecom::Log::info("SimpleShader") << "SHADER:\n" << &infoLog[0];
+			gecom::Log::info() << "SHADER:\n" << &infoLog[0];
 		}
 	}
 
@@ -49,7 +50,7 @@ namespace gecom {
 		if (infologLength > 1) {
 			std::vector<char> infoLog(infologLength);
 			glGetProgramInfoLog(obj, infologLength, &charsWritten, &infoLog[0]);
-			gecom::Log::info("SimpleShader") << "PROGRAM:\n" << &infoLog[0];
+			gecom::Log::info() << "PROGRAM:\n" << &infoLog[0];
 		}
 	}
 
@@ -82,6 +83,7 @@ namespace gecom {
 	}
 
 	inline GLuint makeShaderProgram(const std::string &profile, const std::vector<GLenum> &stypes, const std::string &source) {
+		gecom::section_guard sec("SimpleShader");
 		GLuint prog = glCreateProgram();
 
 		auto get_define = [](GLenum stype) {
@@ -111,8 +113,10 @@ namespace gecom {
 		}
 
 		linkShaderProgram(prog);
-		gecom::Log::info("SimpleShader") << "Shader program compiled and linked successfully";
+		gecom::Log::info() << "Shader program compiled and linked successfully";
 		return prog;
 	}
 
 }
+
+#endif
