@@ -15,15 +15,19 @@ Scene::~Scene() { }
 void Scene::tick() {
 
 	// Input Update
-	// 
+	//
 	m_updateSystem.inputUpdate();
 
 	// Physics
-	// 
+	//
 	m_physicsSystem.tick();
 
+	// Sound
+	//
+	m_soundSystem.update();
+
 	// Update
-	// 
+	//
 	m_camera.update();
 	m_updateSystem.update();
 
@@ -31,7 +35,7 @@ void Scene::tick() {
 	// Later Josh... later...
 
 	// Render
-	// 
+	//
 	double zfar = 200.0;
 	auto size = m_window->size();
 	int w = size.w;

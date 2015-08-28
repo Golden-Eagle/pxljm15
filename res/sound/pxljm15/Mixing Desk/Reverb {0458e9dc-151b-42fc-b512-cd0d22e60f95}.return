@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.01.05.00">
+    <object class="MixerReturn" id="{0458e9dc-151b-42fc-b512-cd0d22e60f95}">
+        <property name="overridingInputFormat">
+            <value>2</value>
+        </property>
+        <property name="inputFormatOverridden">
+            <value>true</value>
+        </property>
+        <property name="name">
+            <value>Reverb</value>
+        </property>
+        <relationship name="effectChain">
+            <destination>{78c244b8-f9fa-4db8-b463-32f698be6ff8}</destination>
+        </relationship>
+        <relationship name="panner">
+            <destination>{c3556bfa-e358-4837-9164-07cf3a83dac0}</destination>
+        </relationship>
+        <relationship name="output">
+            <destination>{05060a0c-305f-4856-bc5a-7e2d3258869c}</destination>
+        </relationship>
+    </object>
+    <object class="MixerBusEffectChain" id="{78c244b8-f9fa-4db8-b463-32f698be6ff8}">
+        <relationship name="effects">
+            <destination>{8fc70a00-3349-4764-bea1-fd50db0e6744}</destination>
+            <destination>{34506305-84f2-493e-9e3c-d02223caf0fa}</destination>
+        </relationship>
+    </object>
+    <object class="MixerBusPanner" id="{c3556bfa-e358-4837-9164-07cf3a83dac0}"/>
+    <object class="SFXReverbEffect" id="{8fc70a00-3349-4764-bea1-fd50db0e6744}">
+        <property name="wetLevel">
+            <value>0</value>
+        </property>
+        <property name="dryLevel">
+            <value>-80</value>
+        </property>
+    </object>
+    <object class="MixerBusFader" id="{34506305-84f2-493e-9e3c-d02223caf0fa}"/>
+</objects>
