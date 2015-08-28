@@ -8,12 +8,15 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 find_package(OpenGL REQUIRED)
 
 # GLFW
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw-3.0.3" "${PROJECT_BINARY_DIR}/ext/glfw")
-include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.0.3/include")
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw-3.1.1" "${PROJECT_BINARY_DIR}/ext/glfw")
+include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.1.1/include")
 
 # GLAER
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glaer" "${PROJECT_BINARY_DIR}/ext/glaer")
 include_directories("${GLAER_BINARY_DIR}/src/include")
+
+# Fmod
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/fmod")
 
 # Bullet
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/bullet-2.83.5" "${PROJECT_BINARY_DIR}/ext/bullet")
@@ -29,14 +32,14 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp /arch:SSE2")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2 -fopenmp")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
 	if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
 	endif()
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2 -fopenmp")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
 endif()
 

@@ -105,8 +105,11 @@ namespace pxljm {
 				int w = m_window->width();
 				double x, y;
 				glfwGetCursorPos(m_window->handle(), &x, &y);
+				std::cout << "x: " << x << " y: " << y << std::endl;
 				x -= w * 0.5;
 				y -= h * 0.5;
+
+				std::cout << "x: " << x << " y: " << y << std::endl;
 				double rot_h = -x / rot_speed;
 				m_ori = quatd::axisangle(up, rot_h) * m_ori;
 				m_rot_v += -y / rot_speed;
@@ -124,7 +127,8 @@ namespace pxljm {
 			if (m_window->getKey(GLFW_KEY_SPACE)) move += up;
 
 			//TODO change this
-			if (m_window->pollKey(GLFW_KEY_GRAVE_ACCENT)) {
+			if (m_window->pollKey(GLFW_KEY_GRAVE_ACCENT) || m_window->pollKey(GLFW_KEY_L)) {
+				glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 				m_mouse_captured = !m_mouse_captured;
 				glfwSetCursorPos(m_window->handle(), m_window->width() * 0.5, m_window->height() * 0.5);
 			}

@@ -332,11 +332,11 @@ namespace gecom {
 
 	public:
 		// ctor: takes ownership of a GLFW window handle
-		Window(GLFWwindow *handle_, const Window *share = nullptr) : m_handle(handle_) {
+		Window(GLFWwindow *handle_) : m_handle(handle_) {
 			if (m_handle == nullptr) throw window_error("GLFW window handle is null");
 			initialize();
 		}
-		
+
 		GLFWwindow * handle() const {
 			return m_handle;
 		}

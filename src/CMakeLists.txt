@@ -32,6 +32,8 @@ SET(gecom_hdr
 	"UpdateSystem.hpp"
 
 	"Scene.hpp"
+
+	"LevelLoader.hpp"
 )
 
 

@@ -506,7 +506,7 @@ namespace gecom {
 			throw window_error("GLFW window creation failed");
 		}
 		gecom::log("Window").information(0) << "Window created";
-		return new Window(handle, m_share);
+		return new Window(handle);
 	}
 
 
