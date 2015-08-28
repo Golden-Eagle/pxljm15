@@ -35,7 +35,7 @@ RigidBody::RigidBody() {
 	abort(); // LOL wut u doin?!?!
 }
 
-RigidBody::RigidBody(collider_ptr c, double m) : m_collider(c), m_mass(m) {  }
+RigidBody::RigidBody(collider_ptr c, double m) : m_collider(c), m_mass(m) { }
 
 
 void RigidBody::start() {
@@ -45,6 +45,7 @@ void RigidBody::start() {
 	shape->calculateLocalInertia(m_mass, inertia);
 	btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(m_mass, this, shape, inertia);
 	m_rigidBody = make_unique<btRigidBody>(rigidBodyCI);
+	if (m_mass <= 0) m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 
 	// Set Attributes
 	// static cast to physics component pointer be cause the type needs to be
@@ -139,6 +140,11 @@ void RigidBody::setMass(double m) {
 	shape->calculateLocalInertia(m_mass, inertia);
 	m_rigidBody->setMassProps(m_mass, inertia);
 	m_rigidBody->updateInertiaTensor();
+	if (m_mass <= 0) {
+		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	} else {
+		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() & !btCollisionObject::CF_KINEMATIC_OBJECT);
+	}
 }
 
 double RigidBody::getMass() {
@@ -440,11 +446,11 @@ PhysicsSystem::PhysicsSystem() {
 
 	// SUPER HACK
 	// Hard limit for the ground to be at y=0
-	btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
-	btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
-	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
-	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
-	dynamicsWorld->addRigidBody(groundRigidBody);
+	//btCollisionShape* groundShape = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+	//btDefaultMotionState* groundMotionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, -1, 0)));
+	//btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, groundMotionState, groundShape, btVector3(0, 0, 0));
+	//btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
+	//dynamicsWorld->addRigidBody(groundRigidBody);
 
 
 	resetClock();

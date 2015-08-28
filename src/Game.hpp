@@ -49,6 +49,19 @@ namespace pxljm {
 			LevelLoader ll;
 			ll.Load(m_scene, "sample.json");
 
+
+
+			// Plane
+			//
+			entity_ptr plane = std::make_shared<Entity>(i3d::vec3d(0, -1.0, 0));
+			plane->emplaceComponent<MeshDrawable>(
+				assets::getMesh("plane"),
+				assets::getMaterial("basic"));
+			plane->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d(100, 1, 100))), 0);
+			m_scene->add(plane);;
+
+
+
 			// Cube
 			//
 			entity_ptr cube = std::make_shared<Entity>(i3d::vec3d(2, 10, 2));
@@ -107,15 +120,6 @@ namespace pxljm {
 			sphere->emplaceComponent<CollisionCallbackTest>();
 
 			m_scene->add(sphere);
-
-
-			// Plane
-			//
-			entity_ptr plane = std::make_shared<Entity>(i3d::vec3d(0, 0, 0));
-			plane->emplaceComponent<MeshDrawable>(
-				assets::getMesh("plane"),
-				assets::getMaterial("basic"));
-			m_scene->add(plane);
 
 		}
 
