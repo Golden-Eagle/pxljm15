@@ -38,8 +38,8 @@
 // #define STB_TEXTEDIT_IMPLEMENTATION
 // #include "stb_textedit.h"
 
-#define STB_TILEMAP_EDITOR_IMPLEMENTATION
-#include "stb_tilemap_editor.h"
+// #define STB_TILEMAP_EDITOR_IMPLEMENTATION
+// #include "stb_tilemap_editor.h"
 
 #include "stb_vorbis.c"
 
