@@ -219,7 +219,7 @@ void Trigger::registerWith(Scene &s) { s.physicsSystem().registerTrigger(this); 
 void Trigger::deregisterWith(Scene &s) { s.physicsSystem().deregisterTrigger(this); }
 
 
-void Trigger::addToDynamicsWorld(btDynamicsWorld *) {
+void Trigger::addToDynamicsWorld(btDynamicsWorld *world) {
 	removeFromDynamicsWorld();
 	m_world = world;
 	if (m_enabled)
@@ -236,6 +236,21 @@ void Trigger::removeFromDynamicsWorld() {
 }
 
 
+void Trigger::physicsUpdate() {
+	m_ghostObject->setWorldTransform(btTransform(i3d2bt(entity()->root()->getRotation()), i3d2bt(entity()->root()->getPosition())));
+}
+
+
+void Trigger::setEnable(bool e) {
+	m_enabled = e;
+}
+
+
+bool Trigger::isEnabled() {
+	return m_enabled;
+}
+
+
 void Trigger::setCollider(collider_ptr col) {
 	m_collider = col;
 	btCollisionShape *shape = m_collider->getCollisionShape();
@@ -247,9 +262,6 @@ collider_ptr Trigger::getCollider() {
 }
 
 
-void Trigger::getWorldTransform (btTransform &) const {
-
-}
 
 
 
@@ -513,8 +525,8 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 
 	auto do_callback = [&](const btCollisionObject *obA, const btCollisionObject *obB, unsigned phase) {
 
-		bool isGhostA = obA->getInternalType() & CO_GHOST_OBJECT;
-		bool isGhostB = obB->getInternalType() & CO_GHOST_OBJECT;
+		bool isGhostA = obA->getInternalType() & btCollisionObject::CollisionObjectTypes::CO_GHOST_OBJECT;
+		bool isGhostB = obB->getInternalType() & btCollisionObject::CollisionObjectTypes::CO_GHOST_OBJECT;
 
 		Physical * physicsA = reinterpret_cast<Physical *>(obA->getUserPointer());
 		Physical * physicsB = reinterpret_cast<Physical *>(obB->getUserPointer());
@@ -522,13 +534,13 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 		Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
 		Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
 
-		void (CollisionCallback::*collision_phase_handler)(Physical *) [] {
+		void (CollisionCallback::*collision_phase_handler[])(Physical *) {
 			&CollisionCallback::onCollisionEnter,
 			&CollisionCallback::onCollision,
 			&CollisionCallback::onCollisionExit
 		};
 
-		void (TriggerCallback::*trigger_phase_handler)(Physical *) trigger_phase_handler [] {
+		void (TriggerCallback::*trigger_phase_handler[])(Physical *) {
 			&TriggerCallback::onTriggerEnter,
 			&TriggerCallback::onTrigger,
 			&TriggerCallback::onTriggerExit
@@ -539,34 +551,34 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 			{
 				auto cca_it = m_collisionCallbacks.find(entityA);
 				if (cca_it != m_collisionCallbacks.end()) {
-					for (CollisionCallback *c : *cca_it) {
-						c->*(collision_phase_handler[phase])(physicsB);
+					for (CollisionCallback *c : cca_it->second) {
+						(c->*(collision_phase_handler[phase]))(physicsB);
 					}
 				}
 				auto ccb_it = m_collisionCallbacks.find(entityB);
 				if (ccb_it != m_collisionCallbacks.end()) {
-					for (CollisionCallback *c : *ccb_it) {
-						c->*(collision_phase_handler[phase])(physicsA);
+					for (CollisionCallback *c : ccb_it->second) {
+						(c->*(collision_phase_handler[phase]))(physicsA);
 					}
 				}
 				break;
 			}
 		case 1: // dynamicA/ghostB collision
 			{
-				auto tcb_it = m_collisionCallbacks.find(entityB);
-				if (tcb_it != m_collisionCallbacks.end()) {
-					for (TriggerCallback *t : *tcb_it) {
-						t->*(trigger_phase_handler[phase])(physicsA);
+				auto tcb_it = m_triggerCallbacks.find(entityB);
+				if (tcb_it != m_triggerCallbacks.end()) {
+					for (TriggerCallback *t : tcb_it->second) {
+						(t->*(trigger_phase_handler[phase]))(physicsA);
 					}
 				}
 				break;
 			}
 		case 2: // ghostA/dynamicB collision
 			{
-				auto tca_it = m_collisionCallbacks.find(entityA);
-				if (tca_it != m_collisionCallbacks.end()) {
-					for (TriggerCallback *t : *tca_it) {
-						t->*(trigger_phase_handler[phase])(physicsB);
+				auto tca_it = m_triggerCallbacks.find(entityA);
+				if (tca_it != m_triggerCallbacks.end()) {
+					for (TriggerCallback *t : tca_it->second) {
+						(t->*(trigger_phase_handler[phase]))(physicsB);
 					}
 				}
 				break;

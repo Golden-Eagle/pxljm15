@@ -153,6 +153,8 @@ namespace pxljm {
 		collider_ptr m_collider = nullptr;
 		btDynamicsWorld * m_world = nullptr;
 		std::unique_ptr<btGhostObject> m_ghostObject;
+
+		bool m_enabled = true;
 	public:
 		Trigger();
 		Trigger(collider_ptr);
@@ -164,9 +166,14 @@ namespace pxljm {
 		virtual void addToDynamicsWorld(btDynamicsWorld *);
 		virtual void removeFromDynamicsWorld();
 
-		// Bullet Physics related methods btMotionState
-		virtual void getWorldTransform (btTransform &) const;
-		virtual void setWorldTransform (const btTransform &) { }
+		virtual void physicsUpdate();
+
+		void setEnable(bool);
+		bool isEnabled();
+
+		// Properties
+		void setCollider(collider_ptr);
+		collider_ptr getCollider();
 	};
 
 
