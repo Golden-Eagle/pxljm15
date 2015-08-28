@@ -12,6 +12,7 @@
 #include "Window.hpp"
 #include "SimpleShader.hpp"
 #include "ComponentTest.hpp"
+#include "LevelLoader.hpp"
 
 // Inclusions for compoenets
 
@@ -35,14 +36,18 @@ namespace pxljm {
 				return false;
 			}).forever();
 
-			
 			assets::init("./AssetConfig.json");
+
 
 
 			//
 			// HACKY scene creation and population code here
 			//
 			m_scene = std::make_shared<Scene>(m_win);
+
+
+			LevelLoader ll;
+			ll.Load(m_scene, "sample.json");
 
 			// Cube
 			//
