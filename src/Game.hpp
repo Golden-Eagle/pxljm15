@@ -19,8 +19,6 @@
 #include "Mesh.hpp"
 #include "Collider.hpp"
 
-
-
 namespace pxljm {
 
 	class Game {
@@ -37,8 +35,6 @@ namespace pxljm {
 			}).forever();
 
 			assets::init("./AssetConfig.json");
-
-
 
 			//
 			// HACKY scene creation and population code here
@@ -130,7 +126,6 @@ namespace pxljm {
 
 			glfwTerminate();
 		}
-		
 	private:
 		gecom::Window *m_win;
 		scene_ptr m_scene;

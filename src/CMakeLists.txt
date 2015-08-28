@@ -30,6 +30,7 @@ SET(gecom_hdr
 	"LightSystem.hpp"
 	"PhysicsSystem.hpp"
 	"UpdateSystem.hpp"
+	"SoundSystem.hpp"
 
 	"Scene.hpp"
 
@@ -44,7 +45,7 @@ SET(gecom_src
 	"Perlin.hpp"
 	"Window.cpp"
 	"Concurrent.cpp"
-	
+
 	"Assets.cpp"
 	"Material.cpp"
 	"Mesh.cpp"
@@ -55,12 +56,15 @@ SET(gecom_src
 	"LightSystem.cpp"
 	"PhysicsSystem.cpp"
 	"UpdateSystem.cpp"
+	"SoundSystem.cpp"
 
 	"Scene.cpp"
 )
 
 
 add_executable(gecom ${gecom_hdr} ${gecom_src})
+
+target_link_libraries(gecom fmod_lowlevel fmod_studio)
 
 target_link_libraries(gecom glfw ${GLFW_LIBRARIES})
 
