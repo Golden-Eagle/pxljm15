@@ -55,6 +55,16 @@ namespace pxljm {
 			m_scene->add(cube);
 
 
+
+
+			// Tigger Cube
+			//
+			cube = std::make_shared<Entity>(i3d::vec3d(0, 0.5, 0));
+			cube->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(0.1));
+			cube->emplaceComponent<TriggerTest>();
+			m_scene->add(cube);
+
+
 			// Another Cube
 			//
 			cube = std::make_shared<Entity>(i3d::vec3d(0, 10, 5));

@@ -53,4 +53,20 @@ namespace pxljm {
 			std::cout << "Colliding (EXIT) with :: " << c << std::endl;
 		} 
 	};
+
+	class TriggerTest : public virtual TriggerCallback {
+	public:
+		TriggerTest() { }
+		virtual void onTriggerEnter(Physical *c) {
+			std::cout << "TRIGGERED WITH (ENTER) with :: " << c << std::endl;
+		}
+		virtual void onTrigger(Physical *c) {
+			std::cout << "TRIGGERED WITH :: " << c << std::endl;
+		}
+
+		virtual void onTriggerExit(Physical *c) {
+			std::cout << "TRIGGERED WITH (ENTER) with :: " << c << std::endl;
+		}
+
+	};
 }

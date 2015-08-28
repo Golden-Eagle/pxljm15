@@ -3,6 +3,7 @@
 
 
 using namespace std;
+using namespace chrono;
 using namespace pxljm;
 using namespace gecom;
 using namespace i3d;
@@ -208,8 +209,22 @@ void CollisionCallback::deregisterWith(Scene &s) { s.physicsSystem().deregisterC
 
 
 
+//
+// Trigger component
+//
+Trigger::Trigger(collider_ptr c) : m_collider(c) { }
+
+
 void Trigger::start() {
 	m_ghostObject = make_unique<btGhostObject>();
+	m_ghostObject->setCollisionShape(m_collider->getCollisionShape());
+	m_ghostObject->setWorldTransform(btTransform(i3d2bt(entity()->root()->getRotation()), i3d2bt(entity()->root()->getPosition())));
+
+	// Set Attributes
+	m_ghostObject->setCollisionFlags(m_ghostObject->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	// static cast to physics component pointer be cause the type needs to be
+	// exactly what we reinterpret_cast it as, in the collision handler
+	m_ghostObject->setUserPointer(static_cast<Physical *>(this)); // ben figured this out.. ask him why
 }
 
 
@@ -431,6 +446,8 @@ PhysicsSystem::PhysicsSystem() {
 	btRigidBody* groundRigidBody = new btRigidBody(groundRigidBodyCI);
 	dynamicsWorld->addRigidBody(groundRigidBody);
 
+
+	resetClock();
 }
 
 
@@ -505,8 +522,17 @@ void PhysicsSystem::deregisterTriggerCallback(TriggerCallback *c) {
 }
 
 
+void PhysicsSystem::resetClock() {
+	m_lastTick = steady_clock::now();
+}
+
+
 void PhysicsSystem::tick() {
-	dynamicsWorld->stepSimulation(1 / 60.f, 10);
+	steady_clock::time_point now = steady_clock::now();
+	steady_clock::duration time_span = now - m_lastTick;
+	double nseconds = double(time_span.count()) * steady_clock::period::num / steady_clock::period::den;
+	dynamicsWorld->stepSimulation(nseconds, 20);
+	m_lastTick = now;
 }
 
 
@@ -596,11 +622,6 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 
 		auto collisionPair = make_pair(obA, obB);
 
-		// Physical * physicsA = reinterpret_cast<Physical *>(obA->getUserPointer());
-		// Physical * physicsB = reinterpret_cast<Physical *>(obB->getUserPointer());
-
-		// Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
-		// Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
 
 		int numContacts = contactManifold->getNumContacts();
 		for (int j = 0; j<numContacts; ++j) {
@@ -612,31 +633,11 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 				auto it  = m_lastFrame.find(collisionPair);
 				if(it != m_lastFrame.end()) {
 					//existing collision
-					
-					// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-					// 		callback->onCollision(physicsB);
-
-					// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-					// 		callback->onCollision(physicsA);
-
 					do_callback(obA, obB, 1);
-
 					m_lastFrame.erase(it);
 				} else {
 					//new collision
-					
-					// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-					// 		callback->onCollisionEnter(physicsB);
-
-					// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-					// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-					// 		callback->onCollisionEnter(physicsA);
-
 					do_callback(obA, obB, 0);
-
 				}
 
 				break; //break out of btManifoldPoint iteration
@@ -645,21 +646,6 @@ void PhysicsSystem::processPhysicsCallback(btScalar timeStep) {
 	}
 
 	for (auto collisionExitPair : m_lastFrame) {
-		// Physical * physicsA = reinterpret_cast<Physical *>(collisionExitPair.first->getUserPointer());
-		// Physical * physicsB = reinterpret_cast<Physical *>(collisionExitPair.second->getUserPointer());
-
-		// Entity * entityA = physicsA ? physicsA->entity().get() : nullptr;
-		// Entity * entityB = physicsB ? physicsB->entity().get() : nullptr;
-
-
-		// if (m_collisionCallbacks.find(entityA) != m_collisionCallbacks.end())
-		// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityA))
-		// 		callback->onCollisionExit(physicsB);
-
-		// if (m_collisionCallbacks.find(entityB) != m_collisionCallbacks.end())
-		// 	for (CollisionCallback *callback : m_collisionCallbacks.at(entityB))
-		// 		callback->onCollisionExit(physicsA);
-
 		do_callback(collisionExitPair.first, collisionExitPair.second, 2);
 	}
 
