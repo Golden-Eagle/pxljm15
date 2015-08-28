@@ -59,6 +59,8 @@ add_subdirectory(res)
 # set IDE display folders
 SET_PROPERTY(TARGET glfw PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET glaer PROPERTY FOLDER "ext")
+SET_PROPERTY(TARGET fmod_lowlevel PROPERTY FOLDER "ext")
+SET_PROPERTY(TARGET fmod_studio PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET res PROPERTY FOLDER "res")
 
 
