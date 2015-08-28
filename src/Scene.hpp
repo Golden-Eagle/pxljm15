@@ -48,7 +48,8 @@ namespace pxljm {
 		Scene(gecom::Window *win);
 		~Scene();
 
-		void tick();
+		void update();
+		void render();
 		void add( entity_ptr e);
 
 		DrawableSystem & drawableSystem();

@@ -13,6 +13,7 @@
 #include "SimpleShader.hpp"
 #include "ComponentTest.hpp"
 #include "LevelLoader.hpp"
+#include "State.hpp"
 
 // Inclusions for compoenets
 
@@ -22,6 +23,8 @@
 namespace pxljm {
 
 	class Game {
+	private:
+		StateManager m_stateManager;
 	public:
 		Game() {
 			m_win = gecom::createWindow().size(1024, 768).hint(GLFW_SAMPLES, 16).title("Pxljm 2015").visible(true);
@@ -36,90 +39,18 @@ namespace pxljm {
 
 			assets::init("./AssetConfig.json");
 
-			//
-			// HACKY scene creation and population code here
-			//
-			m_scene = std::make_shared<Scene>(m_win);
-
-
-			LevelLoader ll;
-			ll.Load(m_scene, "sample.json");
-
-
-
-			// Plane
-			//
-			entity_ptr plane = std::make_shared<Entity>(i3d::vec3d(0, -1.0, 0));
-			plane->emplaceComponent<MeshDrawable>(
-				assets::getMesh("plane"),
-				assets::getMaterial("basic"));
-			plane->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d(100, 1, 100))), 0);
-			m_scene->add(plane);;
-
-
-
-			// Cube
-			//
-			entity_ptr cube = std::make_shared<Entity>(i3d::vec3d(2, 10, 2));
-			cube->emplaceComponent<MeshDrawable>(
-				assets::getMesh("cube"),
-				assets::getMaterial("basic"));
-
-			cube->emplaceComponent<BoxMove>();
-			m_scene->add(cube);
-
-
-			//
-			// The falling cube
-			//
-			cube = std::make_shared<Entity>(i3d::vec3d(0, 60, 5));
-			cube->emplaceComponent<MeshDrawable>(
-				assets::getMesh("cube"),
-				assets::getMaterial("basic"));
-
-			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d::one())));
-			m_scene->add(cube);
-
-
-
-
-			// Tigger Cube
-			//
-			cube = std::make_shared<Entity>(i3d::vec3d(0, 0.5, 0));
-			cube->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(0.1));
-			cube->emplaceComponent<TriggerTest>();
-			m_scene->add(cube);
-			
-
-			// Another Cube
-			//
-			cube = std::make_shared<Entity>(i3d::vec3d(0, 10, 5));
-			cube->emplaceComponent<MeshDrawable>(
-				assets::getMesh("cube"),
-				assets::getMaterial("basic"));
-
-			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d::one())));
-			m_scene->add(cube);
-
-
-			// Sphere
-			//
-			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(0, 50, -10));
-			sphere->emplaceComponent<MeshDrawable>(
-				assets::getMesh("sphere"),
-				assets::getMaterial("basic"));
-
-			sphere->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(1));
-
-			sphere->emplaceComponent<SphereBounce>();
-
-			sphere->emplaceComponent<CollisionCallbackTest>();
-
-			m_scene->add(sphere);
-
 		}
 
 		~Game();
+
+		template <typename FirstStateT>
+		void init() {
+			m_stateManager.init<FirstStateT>(this);
+		}
+
+		gecom::Window* window() const {
+			return m_win;
+		}
 
 
 		void run() {
@@ -131,8 +62,8 @@ namespace pxljm {
 
 				double now = glfwGetTime();
 
-				// Game loop
-				m_scene->tick();
+				m_stateManager.update();
+				m_stateManager.draw();
 
 				m_win->swapBuffers();
 
