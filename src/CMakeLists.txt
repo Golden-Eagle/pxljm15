@@ -65,6 +65,7 @@ SET(gecom_src
 add_executable(gecom ${gecom_hdr} ${gecom_src})
 
 target_link_libraries(gecom fmod_lowlevel fmod_studio)
+target_link_libraries(gecom stb)
 
 target_link_libraries(gecom glfw ${GLFW_LIBRARIES})
 

@@ -15,6 +15,9 @@ include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.1.1/include")
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glaer" "${PROJECT_BINARY_DIR}/ext/glaer")
 include_directories("${GLAER_BINARY_DIR}/src/include")
 
+# Stb
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
+
 # Fmod
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/fmod")
 
@@ -61,6 +64,7 @@ SET_PROPERTY(TARGET glfw PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET glaer PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET fmod_lowlevel PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET fmod_studio PROPERTY FOLDER "ext")
+SET_PROPERTY(TARGET stb PROPERTY FOLDER "ext")
 SET_PROPERTY(TARGET res PROPERTY FOLDER "res")
 
 
