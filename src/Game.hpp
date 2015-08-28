@@ -55,6 +55,18 @@ namespace pxljm {
 			m_scene->add(cube);
 
 
+			//
+			// The falling cube
+			//
+			cube = std::make_shared<Entity>(i3d::vec3d(0, 60, 5));
+			cube->emplaceComponent<MeshDrawable>(
+				assets::getMesh("cube"),
+				assets::getMaterial("basic"));
+
+			cube->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(gecom::i3d2bt(i3d::vec3d::one())));
+			m_scene->add(cube);
+
+
 
 
 			// Tigger Cube
@@ -63,7 +75,7 @@ namespace pxljm {
 			cube->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(0.1));
 			cube->emplaceComponent<TriggerTest>();
 			m_scene->add(cube);
-
+			
 
 			// Another Cube
 			//
@@ -78,7 +90,7 @@ namespace pxljm {
 
 			// Sphere
 			//
-			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(0, 20, -10));
+			entity_ptr sphere = std::make_shared<Entity>(i3d::vec3d(0, 50, -10));
 			sphere->emplaceComponent<MeshDrawable>(
 				assets::getMesh("sphere"),
 				assets::getMaterial("basic"));
