@@ -4,6 +4,7 @@
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
 		"waypoint" : "./res/meshes/waypoint.obj"
+		"asteriod" : "./res/meshes/asteriod.obj",
 	},
 
 	"materials" : {
