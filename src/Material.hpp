@@ -25,6 +25,18 @@ namespace pxljm {
 	using shader_ptr = std::shared_ptr<Shader>;
 
 	class Material : gecom::Uncopyable, public std::enable_shared_from_this<Material> {
+	private:
+		bool m_texture;
+		i3d::vec3d m_color;
+		// Color Texture
+
+		
+
+		// Normal Texture
+
+
+
+
 	public:
 		Material();
 		~Material();

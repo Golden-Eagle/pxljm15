@@ -12,26 +12,32 @@ Scene::Scene(Window *win) : m_camera(win, i3d::vec3d(0, 2, 3)), m_renderer(win),
 Scene::~Scene() { }
 
 
-void Scene::tick() {
+void Scene::update() {
 
 	// Input Update
-	// 
+	//
 	m_updateSystem.inputUpdate();
 
 	// Physics
-	// 
+	//
 	m_physicsSystem.tick();
 
+	// Sound
+	//
+	m_soundSystem.update();
+
 	// Update
-	// 
+	//
 	m_camera.update();
 	m_updateSystem.update();
 
 	// Animation
 	// Later Josh... later...
+}
 
+void Scene::render() {
 	// Render
-	// 
+	//
 	double zfar = 200.0;
 	auto size = m_window->size();
 	int w = size.w;

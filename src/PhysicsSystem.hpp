@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -157,7 +158,6 @@ namespace pxljm {
 
 		bool m_enabled = true;
 	public:
-		Trigger();
 		Trigger(collider_ptr);
 
 		virtual void start();
@@ -272,6 +272,7 @@ namespace pxljm {
 		void registerTriggerCallback(TriggerCallback *);
 		void deregisterTriggerCallback(TriggerCallback *);
 
+		void resetClock();
 		void tick();
 
 		void debugDraw(i3d::mat4d, i3d::mat4d);
@@ -281,6 +282,8 @@ namespace pxljm {
 	private:
 
 		PhysicsDebugDrawer m_debugDrawer;
+
+		std::chrono::steady_clock::time_point m_lastTick;
 
 		// Physics collections
 		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;

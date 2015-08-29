@@ -9,6 +9,7 @@ namespace pxljm {
 		map<string, material_ptr> materialMap;
 		map<string, shader_ptr> shaderMap;
 		map<string, mesh_ptr> meshMap;
+		map<string, image_ptr> imageMap;
 	}
 
 	namespace assets {
@@ -54,6 +55,13 @@ namespace pxljm {
 					meshMap[tag] = make_shared<Mesh>(filePath);
 				}
 
+				cout << " >> images" << endl;
+				for (auto it = config["images"].begin(); it != config["images"].end(); ++it) {
+					cout << " " << it.key() << ":" << it.value() << endl;
+					string tag = it.key(), filePath = it.value();
+					imageMap[tag] = make_shared<Image>(filePath);
+				}
+
 			} else {
 				cerr << "Could not find Asset Configuration file. Aborting..." << endl;
 				abort();
@@ -75,6 +83,10 @@ namespace pxljm {
 
 		mesh_ptr getMesh(const std::string &tag) {
 			return meshMap.at(tag);
+		}
+
+		image_ptr getImage(const std::string &tag) {
+			return imageMap.at(tag);
 		}
 	}
 }

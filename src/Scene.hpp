@@ -20,6 +20,7 @@
 #include "LightSystem.hpp"
 #include "PhysicsSystem.hpp"
 #include "UpdateSystem.hpp"
+#include "SoundSystem.hpp"
 
 namespace pxljm {
 
@@ -35,6 +36,7 @@ namespace pxljm {
 		DrawableSystem m_drawableSystem;
 		PhysicsSystem  m_physicsSystem;
 		LightSystem    m_lightSystem;
+		SoundSystem		 m_soundSystem;
 
 		//TEMP TODO needs to be moved into a component
 		Projection m_projection;
@@ -46,7 +48,8 @@ namespace pxljm {
 		Scene(gecom::Window *win);
 		~Scene();
 
-		void tick();
+		void update();
+		void render();
 		void add( entity_ptr e);
 
 		DrawableSystem & drawableSystem();
