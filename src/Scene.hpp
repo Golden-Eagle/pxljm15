@@ -8,8 +8,6 @@
 #include <gecom/Window.hpp>
 #include <gecom/Initial3D.hpp>
 
-#include "Renderer.hpp"
-
 // Entity Stuff
 //
 #include "ComponentSystem.hpp"
@@ -37,10 +35,8 @@ namespace pxljm {
 		PhysicsSystem  m_physicsSystem;
 		LightSystem    m_lightSystem;
 		SoundSystem	   m_soundSystem;
-		CameraSystem   m_cameraSystem
+		CameraSystem   m_cameraSystem;
 
-		//TEMP TODO needs to be moved into a component
-		Renderer m_renderer;
 		gecom::Window *m_window;
 
 	public:

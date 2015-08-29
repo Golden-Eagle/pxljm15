@@ -70,7 +70,7 @@ namespace pxljm {
 
 	class PerspectiveCamera : public Camera {
 	private:
-		float m_fov; //radians
+		float m_fov = 1.0; //radians
 		float m_zNear = 0.1;
 		float m_zFar = 1000;
 
@@ -96,18 +96,24 @@ namespace pxljm {
 
 	class StaticDefaultCamera : public PerspectiveCamera {
 	public:
-		virtual i3d::mat4d getViewMatrix(){ return i3d::mat4d(); }
+		virtual i3d::mat4d getViewMatrix(){
+			return i3d::mat4d();
+			//return i3d::mat4d::translate(0, 0, 5);
+
+		}
 	};
 
 
 	class CameraSystem : public ComponentSystem	{
 	private:
 		std::unordered_set<Camera *> m_cameras;
-		Camera * m_primary;
+		Camera * m_primary = nullptr;
 		StaticDefaultCamera m_defaultCamera;
 
 	public:
 		CameraSystem() { }
+
+		void update(int, int);
 
 		void registerCamera(Camera *);
 		void deregisterCamera(Camera *);

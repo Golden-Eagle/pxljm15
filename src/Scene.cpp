@@ -6,7 +6,7 @@ using namespace pxljm;
 using namespace gecom;
 using namespace i3d;
 
-Scene::Scene(Window *win) : m_renderer(win), m_window(win) { }
+Scene::Scene(Window *win) : m_window(win) { }
 
 
 Scene::~Scene() { }
@@ -28,26 +28,12 @@ void Scene::update() {
 
 	// Update
 	//
-	m_camera.update();
 	m_updateSystem.update();
 
 	// Animation
 	// Later Josh... later...
 }
 
-void Scene::render() {
-	// Render
-	//
-	double zfar = 200.0;
-	auto size = m_window->size();
-	int w = size.w;
-	int h = size.h;
-
-	if (w != 0 && h != 0) {
-		m_renderer.renderScene(*this);
-		m_physicsSystem.debugDraw(*this);
-	}
-}
 
 
 void Scene::add( entity_ptr e){

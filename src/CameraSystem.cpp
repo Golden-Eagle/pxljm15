@@ -46,6 +46,12 @@ double PerspectiveCamera::getFOV() { return m_fov; }
 void PerspectiveCamera::setFOV(double f) { m_fov = f; }
 
 
+
+void CameraSystem::update(int w, int h) {
+	getPrimaryCamera()->update(w, h);
+}
+
+
 void CameraSystem::registerCamera(Camera *c) {
 	m_cameras.insert(c);
 }
@@ -69,6 +75,5 @@ Camera * CameraSystem::getPrimaryCamera() {
 
 
 void CameraSystem::setCamera(Camera *c) {
-
-
+	m_primary = c;
 }
