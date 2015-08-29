@@ -10,6 +10,7 @@ set(headers
 	"Game.hpp"
 	"Renderer.hpp"
 	"ComponentTest.hpp"
+	"Collider.hpp"
 	"SimpleShader.hpp"
 	
 	# Assets

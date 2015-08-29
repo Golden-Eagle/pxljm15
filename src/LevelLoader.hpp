@@ -28,22 +28,23 @@ namespace pxljm {
           assets::getMesh("waypoint"),
           assets::getMaterial("basic")
         );
+		waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(1));
 
         scene->add(waypt);
       }
 
-      for(auto waypoint : j["asteroids"]) {
-        double x = waypoint["x"];
-        double y = waypoint["y"];
-        double z = waypoint["z"];
+      for(auto asteroid : j["asteroids"]) {
+        double x = asteroid["x"];
+        double y = asteroid["y"];
+        double z = asteroid["z"];
 
-        auto waypt = std::make_shared<Entity>(i3d::vec3d(x, y, z));
-        waypt->emplaceComponent<MeshDrawable>(
+        auto aster = std::make_shared<Entity>(i3d::vec3d(x, y, z));
+		aster->emplaceComponent<MeshDrawable>(
           assets::getMesh("cube"),
           assets::getMaterial("basic")
         );
 
-        scene->add(waypt);
+        scene->add(aster);
       }
     }
   };
