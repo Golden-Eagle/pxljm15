@@ -45,6 +45,7 @@ set(sources
 	"Assets.cpp"
 	"Material.cpp"
 	"Mesh.cpp"
+	"Renderer.cpp"
 
 	"ComponentSystem.cpp"
 	"Entity.cpp"
