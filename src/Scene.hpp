@@ -44,7 +44,6 @@ namespace pxljm {
 		~Scene();
 
 		void update();
-		void render();
 		void add( entity_ptr e);
 
 		CameraSystem & cameraSystem();

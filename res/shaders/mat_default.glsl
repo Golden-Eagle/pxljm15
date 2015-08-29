@@ -12,12 +12,12 @@ uniform mat4 uModelViewMatrix;
 uniform float uZFar;
 
 
-uniform vec3 uColor;
+uniform vec3 uDiffuse;
 uniform float uMetalicity;
 uniform float uRoughness;
 uniform float uSpecular;
 
-uniform sampler2D uColorMap;
+uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
 
 
@@ -75,25 +75,25 @@ in VertexData {
 
 #ifndef _DEPTH_ONLY_
 
-// (rgb) color, (a) metalicity or (rgb) color, (a) opacity
+// (rgb) diffuse, (a) metalicity or (rgb) diffuse, (a) opacity
 // (rg) normal, (b) roughness, (a) specularity
 //
-layout(location = 0) out vec4 fColor;
+layout(location = 0) out vec4 fDiffuse;
 layout(location = 1) out vec4 fNormalMaterials;
 
 #endif
 
 
-subroutine vec3 colorFetch();
+subroutine vec3 diffuseFetch();
 subroutine vec4 normalFetch();
 
-subroutine uniform colorFetch getColor;
+subroutine uniform diffuseFetch getDiffuse;
 subroutine uniform normalFetch getNormal;
 
-// Color
+// Diffuse
 //
-subroutine(colorFetch) vec3 colorFromTexture() { return texture(uColorMap, f_in.uv).rgb; }
-subroutine(colorFetch) vec3 colorFromValue() { return uColor; }
+subroutine(diffuseFetch) vec3 diffuseFromTexture() { return texture(uDiffuseMap, f_in.uv).rgb; }
+subroutine(diffuseFetch) vec3 diffuseFromValue() { return uDiffuse; }
 
 // Normal
 //
@@ -123,7 +123,7 @@ void main() {
 
 	vec4 n = uProjectionMatrix * getNormal();
 	n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
-	fColor = vec4(getColor(), uMetalicity);
+	fDiffuse = vec4(getDiffuse(), uMetalicity);
 	fNormalMaterials = vec4(n.xy, uRoughness, uSpecular);
 
 	#endif
