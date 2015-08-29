@@ -174,30 +174,28 @@ namespace pxljm {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo_scene);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
-			i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
-			float zFar = s.cameraSystem().getPrimaryCamera()->getZfar();
-			std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
+		double zfar = s.cameraSystem().getPrimaryCamera()->getZfar();
+		i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
+		i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
+		std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
 
-			for (; !drawList.empty(); drawList.pop()) {
-				auto d = drawList.top();
-				// Bind shader program
-				// Bind material properties
-				// Bind Geometry
-				// Then render
+		for (; !drawList.empty(); drawList.pop()) {
+			auto d = drawList.top();
+			// Bind shader program
+			// Bind material properties
+			// Bind Geometry
+			// Then render
 
-				material_ptr m = d->material();
-				m->shader->bind();
-				m->bind(proj, zFar);
-				d->draw();
-			}
+			material_ptr m = d->material();
+			m->shader->bind();
+			m->bind(proj, zfar);
+			d->draw();
+		}
 
 		static GLuint prog_deferred0 = 0;
 		if (!prog_deferred0) {
 			prog_deferred0 = gecom::makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER }, shader_deferred0_source);
 		}
-
-		//return;
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
