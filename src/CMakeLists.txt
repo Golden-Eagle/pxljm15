@@ -66,6 +66,3 @@ target_link_libraries(pxljm PRIVATE BulletCollision BulletDynamics BulletSoftBod
 
 target_link_libraries(pxljm PRIVATE fmod_lowlevel fmod_studio)
 target_link_libraries(pxljm PRIVATE stb)
-
-
-

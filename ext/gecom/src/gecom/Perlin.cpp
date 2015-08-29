@@ -50,7 +50,7 @@ Perlin::Perlin() {
 }
 
 Perlin::Perlin(long seed) {
-	default_random_engine gen;
+	default_random_engine gen(seed);
 	uniform_real_distribution<double> randomd(0.0,1.0);
 	//InitGradients
 	for (int i = 0; i < int(grad_table_size); i++){

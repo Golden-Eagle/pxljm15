@@ -32,7 +32,7 @@ namespace pxljm {
 
 		virtual void physicsUpdate() {
 			i3d::vec3d pos = entity()->root()->getPosition();
-			if (entity()->root()->getPosition().y() < 0.1) {
+			if (pos.y() < 0.1) {
 				rigidbody->applyImpulse(i3d::vec3d(0,1,1));
 			}
 		}

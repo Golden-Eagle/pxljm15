@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <gecom/Window.hpp>
-#include <gecom/Initial3D.hpp>>
+#include <gecom/Initial3D.hpp>
 
 #include "Camera.hpp"
 #include "Renderer.hpp"

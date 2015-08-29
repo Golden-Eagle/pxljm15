@@ -516,6 +516,7 @@ namespace gecom {
 		size2i framebufferSize() const {
 			size2i s;
 			glfwGetFramebufferSize(m_handle, &s.w, &s.h);
+			return s;
 		}
 
 		void width(int w) {
