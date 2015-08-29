@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
+#include <unordered_set>
 
 #include <gecom/Uncopyable.hpp>
 #include <gecom/Initial3D.hpp>
@@ -32,22 +33,37 @@ namespace pxljm {
 	// Entity Tranform component
 	//
 	class EntityTransform : public virtual TransformComponent {
+	private:
+		i3d::vec3d position;
+		i3d::quatd rotation;
+
+		EntityTransform *m_parent = nullptr;
+		std::unordered_set<EntityTransform *> m_children;
+
 	public:
 		EntityTransform(i3d::vec3d = i3d::vec3d(), i3d::quatd = i3d::quatd());
 		EntityTransform(i3d::quatd);
 
 		virtual i3d::mat4d matrix();
+		virtual i3d::mat4d localMatrix();
 
 		virtual i3d::vec3d getPosition() const;
 		virtual i3d::quatd getRotation() const;
 
+		virtual i3d::vec3d getLocalPosition() const;
+		virtual i3d::quatd getLocalRotation() const;
+
 		virtual void setPosition(i3d::vec3d);
 		virtual void setRotation(i3d::quatd);
 
-	private:
+		virtual void setLocalPosition(i3d::vec3d);
+		virtual void setLocalRotation(i3d::quatd);
 
-		i3d::vec3d position;
-		i3d::quatd rotation;
+		void addChild(EntityTransform *);
+		void removeChild(EntityTransform *);
+
+		bool hasParent();
+		EntityTransform * getParent();
 	};
 
 	//

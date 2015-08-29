@@ -117,6 +117,7 @@ namespace pxljm {
 			m_scene->cameraSystem().setCamera(m_cameraComponent);
 
 			m_scene->add(m_camera);
+			m_player->root()->addChild(m_camera->root());
 		}
 
 		virtual action_ptr updateForeground() override {
