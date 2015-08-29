@@ -31,6 +31,7 @@ void Material::bind(i3d::mat4d projectionMatrix, float zfar) {
 			GLuint pidx = shader->subroutineIndex(GL_FRAGMENT_SHADER, name);
 			if (uidx != GL_INVALID_INDEX && pidx != GL_INVALID_INDEX) {
 				fragSubroutines[uidx] = pidx;
+
 			}
 		};
 
