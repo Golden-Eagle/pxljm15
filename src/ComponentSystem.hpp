@@ -2,7 +2,9 @@
 
 #include <memory>
 
-#include "GECom.hpp"
+#include <gecom/Uncopyable.hpp>
+
+#include "Pxljm.hpp"
 
 
 namespace pxljm {

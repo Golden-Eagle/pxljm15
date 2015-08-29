@@ -9,11 +9,12 @@
 
 #include <btBulletDynamicsCommon.h>
 
-#include "GECom.hpp"
-#include "GLOW.hpp"
+#include <gecom/Uncopyable.hpp>
+#include <gecom/GL.hpp>
+#include <gecom/Initial3D.hpp>
+
 #include "Entity.hpp"
 #include "Material.hpp"
-#include "Initial3D.hpp"
 
 #include "DrawSystem.hpp"
 

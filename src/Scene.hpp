@@ -5,11 +5,11 @@
 #include <memory>
 #include <vector>
 
-#include "GECom.hpp"
+#include <gecom/Window.hpp>
+#include <gecom/Initial3D.hpp>>
+
 #include "Camera.hpp"
 #include "Renderer.hpp"
-#include "Window.hpp"
-#include "Initial3D.hpp"
 
 // Entity Stuff
 //
@@ -48,7 +48,8 @@ namespace pxljm {
 		Scene(gecom::Window *win);
 		~Scene();
 
-		void tick();
+		void update();
+		void render();
 		void add( entity_ptr e);
 
 		DrawableSystem & drawableSystem();

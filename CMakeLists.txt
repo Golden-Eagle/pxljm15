@@ -1,5 +1,9 @@
-project (GECOM CXX C)
-cmake_minimum_required (VERSION 2.8.8)
+
+cmake_minimum_required (VERSION 3.1)
+
+project (PXLJM15 CXX C)
+
+list(APPEND CMAKE_MODULE_PATH "${GECOM_SOURCE_DIR}/cmake")
 
 # enable IDE project folders
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -7,13 +11,11 @@ SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 # OpenGL
 find_package(OpenGL REQUIRED)
 
-# GLFW
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glfw-3.1.1" "${PROJECT_BINARY_DIR}/ext/glfw")
-include_directories("${PROJECT_SOURCE_DIR}/ext/glfw-3.1.1/include")
+# GECom
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/gecom")
 
-# GLAER
-add_subdirectory("${PROJECT_SOURCE_DIR}/ext/glaer" "${PROJECT_BINARY_DIR}/ext/glaer")
-include_directories("${GLAER_BINARY_DIR}/src/include")
+# Stb
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 
 # Fmod
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/fmod")
@@ -21,33 +23,15 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/ext/fmod")
 # Bullet
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/bullet-2.83.5" "${PROJECT_BINARY_DIR}/ext/bullet")
 
-# compiler flags
-if(MSVC)
-	# Force to always compile with W4
-	if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
-		string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-	endif()
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /openmp /arch:SSE2")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-	if (GCC_VERSION VERSION_GREATER 4.9 OR GCC_VERSION VERSION_EQUAL 4.9)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color")
-	endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra -Werror=return-type -pedantic -std=c++1y -g -msse2 -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
-endif()
+# Set GECOM default compile options
+include(GEComCompileOptions)
+gecom_add_default_compile_options()
 
 # output directories
+# this is hacky nasty shit and i hate it
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
-
 
 # source
 add_subdirectory(src)
@@ -57,11 +41,10 @@ add_subdirectory(src)
 add_subdirectory(res)
 
 # set IDE display folders
-SET_PROPERTY(TARGET glfw PROPERTY FOLDER "ext")
-SET_PROPERTY(TARGET glaer PROPERTY FOLDER "ext")
-SET_PROPERTY(TARGET fmod_lowlevel PROPERTY FOLDER "ext")
-SET_PROPERTY(TARGET fmod_studio PROPERTY FOLDER "ext")
-SET_PROPERTY(TARGET res PROPERTY FOLDER "res")
+SET_PROPERTY(TARGET pxljm PROPERTY FOLDER "PXLJM")
+SET_PROPERTY(TARGET fmod_lowlevel PROPERTY FOLDER "FMOD")
+SET_PROPERTY(TARGET fmod_studio PROPERTY FOLDER "FMOD")
+SET_PROPERTY(TARGET stb PROPERTY FOLDER "STB")
 
 
 

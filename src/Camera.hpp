@@ -10,9 +10,8 @@
 #include <string>
 #include <vector>
 
-#include "Initial3D.hpp"
-#include "GLOW.hpp"
-#include "Window.hpp"
+#include <gecom/Initial3D.hpp>
+#include <gecom/Window.hpp>
 
 
 namespace pxljm {
@@ -125,9 +124,9 @@ namespace pxljm {
 			if (m_window->getKey(GLFW_KEY_SPACE)) move += up;
 
 			//TODO change this
-			if (m_window->pollKey(GLFW_KEY_GRAVE_ACCENT) || m_window->pollKey(GLFW_KEY_L)) {
+			if (m_window->clearKey(GLFW_KEY_GRAVE_ACCENT) || m_window->clearKey(GLFW_KEY_L)) {
 				if(!m_mouse_captured)
-					glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 				else
 					glfwSetInputMode(m_window->handle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 

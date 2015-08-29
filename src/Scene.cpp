@@ -12,7 +12,7 @@ Scene::Scene(Window *win) : m_camera(win, i3d::vec3d(0, 2, 3)), m_renderer(win),
 Scene::~Scene() { }
 
 
-void Scene::tick() {
+void Scene::update() {
 
 	// Input Update
 	//
@@ -33,7 +33,9 @@ void Scene::tick() {
 
 	// Animation
 	// Later Josh... later...
+}
 
+void Scene::render() {
 	// Render
 	//
 	double zfar = 200.0;

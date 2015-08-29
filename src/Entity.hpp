@@ -4,9 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include <gecom/Uncopyable.hpp>
+#include <gecom/Initial3D.hpp>
+
 #include "ComponentSystem.hpp"
-#include "GECom.hpp"
-#include "Initial3D.hpp"
 
 namespace pxljm {
 
