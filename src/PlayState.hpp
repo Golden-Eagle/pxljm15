@@ -8,14 +8,20 @@
 
 namespace pxljm {
 	class PlayerControllable : public virtual InputUpdatable {
+		RigidBody* m_rigidBody;
+
 		virtual void inputUpdate(gecom::WindowEventProxy &wep) override {
+			if(!m_rigidBody) {
+				m_rigidBody = entity()->getComponent<RigidBody>();
+			}
+
 			if(wep.getKey(GLFW_KEY_UP)) {
-				gecom::Log::info() << "up";
-				entity()->getComponent<RigidBody>()->applyImpulse(i3d::vec3d(0, 0, -0.1));
+				m_rigidBody->wakeUp();
+				m_rigidBody->applyImpulse(i3d::vec3d(0, 0, -0.1));
 			}
 			else if(wep.getKey(GLFW_KEY_DOWN)) {
-				gecom::Log::info() << "down";
-				entity()->getComponent<RigidBody>()->applyImpulse(i3d::vec3d(0, 0, 0.1));
+				m_rigidBody->wakeUp();
+				m_rigidBody->applyImpulse(i3d::vec3d(0, 0, 0.1));
 			}
 		}
 	};
@@ -38,9 +44,8 @@ namespace pxljm {
 				assets::getMesh("cube"),
 				assets::getMaterial("basic"));
 
-			m_player->emplaceComponent<PlayerControllable>();
-
 			m_player->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
+			m_player->emplaceComponent<PlayerControllable>();
 			m_scene->add(m_player);
 		}
 
