@@ -18,7 +18,7 @@ void Camera::deregisterWith(Scene &s) { s.cameraSystem().deregisterCamera(this);
 
 
 i3d::mat4d Camera::getViewMatrix(){
-	return entity()->root()->matrix();
+	return !entity()->root()->matrix();
 }
 
 

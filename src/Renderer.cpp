@@ -148,6 +148,7 @@ namespace pxljm {
 		glBindTexture(GL_TEXTURE_2D, m_tex_scene_normal);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, sz.w, sz.h, 0, GL_RGBA, GL_FLOAT, nullptr);
 
+		m_fbsize = sz;
 	}
 
 	void Renderer::renderScene(Scene &s) {
@@ -160,7 +161,7 @@ namespace pxljm {
 		auto size = m_win->framebufferSize();
 		
 		initFBO(size);
-		
+
 		if (size == size2i(0, 0)) return;
 
 		s.cameraSystem().update(size.w, size.h);
@@ -169,7 +170,6 @@ namespace pxljm {
 		// draw material properties to scene buffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo_scene);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
 
 		i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 		i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
@@ -193,7 +193,10 @@ namespace pxljm {
 			prog_deferred0 = gecom::makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER }, shader_deferred0_source);
 		}
 
+		//return;
+
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
 		glUseProgram(prog_deferred0);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -210,6 +213,7 @@ namespace pxljm {
 		draw_dummy();
 
 
+		glUseProgram(0);
 
 		s.physicsSystem().debugDraw(s);
 		

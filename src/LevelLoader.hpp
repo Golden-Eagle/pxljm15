@@ -25,7 +25,7 @@ namespace pxljm {
 
         auto waypt = std::make_shared<Entity>(i3d::vec3d(x, y, z));
         waypt->emplaceComponent<MeshDrawable>(
-          assets::getMesh("cube"),
+          assets::getMesh("waypoint"),
           assets::getMaterial("basic")
         );
 

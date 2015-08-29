@@ -97,25 +97,91 @@ EntityTransform::EntityTransform(quatd rot) : position(vec3d()), rotation(rot) {
 
 
 mat4d EntityTransform::matrix() {
+	if (m_parent) {
+		return m_parent->matrix() * mat4d::translate(position) * mat4d::rotate(rotation);
+	}
+	return mat4d::translate(position) * mat4d::rotate(rotation);
+}
+
+
+mat4d EntityTransform::localMatrix() {
 	return mat4d::translate(position) * mat4d::rotate(rotation);
 }
 
 
 vec3d EntityTransform::getPosition() const {
+	if (m_parent) {
+		return vec3d(m_parent->matrix() * vec4d(position));
+	}
 	return position;
 }
 
 
 quatd EntityTransform::getRotation() const {
+	if (m_parent) {
+		return m_parent->getRotation() * rotation;
+	}
+	return rotation;
+}
+
+
+vec3d EntityTransform::getLocalPosition() const {
+	return position;
+}
+
+
+quatd EntityTransform::getLocalRotation() const {
 	return rotation;
 }
 
 
 void EntityTransform::setPosition(vec3d pos) {
-	position = pos;
+	if (m_parent) {
+		position = !m_parent->matrix() * pos;
+	} else {
+		position = pos;
+	}
 }
 
 
 void EntityTransform::setRotation(quatd rot) {
+	if (m_parent) {
+		rotation = !m_parent->getRotation() * rot;
+	}
+	else {
+		rotation = rot;
+	}
+}
+
+void EntityTransform::setLocalPosition(vec3d pos) {
+	position = pos;
+}
+
+void EntityTransform::setLocalRotation(quatd rot) {
 	rotation = rot;
 }
+
+
+void EntityTransform::addChild(EntityTransform *c) {
+	m_children.insert(c);
+	if (c->m_parent) {
+		c->m_parent->removeChild(c);
+	}
+	c->m_parent = this;
+}
+
+
+void EntityTransform::removeChild(EntityTransform *c) {
+	m_children.erase(c);
+	c->m_parent = nullptr;
+}
+
+
+bool EntityTransform::hasParent() {
+	return m_parent;
+}
+
+EntityTransform * EntityTransform::getParent() {
+	return m_parent;
+}
+
