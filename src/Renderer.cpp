@@ -174,6 +174,7 @@ namespace pxljm {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo_scene);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		double zfar = s.cameraSystem().getPrimaryCamera()->getZfar();
 		i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 		i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
 		std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
@@ -187,7 +188,7 @@ namespace pxljm {
 
 			material_ptr m = d->material();
 			m->shader->bind();
-			m->bind(proj);
+			m->bind(proj, zfar);
 			d->draw();
 		}
 
