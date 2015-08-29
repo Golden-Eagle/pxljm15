@@ -23,6 +23,8 @@ namespace pxljm {
 		PlayState(Game* game) : m_game(game) {
 			m_scene = std::make_shared<Scene>(game->window());
 
+			m_window_scene_sub = game->window()->subscribeEventDispatcher(m_scene->updateSystem().eventProxy());
+
 			m_player = std::make_shared<Entity>(i3d::vec3d(0, 90, 5));
 			m_player->emplaceComponent<MeshDrawable>(
 				assets::getMesh("cube"),
