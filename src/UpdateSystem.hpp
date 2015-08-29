@@ -2,6 +2,9 @@
 
 #include <unordered_set>
 #include <chrono>
+#include <memory>
+
+#include <gecom/Window.hpp>
 
 #include "ComponentSystem.hpp"
 
@@ -28,7 +31,7 @@ namespace pxljm {
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual void inputUpdate() = 0;
+		virtual void inputUpdate(gecom::WindowEventProxy &) = 0;
 	};
 
 
@@ -47,9 +50,14 @@ namespace pxljm {
 		void deregisterInputUpdatable(InputUpdatable *);
 		void inputUpdate();
 
+		const std::shared_ptr<gecom::WindowEventProxy> & eventProxy() {
+			return m_wep;
+		}
+
 	private:
 		std::unordered_set<Updatable *> m_updatables;
 		std::unordered_set<InputUpdatable *> m_inputUpdatables;
+		std::shared_ptr<gecom::WindowEventProxy> m_wep = std::make_shared<gecom::WindowEventProxy>();
 	};
 
 }

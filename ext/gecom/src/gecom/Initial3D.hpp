@@ -453,7 +453,7 @@ namespace initial3d {
 			if (m_mag < 0) m_mag = math::sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
 		}
 		
-		inline static T getElement(const vec3<T> *v, T *el) {
+		inline static T getElement(const vec3<T> *, T *el) {
 			return *el;
 		}
 		
@@ -462,12 +462,12 @@ namespace initial3d {
 			v->m_mag = -1;
 		}
 		
-		inline static T getMag(const vec3<T> *v, T *el) {
+		inline static T getMag(const vec3<T> *v, T *) {
 			v->checkMag();
 			return v->m_mag;
 		}
 		
-		inline static void setMag(vec3<T> *v, T *el, const T &newval) {
+		inline static void setMag(vec3<T> *v, T *, const T &newval) {
 			v->checkMag();
 			*v *= newval / v->m_mag;
 		}

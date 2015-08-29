@@ -15,6 +15,6 @@ namespace pxljm {
 		material_ptr getMaterial(const std::string &);
 		shader_ptr getShader(const std::string &);
 		mesh_ptr getMesh(const std::string &);
-	image_ptr getImage(const std::string &);
+		image_ptr getImage(const std::string &);
 	}
 }

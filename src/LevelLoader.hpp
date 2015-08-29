@@ -1,3 +1,7 @@
+
+#ifndef PXLJM_LEVELLOADER_HPP
+#define PXLJM_LEVELLOADER_HPP
+
 #include <iostream>
 #include "json.hpp"
 #include "Scene.hpp"
@@ -44,3 +48,6 @@ namespace pxljm {
     }
   };
 }
+
+
+#endif

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gecom/Initial3D.hpp>
+#include <gecom/Log.hpp>
 
 #include "Scene.hpp"
 
@@ -31,7 +32,7 @@ namespace pxljm {
 
 		virtual void physicsUpdate() {
 			i3d::vec3d pos = entity()->root()->getPosition();
-			if (entity()->root()->getPosition().y() < 0.1) {
+			if (pos.y() < 0.1) {
 				rigidbody->applyImpulse(i3d::vec3d(0,1,1));
 			}
 		}
@@ -68,5 +69,14 @@ namespace pxljm {
 			std::cout << "TRIGGERED WITH (ENTER) with :: " << c << std::endl;
 		}
 
+	};
+
+	class InputTest : public virtual InputUpdatable {
+	public:
+		virtual void inputUpdate(gecom::WindowEventProxy &wep) {
+			if (wep.clearKey(GLFW_KEY_SPACE)) {
+				gecom::Log::info("INPUT") << "SPACEBAR!";
+			}
+		}
 	};
 }
