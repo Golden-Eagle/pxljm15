@@ -254,6 +254,8 @@ namespace pxljm {
 	// 
 	class PhysicsSystem : public ComponentSystem {
 	public:
+		using clock_t = std::chrono::steady_clock;
+
 		PhysicsSystem();
 		virtual ~PhysicsSystem();
 
@@ -275,6 +277,8 @@ namespace pxljm {
 		void resetClock();
 		void tick();
 
+		clock_t::time_point lastTick();
+
 		void debugDraw(Scene &);
 
 		void processPhysicsCallback(btScalar);
@@ -283,7 +287,7 @@ namespace pxljm {
 
 		PhysicsDebugDrawer m_debugDrawer;
 
-		std::chrono::steady_clock::time_point m_lastTick;
+		clock_t::time_point m_lastTick;
 
 		// Physics collections
 		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;
