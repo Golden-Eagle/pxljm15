@@ -13,7 +13,7 @@ namespace pxljm {
 
 
 
-		auto size = m_win->size();
+		auto size = m_win->framebufferSize();
 		int w = size.w;
 		int h = size.h;
 
