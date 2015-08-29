@@ -7,9 +7,13 @@
 #include "Section.hpp"
 
 namespace {
+#ifndef __APPLE__
 	std::atomic<bool> default_profiling { false };
 	thread_local bool thread_profiling { default_profiling };
-
+#else
+	std::atomic<bool> default_profiling { false };
+	thread_local bool thread_profiling { false };
+#endif
 	// this does not get leaked if sections are used correctly
 	thread_local std::vector<gecom::section> *sections = nullptr;
 

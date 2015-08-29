@@ -25,7 +25,7 @@ function(gecom_add_default_compile_options)
 		endif()
 	elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 		# C++14, full normal warnings
-		add_compile_options(-std=c++1y -Wall -Wextra -pedantic)
+		add_compile_options(-std=c++1y -stdlib=libc++ -Dthread_local=__thread -Wall -Wextra -pedantic)
 		# Threading support
 		add_compile_options(-pthread)
 		# Promote missing return to error

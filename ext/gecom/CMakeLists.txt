@@ -23,4 +23,3 @@ gecom_add_default_compile_options()
 # gecom lib target
 add_subdirectory(src/gecom)
 set_property(TARGET gecom PROPERTY FOLDER "GECOM")
-

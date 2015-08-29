@@ -19,6 +19,7 @@
 
 #include "Log.hpp"
 #include "Uncopyable.hpp"
+#include "Util.hpp"
 
 namespace gecom {
 	
