@@ -21,7 +21,7 @@
 	},
 
 	"images": {
-		"testrgb" : "./res/images/testrgb.bmp",
-		"testrgba" : "./res/images/testrgba.png"
+		"rock-diffuse" : "./res/images/rock-diffuse.jpg",
+		"rock-normal" : "./res/images/rock-normal.jpg"
 	}
 }
