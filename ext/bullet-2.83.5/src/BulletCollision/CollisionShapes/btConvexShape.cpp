@@ -48,7 +48,7 @@ btConvexShape::~btConvexShape()
 }
 
 
-void btConvexShape::project(const btTransform& trans, const btVector3& dir, btScalar& min, btScalar& max) const
+void btConvexShape::project(const btTransform& trans, const btVector3& dir, btScalar& min, btScalar& max, btVector3&,btVector3&) const
 {
 	btVector3 localAxis = dir*trans.getBasis();
 	btVector3 vtx1 = trans(localGetSupportingVertex(localAxis));
