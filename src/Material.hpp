@@ -30,12 +30,7 @@ namespace pxljm {
 		i3d::vec3d m_color;
 		// Color Texture
 
-		
-
 		// Normal Texture
-
-
-
 
 	public:
 		Material();

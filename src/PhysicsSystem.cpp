@@ -434,7 +434,7 @@ PhysicsSystem::PhysicsSystem() {
 	// TODO make it realitive?
 	// If not configurable
 	// HACK
-	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+	dynamicsWorld->setGravity(btVector3(0.0, 0.0, 0.0));
 
 
 
