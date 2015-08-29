@@ -6,34 +6,35 @@
 
 
 namespace pxljm {
+	
+	// Directional Light component
 	//
-	// Light component
-	//
-	class Light : public virtual EntityComponent {
+	class DirectionalLight : public virtual EntityComponent {
 	public:
+		DirectionalLight();
+
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 	};
 
-	// Directional Light component
-	//
-	class DirectionalLight : public virtual Light {
-	public:
-		DirectionalLight();
-	};
-
 	// Point Light component
 	//
-	class PointLight : public virtual Light {
+	class PointLight : public virtual EntityComponent {
 	public:
 		PointLight();
+
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 	};
 
 	// Spot Light component
 	//
-	class SpotLight : public virtual Light {
+	class SpotLight : public virtual EntityComponent {
 	public:
 		SpotLight();
+
+		virtual void registerWith(Scene &) override;
+		virtual void deregisterWith(Scene &) override;
 	};
 
 
@@ -45,12 +46,21 @@ namespace pxljm {
 	public:
 		LightSystem();
 
-		void registerLight(Light *);
-		void deregisterLight(Light *);
+		void registerDirectionalLight(DirectionalLight *);
+		void registerPointLight(PointLight *);
+		void registerSpotLight(SpotLight *);
 
-		const std::unordered_set<Light *> & getLights();
+		void deregisterDirectionalLight(DirectionalLight *);
+		void deregisterPointLight(PointLight *);
+		void deregisterSpotLight(SpotLight *);
+
+		const std::unordered_set<DirectionalLight *> & getDirectionalLights();
+		const std::unordered_set<PointLight *> & getPointLights();
+		const std::unordered_set<SpotLight *> & getSpotLights();
 
 	private:
-		std::unordered_set<Light *> m_lights;
+		std::unordered_set<DirectionalLight *> m_dirlights;
+		std::unordered_set<PointLight *> m_pointlights;
+		std::unordered_set<SpotLight *> m_spotlights;
 	};
 }

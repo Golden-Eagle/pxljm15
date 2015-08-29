@@ -196,8 +196,6 @@ namespace pxljm {
 			prog_deferred0 = gecom::makeShaderProgram("330 core", { GL_VERTEX_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER }, shader_deferred0_source);
 		}
 
-		//return;
-
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
 		glUseProgram(prog_deferred0);
