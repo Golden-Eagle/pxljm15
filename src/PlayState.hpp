@@ -9,7 +9,14 @@
 namespace pxljm {
 	class PlayerControllable : public virtual InputUpdatable {
 		virtual void inputUpdate(gecom::WindowEventProxy &wep) override {
-
+			if(wep.getKey(GLFW_KEY_UP)) {
+				gecom::Log::info() << "up";
+				entity()->getComponent<RigidBody>()->applyImpulse(i3d::vec3d(0, 0, -0.1));
+			}
+			else if(wep.getKey(GLFW_KEY_DOWN)) {
+				gecom::Log::info() << "down";
+				entity()->getComponent<RigidBody>()->applyImpulse(i3d::vec3d(0, 0, 0.1));
+			}
 		}
 	};
 
@@ -25,8 +32,9 @@ namespace pxljm {
 
 			m_window_scene_sub = game->window()->subscribeEventDispatcher(m_scene->updateSystem().eventProxy());
 
-			m_player = std::make_shared<Entity>(i3d::vec3d(0, 90, 5));
+			m_player = std::make_shared<Entity>(i3d::vec3d(0, 0, -1));
 			m_player->emplaceComponent<MeshDrawable>(
+
 				assets::getMesh("cube"),
 				assets::getMaterial("basic"));
 
