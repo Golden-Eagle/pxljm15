@@ -16,28 +16,31 @@ namespace pxljm {
 				m_rigidBody = entity()->getComponent<RigidBody>();
 			}
 
+			const float keyBoardTorqueScale = 0.05;
+			const float keyBoardThrustScale = 0.025;
+
 			if(wep.getKey(GLFW_KEY_UP)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(i3d::vec3d(-1, 0, 0));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(-1, 0, 0));
 			}
 			else if(wep.getKey(GLFW_KEY_DOWN)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(i3d::vec3d(1, 0, 0));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(1, 0, 0));
 			}
 
 			if(wep.getKey(GLFW_KEY_LEFT)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(i3d::vec3d(0, 0, 1));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, -1));
 			}
 			else if(wep.getKey(GLFW_KEY_RIGHT)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(i3d::vec3d(0, 0, -1));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, 1));
 			}
 
 			if(wep.getKey(GLFW_KEY_SPACE)) {
-				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, -1);
+				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, 1);
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(facing);
+				m_rigidBody->applyImpulse(keyBoardThrustScale * facing);
 			}
 
 			if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {

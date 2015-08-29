@@ -52,6 +52,7 @@ namespace pxljm {
 		std::unique_ptr<btRigidBody> m_rigidBody;
 
 		double m_mass = 1.0;
+		bool m_kinematic = false;
 		bool m_enabled = true;
 
 	public:
@@ -70,6 +71,9 @@ namespace pxljm {
 
 		void setEnable(bool);
 		bool isEnabled();
+
+		void setKinematic(bool);
+		bool isKinematic();
 
 		// Properties
 		void setCollider(collider_ptr);
