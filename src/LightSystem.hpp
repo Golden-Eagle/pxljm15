@@ -22,14 +22,14 @@ namespace pxljm {
 		DirectionalLight();
 	};
 
-	// Directional Light component
+	// Point Light component
 	//
 	class PointLight : public virtual Light {
 	public:
 		PointLight();
 	};
 
-	// Directional Light component
+	// Spot Light component
 	//
 	class SpotLight : public virtual Light {
 	public:
