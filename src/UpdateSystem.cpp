@@ -65,5 +65,5 @@ void UpdateSystem::deregisterInputUpdatable(InputUpdatable *c) {
 
 void UpdateSystem::inputUpdate() {
 	for (InputUpdatable *c : m_inputUpdatables)
-		c->inputUpdate();
+		c->inputUpdate(*m_wep);
 }

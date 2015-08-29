@@ -4,14 +4,19 @@
 // fuck these spaces
 
 #include "Pxljm.hpp"
+#include "Game.hpp"
 
 namespace pxljm {
   class PlayState : public State < std::string > {
     std::shared_ptr<Scene> m_scene;
     Game* m_game;
+	gecom::subscription_ptr m_window_scene_sub;
+
   public:
     PlayState(Game* game) : m_game(game) {
       m_scene = std::make_shared<Scene>(game->window());
+
+	  m_window_scene_sub = game->window()->subscribeEventDispatcher(m_scene->updateSystem().eventProxy());
 
       // Plane
       //
@@ -73,6 +78,8 @@ namespace pxljm {
       sphere->emplaceComponent<SphereBounce>();
 
       sphere->emplaceComponent<CollisionCallbackTest>();
+
+	  sphere->emplaceComponent<InputTest>();
 
       m_scene->add(sphere);
     }
