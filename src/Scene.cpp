@@ -1,12 +1,15 @@
 
+#include <chrono>
+
 #include "Scene.hpp"
 
 using namespace std;
 using namespace pxljm;
 using namespace gecom;
 using namespace i3d;
+using namespace std::chrono_literals;
 
-Scene::Scene(Window *win) : m_camera(win, i3d::vec3d(0, 2, 3)), m_renderer(win), m_window(win) { }
+Scene::Scene(Window *win) : m_window(win) { }
 
 
 Scene::~Scene() { }
@@ -28,39 +31,21 @@ void Scene::update() {
 
 	// Update
 	//
-	m_camera.update();
-	m_updateSystem.update();
+	m_updateSystem.update(m_physicsSystem.lastTick(), 10ms, 5ms);
 
 	// Animation
 	// Later Josh... later...
 }
 
-void Scene::render() {
-	// Render
-	//
-	double zfar = 200.0;
-	auto size = m_window->size();
-	int w = size.w;
-	int h = size.h;
-
-	if (w != 0 && h != 0) {
-
-		m_projection.setPerspectiveProjection(i3d::math::pi() / 3, double(w) / h, 0.1, zfar);
-		i3d::mat4d proj_matrix = m_projection.getProjectionTransform();
-		i3d::mat4d view_matrix = m_camera.getViewTransform();
-
-		std::priority_queue<DrawCall *> drawQueue = m_drawableSystem.getDrawQueue(view_matrix);
-		m_renderer.renderScene(proj_matrix, drawQueue);
-		m_physicsSystem.debugDraw(view_matrix, proj_matrix);
-
-	}
-}
 
 
 void Scene::add( entity_ptr e){
 	e->registerWith(*this);
 	m_entities.push_back(e);
 }
+
+
+CameraSystem & Scene::cameraSystem() { return m_cameraSystem; }
 
 
 DrawableSystem & Scene::drawableSystem() { return m_drawableSystem; }
@@ -72,4 +57,9 @@ PhysicsSystem & Scene::physicsSystem() { return m_physicsSystem; }
 UpdateSystem & Scene::updateSystem() { return m_updateSystem; }
 
 
+SoundSystem & Scene::soundSystem() { return m_soundSystem; }
+
+
 LightSystem & Scene::lightSystem() { return m_lightSystem; }
+
+

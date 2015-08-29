@@ -39,6 +39,11 @@ UpdateSystem::UpdateSystem() { }
 
 void UpdateSystem::registerUpdatable(Updatable *c) {
 	m_updatables.insert(c);
+	update_data ud;
+	ud.up = c;
+	ud.prev = clock_t::now();
+	ud.next = ud.prev;
+	m_update_queue.push(ud);
 }
 
 
@@ -47,9 +52,26 @@ void UpdateSystem::deregisterUpdatable(Updatable *c) {
 }
 
 
-void UpdateSystem::update() { //TODO change this to update queue stuff
-	for (Updatable *c : m_updatables)
-		c->update();
+void UpdateSystem::update(clock_t::time_point now, clock_t::duration maxlead, clock_t::duration timebudget) {
+	auto time0 = clock_t::now();
+	std::vector<update_data> done_updates;
+	// run updates until nothing to do or time budget consumed
+	while (!m_update_queue.empty() && clock_t::now() < time0 + timebudget) {
+		update_data ud = m_update_queue.top();
+		if (ud.next >= now + maxlead) break;
+		m_update_queue.pop();
+		if (m_updatables.find(ud.up) != m_updatables.end()) {
+			// updateable still registered
+			ud.up->update(now, ud.prev);
+			ud.prev = now;
+			ud.next = std::chrono::time_point_cast<clock_t::duration, clock_t>(now + ud.up->updateInterval());
+			done_updates.push_back(ud);
+		}
+	}
+	// re-queue updateables that were updated
+	for (const auto &ud : done_updates) {
+		m_update_queue.push(ud);
+	}
 }
 
 

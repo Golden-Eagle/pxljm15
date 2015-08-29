@@ -12,12 +12,12 @@ uniform mat4 uModelViewMatrix;
 uniform float uZFar;
 
 
-uniform vec3 uColor;
+uniform vec3 uDiffuse;
 uniform float uMetalicity;
 uniform float uRoughness;
 uniform float uSpecular;
 
-uniform sampler2D uColorMap;
+uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
 
 
@@ -73,55 +73,27 @@ in VertexData {
 	vec2 uv;
 } f_in;
 
+#ifndef _DEPTH_ONLY_
 
-// (rgb) color, (a) metalicity or (rgb) color, (a) opacity
+// (rgb) diffuse, (a) metalicity or (rgb) diffuse, (a) opacity
 // (rg) normal, (b) roughness, (a) specularity
 //
-layout(location = 0) out vec4 fColor;
+layout(location = 0) out vec4 fDiffuse;
 layout(location = 1) out vec4 fNormalMaterials;
 
+#endif
 
-subroutine void drawmode();
-subroutine vec3 colorFetch();
+
+subroutine vec3 diffuseFetch();
 subroutine vec4 normalFetch();
 
-subroutine uniform drawmode drawFragment;
-subroutine uniform colorFetch getColor;
+subroutine uniform diffuseFetch getDiffuse;
 subroutine uniform normalFetch getNormal;
 
-
+// Diffuse
 //
-// Helper functions
-//
-void writeDepth(float depth) {
-	// this has to match with depth buffer settings from shadow shaders
-	const float C = 0.01;
-	float FC = 1.0 / log(uZFar * C + 1.0);
-	gl_FragDepth = log(depth * C + 1.0) * FC;
-}
-
-
-// Drawing subroutines
-//
-subroutine(drawmode) void depth_only() {
-	vec4 p = uProjectionMatrix * f_in.pos;
-	writeDepth(p.z/p.w);
-}
-
-subroutine(drawmode) void material() {
-	vec4 p = uProjectionMatrix * f_in.pos;
-	writeDepth(p.z/p.w);
-
-	// vec4 n = uProjectionMatrix * getNormal();
-	// n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
-	// fColor = vec4(getColor(), uMetalicity);
-	// fNormalMaterials = vec4(n.xy, uRoughness, uSpecular);
-}
-
-// Color
-//
-subroutine(colorFetch) vec3 colorFromTexture() { return texture(uColorMap, f_in.uv).rgb; }
-subroutine(colorFetch) vec3 colorFromValue() { return uColor; }
+subroutine(diffuseFetch) vec3 diffuseFromTexture() { return texture(uDiffuseMap, f_in.uv).rgb; }
+subroutine(diffuseFetch) vec3 diffuseFromValue() { return uDiffuse; }
 
 // Normal
 //
@@ -132,12 +104,29 @@ subroutine(normalFetch) vec4 normalFromTexture() {
 subroutine(normalFetch) vec4 normalFromValue() { return f_in.normal; }
 
 
+void writeDepth(float depth) {
+	// this has to match with depth buffer settings from shadow shaders
+	const float C = 0.01;
+	float FC = 1.0 / log(uZFar * C + 1.0);
+	gl_FragDepth = log(depth * C + 1.0) * FC;
+}
+
+
 //
 // Main
 //
-
 void main() {
-	drawFragment();
+	vec4 p = uProjectionMatrix * f_in.pos;
+	writeDepth(p.z/p.w);
+
+	#ifndef _DEPTH_ONLY_
+
+	vec4 n = uProjectionMatrix * getNormal();
+	n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
+	fDiffuse = vec4(getDiffuse(), uMetalicity);
+	fNormalMaterials = vec4(n.xy, uRoughness, uSpecular);
+
+	#endif
 }
 
 

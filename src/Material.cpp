@@ -3,85 +3,100 @@
 
 using namespace std;
 using namespace pxljm;
+using namespace i3d;
 
 
-Material::Material() { }
+Material::Material() {}
 
 
 Material::~Material() { }
 
 
-void Material::bind(i3d::mat4d projectionMatrix) {
+void Material::bind(i3d::mat4d projectionMatrix, float zfar) {
+	// basic
 	glUniformMatrix4fv(shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
+	glUniform1f(shader->uniformLocation("uZFar"), zfar);
+
+	// material
+	glUniform3f(shader->uniformLocation("uDiffuse"), m_diffuse.x(), m_diffuse.y(), m_diffuse.z());
+	glUniform1f(shader->uniformLocation("uMetalicity"), m_metalicity);
+	glUniform1f(shader->uniformLocation("uRoughness"), m_roughness);
+	glUniform1f(shader->uniformLocation("uSpecular"), m_specular);
+
+	// material maps
+	GLuint textureLocation = GL_TEXTURE0;
+	auto setTexture = [&](texture_ptr tex,  const string &sampler) {
+		tex->bind(textureLocation);
+		glUniform1i(shader->uniformLocation(sampler), textureLocation);
+		textureLocation++;
+	};
+
+	if (m_useDiffuseMap && m_diffuseMap) setTexture(m_diffuseMap, "uDiffuseMap");
+	if (m_normalMap) setTexture(m_normalMap, "uNormalMap");
+
+
+
+	vector<GLuint> fragSubroutines(shader->activeSubroutines(GL_FRAGMENT_SHADER), 0);
+
+	if (fragSubroutines.size() > 0) {
+		auto addFragSubroutine = [&](const string &uniform, const string &name) {
+			GLuint uidx = shader->subroutineUniformIndex(GL_FRAGMENT_SHADER, uniform);
+			GLuint pidx = shader->subroutineIndex(GL_FRAGMENT_SHADER, name);
+			if (uidx != GL_INVALID_INDEX && pidx != GL_INVALID_INDEX) {
+				fragSubroutines[uidx] = pidx;
+			}
+		};
+
+		// diffuse
+		if (m_useDiffuseMap && m_diffuseMap) addFragSubroutine("getDiffuse", "diffuseFromTexture");
+		else addFragSubroutine("getDiffuse", "diffuseFromValue");
+
+		// diffuse
+		if (m_normalMap) addFragSubroutine("getNormal", "normalFromTexture");
+		else addFragSubroutine("getNormal", "normalFromValue");
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, fragSubroutines.size(), &fragSubroutines[0]);
+	}
 }
 
 
+// Diffuse
+vec3d Material::getDiffuseValue() { return m_diffuse; }
+texture_ptr Material::getDiffuseMap() { return m_diffuseMap; }
+void Material::setDiffuseValue(vec3d d) { m_diffuse = d; }
+void Material::setDiffuseMap(texture_ptr d) { m_diffuseMap = d; }
+void Material::setUseDiffuseMap(bool b) { m_useDiffuseMap = b; }
+bool Material::useDiffuseMap() { return m_useDiffuseMap;  }
 
-Shader::Shader() {
-	static const char *shader_prog_src = R"delim(
-		/*
-		 *
-		 * Default shader program for writing to scene buffer using GL_TRIANGLES
-		 *
-		 */
+// Attributes
+float Material::getMetalicityValue() { return m_metalicity; }
+void Material::setMetalicityValue(float m) { m_metalicity = m; }
 
-		uniform mat4 uModelViewMatrix;
-		uniform mat4 uProjectionMatrix;
+float Material::getRoughnessValue() { return m_roughness;}
+void Material::setRoughnessValue(float r) { m_roughness = r; }
 
-		#ifdef _VERTEX_
+float Material::getSpecularValue() { return m_specular; }
+void Material::setSpecularValue(float s) { m_specular = s; }
 
-		layout(location = 0) in vec3 aPosition;
-		layout(location = 1) in vec3 aNormal;
-		layout(location = 2) in vec3 aUV;
-
-		out VertexData {
-			vec4 pos;
-			vec4 normal;
-			vec2 uv;
-		} v_out;
-
-		void main() {
-			vec4 p = (uModelViewMatrix * vec4(aPosition, 1.0));
-			gl_Position = uProjectionMatrix * p;
-			v_out.pos = p;
-			v_out.normal = (uModelViewMatrix * vec4(aNormal, 0.0));
-		}
-
-		#endif
+// Normals
+void Material::setNormalMap(texture_ptr n) { m_normalMap = n; }
+texture_ptr Material::getNormalMap() { return m_normalMap; }
 
 
-		#ifdef _FRAGMENT_
 
-		in VertexData {
-			vec4 pos;
-			vec4 normal;
-			vec2 uv;
-		} v_in;
-
-		out vec3 color;
-
-		void main() {
-			vec3 grey = vec3(0.8, 0.8, 0.8);
-		    color = abs(v_in.normal.z) * grey;
-		}
-
-		#endif
-		)delim";
-
-	cout << "NOOOOP" << endl; 
-
-	m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
-}
-
-
-Shader::Shader(const string &filename) {
+shader_ptr Shader::fromFile(const std::string &filename) {
 	ifstream fileStream(filename);
 
 	if (fileStream) {
 		stringstream buffer;
 		buffer << fileStream.rdbuf();
-		m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
+		return make_shared<Shader>(buffer.str());
 	}
+}
+
+
+Shader::Shader(const string &text) {
+	m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, text);
 }
 
 
@@ -98,10 +113,39 @@ GLuint Shader::uniformLocation(const string &name) {
 		return m_uniformLocationCache.at(name);
 	} catch (const std::out_of_range& oor) {
 		GLuint location = glGetUniformLocation(m_prog, name.c_str());
-		if (location == GLuint(-1)) 
-			throw runtime_error("Error :: Tried to access invalid uniform name.");
 		m_uniformLocationCache[name] = location;
 		return location;
+	}
+}
+
+
+GLint Shader::activeSubroutines(GLenum shadertype) {
+	GLint activeCount = 0;
+	glGetProgramStageiv(m_prog, shadertype, GL_ACTIVE_SUBROUTINE_UNIFORMS, &activeCount);
+	return activeCount;
+}
+
+
+GLuint Shader::subroutineUniformIndex(GLenum shadertype, const string &name) {
+	try {
+		return m_subroutineUniformIndexCache.at(shadertype).at(name);
+	}
+	catch (const std::out_of_range& oor) {
+		GLuint index = glGetSubroutineUniformLocation(m_prog, shadertype, name.c_str());
+		m_subroutineUniformIndexCache[shadertype][name] = index;
+		return index;
+	}
+}
+
+
+GLuint Shader::subroutineIndex(GLenum shadertype, const string &name) {
+	try {
+		return m_subroutineIndexCache.at(shadertype).at(name);
+	}
+	catch (const std::out_of_range& oor) {
+		GLuint index = glGetSubroutineIndex(m_prog, shadertype, name.c_str());
+		m_subroutineIndexCache[shadertype][name] = index;
+		return index;
 	}
 }
 

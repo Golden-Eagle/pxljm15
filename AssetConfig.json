@@ -3,19 +3,21 @@
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
-		"waypoint" : "./res/meshes/waypoint.obj"
 		"asteriod" : "./res/meshes/asteriod.obj",
+		"waypoint" : "./res/meshes/waypoint.obj",
+		"ship" : "./res/meshes/ship.obj"
 	},
 
 	"materials" : {
 		"basic" : {
-			"shader" : "temp"
+			"shader" : "mat_default"
 		}
 	},
 
 	"shaders" : {
 		"temp" : "./res/shaders/temp.glsl",
-		"physics_debug" : "./res/shaders/physics_debug.glsl"
+		"physics_debug" : "./res/shaders/physics_debug.glsl",
+		"mat_default" : "./res/shaders/mat_default.glsl"
 	},
 
 	"images": {

@@ -8,18 +8,20 @@ set(headers
 	"json.hpp"
 
 	"Game.hpp"
-	"Camera.hpp"
 	"Renderer.hpp"
 	"ComponentTest.hpp"
+	"Collider.hpp"
 	"SimpleShader.hpp"
 	
 	# Assets
 	"Assets.hpp"
 	"Material.hpp"
 	"Mesh.hpp"
+	"Texture.hpp"
 
 	# Entity
 	"ComponentSystem.hpp"
+	"CameraSystem.hpp"
 	"Entity.hpp"
 	"DrawSystem.hpp"
 	"LightSystem.hpp"
@@ -41,13 +43,16 @@ set(headers
 # list sources here
 set(sources
 	"main.cpp"
+	"Renderer.cpp"
 	
 	"Assets.cpp"
 	"Material.cpp"
 	"Mesh.cpp"
+	"Texture.cpp"
 
 	"ComponentSystem.cpp"
 	"Entity.cpp"
+	"CameraSystem.cpp"
 	"DrawSystem.cpp"
 	"LightSystem.cpp"
 	"PhysicsSystem.cpp"

@@ -7,10 +7,7 @@
 #include <gecom/Window.hpp>
 #include <gecom/Initial3D.hpp>
 
-#include "Entity.hpp"
-#include "Mesh.hpp"
-#include "Material.hpp"
-#include "SimpleShader.hpp"
+#include "Scene.hpp"
 
 
 namespace pxljm {
@@ -19,44 +16,18 @@ namespace pxljm {
 		Renderer(gecom::Window *win) : m_win(win) { }
 		~Renderer() { }
 
-		void renderScene(i3d::mat4d proj, std::priority_queue<DrawCall *> drawList) {
+		void renderScene(Scene &s);
 
-			glClearColor(1.f, 1.f, 1.f, 1.f); // default background color
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
-
-
-
-			auto size = m_win->size();
-			int w = size.w;
-			int h = size.h;
-			glViewport(0, 0, w, h);
-
-
-			//
-			// Draw forward rendering
-			//
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-			for (; !drawList.empty(); drawList.pop()) {
-				auto d = drawList.top();
-				// Bind shader program
-				// Bind material properties
-				// Bind Geometry
-				// Then render
-
-				material_ptr m = d->material();
-				m->shader->bind();
-				m->bind(proj);
-				d->draw();
-			}
-
-			glFinish();
-		}
+		void initFBO(gecom::size2i);
 
 	private:
 		gecom::Window *m_win;
+
+		gecom::size2i m_fbsize { 0, 0 };
+		GLuint m_fbo_scene = 0;
+		GLuint m_tex_scene_depth = 0;
+		GLuint m_tex_scene_color = 0;
+		GLuint m_tex_scene_normal = 0;
+
 	};
 }

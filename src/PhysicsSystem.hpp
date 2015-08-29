@@ -52,6 +52,7 @@ namespace pxljm {
 		std::unique_ptr<btRigidBody> m_rigidBody;
 
 		double m_mass = 1.0;
+		bool m_kinematic = false;
 		bool m_enabled = true;
 
 	public:
@@ -70,6 +71,9 @@ namespace pxljm {
 
 		void setEnable(bool);
 		bool isEnabled();
+
+		void setKinematic(bool);
+		bool isKinematic();
 
 		// Properties
 		void setCollider(collider_ptr);
@@ -254,6 +258,8 @@ namespace pxljm {
 	// 
 	class PhysicsSystem : public ComponentSystem {
 	public:
+		using clock_t = std::chrono::steady_clock;
+
 		PhysicsSystem();
 		virtual ~PhysicsSystem();
 
@@ -275,7 +281,9 @@ namespace pxljm {
 		void resetClock();
 		void tick();
 
-		void debugDraw(i3d::mat4d, i3d::mat4d);
+		clock_t::time_point lastTick();
+
+		void debugDraw(Scene &);
 
 		void processPhysicsCallback(btScalar);
 
@@ -283,7 +291,7 @@ namespace pxljm {
 
 		PhysicsDebugDrawer m_debugDrawer;
 
-		std::chrono::steady_clock::time_point m_lastTick;
+		clock_t::time_point m_lastTick;
 
 		// Physics collections
 		std::unordered_set<PhysicsUpdatable *> m_physicsUpdatables;

@@ -106,6 +106,25 @@ void RigidBody::setEnable(bool e) {
 bool RigidBody::isEnabled() { return m_enabled; }
 
 
+void RigidBody::setKinematic(bool k) {
+	m_kinematic = k;
+	if (m_kinematic) {
+		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+		m_rigidBody->setMassProps(0, btVector3());
+		m_rigidBody->updateInertiaTensor();
+	} else {
+		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() & !btCollisionObject::CF_KINEMATIC_OBJECT);
+		btCollisionShape *shape = m_collider->getCollisionShape();
+		btVector3 inertia(0, 0, 0);
+		shape->calculateLocalInertia(m_mass, inertia);
+		m_rigidBody->setMassProps(m_mass, inertia);
+		m_rigidBody->updateInertiaTensor();
+	}
+}
+
+bool RigidBody::isKinematic() { return m_kinematic; }
+
+
 // Anisotropic Friction
 void RigidBody::setAnisotropicFriction(i3d::vec3d f) { m_rigidBody->setAnisotropicFriction(i3d2bt(f)); }
 i3d::vec3d RigidBody::getAnisotropicFriction() { return bt2i3d(m_rigidBody->getAnisotropicFriction()); }
@@ -136,15 +155,12 @@ i3d::vec3d RigidBody::getAngularFactor() { return bt2i3d(m_rigidBody->getAngular
 // Mass, Kinematic / Dynamic
 void RigidBody::setMass(double m) {
 	m_mass = m;
-	btCollisionShape *shape = m_collider->getCollisionShape();
-	btVector3 inertia(0, 0, 0);
-	shape->calculateLocalInertia(m_mass, inertia);
-	m_rigidBody->setMassProps(m_mass, inertia);
-	m_rigidBody->updateInertiaTensor();
-	if (m_mass <= 0) {
-		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-	} else {
-		m_rigidBody->setCollisionFlags(m_rigidBody->getCollisionFlags() & !btCollisionObject::CF_KINEMATIC_OBJECT);
+	if (!m_kinematic) {
+		btCollisionShape *shape = m_collider->getCollisionShape();
+		btVector3 inertia(0, 0, 0);
+		shape->calculateLocalInertia(m_mass, inertia);
+		m_rigidBody->setMassProps(m_mass, inertia);
+		m_rigidBody->updateInertiaTensor();
 	}
 }
 
@@ -157,8 +173,8 @@ double RigidBody::getMass() {
 //shape offset
 
 // Current state
-void RigidBody::setLinearVelocity(i3d::vec3d v) { m_rigidBody->setLinearVelocity(i3d2bt(v)); }
-void RigidBody::setAngularVelocity(i3d::vec3d v) { m_rigidBody->setAngularVelocity(i3d2bt(v)); }
+void RigidBody::setLinearVelocity(i3d::vec3d v) { m_rigidBody->activate(); m_rigidBody->setLinearVelocity(i3d2bt(v)); }
+void RigidBody::setAngularVelocity(i3d::vec3d v) { m_rigidBody->activate(); m_rigidBody->setAngularVelocity(i3d2bt(v)); }
 // void RigidBody::setLocalLinearVelocity(i3d::vec3d v) { m_rigidBody->setLinearVelocity(i3d2bt(vec3(entity()->root()->matrix() * vec4(v, 0))); }
 // void RigidBody::setLocalAngularVelocity(i3d::vec3d v) { m_rigidBody->setAngularVelocity(i3d2bt(vec3(entity()->root()->matrix() * vec4(v, 0))); }
 
@@ -171,12 +187,12 @@ i3d::vec3d RigidBody::getAngularVelocity() { return bt2i3d(m_rigidBody->getAngul
 
 
 // Dynamic Rigid Bodies
-void RigidBody::applyForce(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->applyForce(i3d2bt(v), i3d2bt(p)); }
-void RigidBody::applyImpulse(i3d::vec3d v) { m_rigidBody->applyCentralImpulse(i3d2bt(v)); }
-void RigidBody::applyImpulse(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->applyImpulse(i3d2bt(v), i3d2bt(p)); }
+void RigidBody::applyForce(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->activate(); m_rigidBody->applyForce(i3d2bt(v), i3d2bt(p)); }
+void RigidBody::applyImpulse(i3d::vec3d v) { m_rigidBody->activate(); m_rigidBody->applyCentralImpulse(i3d2bt(v)); }
+void RigidBody::applyImpulse(i3d::vec3d v, i3d::vec3d p) { m_rigidBody->activate(); m_rigidBody->applyImpulse(i3d2bt(v), i3d2bt(p)); }
 
-void RigidBody::applyTorque(i3d::vec3d v) { m_rigidBody->applyTorque(i3d2bt(v)); }
-void RigidBody::applyTorqueImpulse(i3d::vec3d v) { m_rigidBody->applyTorqueImpulse(i3d2bt(v)); }
+void RigidBody::applyTorque(i3d::vec3d v) { m_rigidBody->activate(); m_rigidBody->applyTorque(i3d2bt(v)); }
+void RigidBody::applyTorqueImpulse(i3d::vec3d v) { m_rigidBody->activate(); m_rigidBody->applyTorqueImpulse(i3d2bt(v)); }
 
 void RigidBody::clearForces() { m_rigidBody->clearForces(); }
 
@@ -535,15 +551,20 @@ void PhysicsSystem::resetClock() {
 
 
 void PhysicsSystem::tick() {
+	using namespace std::chrono;
 	steady_clock::time_point now = steady_clock::now();
-	steady_clock::duration time_span = now - m_lastTick;
-	double nseconds = double(time_span.count()) * steady_clock::period::num / steady_clock::period::den;
+	double nseconds = duration_cast<duration<double>>(now - m_lastTick).count();
 	dynamicsWorld->stepSimulation(nseconds, 20);
 	m_lastTick = now;
 }
 
+PhysicsSystem::clock_t::time_point PhysicsSystem::lastTick() {
+	return m_lastTick;
+}
 
-void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
+void PhysicsSystem::debugDraw(Scene &s) {
+	mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
+	mat4d proj = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 	dynamicsWorld->debugDrawWorld();
 	m_debugDrawer.draw(view, proj);
 }

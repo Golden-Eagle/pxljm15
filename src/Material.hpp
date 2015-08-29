@@ -14,6 +14,7 @@
 #include <gecom/Initial3D.hpp>
 
 #include "SimpleShader.hpp"
+#include "Texture.hpp"
 
 
 namespace pxljm {
@@ -26,34 +27,70 @@ namespace pxljm {
 
 	class Material : gecom::Uncopyable, public std::enable_shared_from_this<Material> {
 	private:
-		bool m_texture;
-		i3d::vec3d m_color;
-		// Color Texture
+		bool m_useDiffuseMap = false;
+		i3d::vec3d m_diffuse = i3d::vec3d(0.5, 0.5, 0.5);
+		texture_ptr m_diffuseMap;
 
-		// Normal Texture
+		float m_metalicity = 0;
+		float m_roughness = 0;
+		float m_specular = 0;
+		
+		texture_ptr m_normalMap;
+
 
 	public:
 		Material();
 		~Material();
 
-		void bind(i3d::mat4d);
+		void bind(i3d::mat4d, float);
+
+		// Diffuse
+		i3d::vec3d getDiffuseValue();
+		texture_ptr getDiffuseMap();
+		void setDiffuseValue(i3d::vec3d);
+		void setDiffuseMap(texture_ptr);
+		void setUseDiffuseMap(bool);
+		bool useDiffuseMap();
+
+		// Attributes
+		float getMetalicityValue();
+		void setMetalicityValue(float);
+
+		float getRoughnessValue();
+		void setRoughnessValue(float);
+
+		float getSpecularValue();
+		void setSpecularValue(float);
+
+
+		// Normals
+		void setNormalMap(texture_ptr);
+		texture_ptr getNormalMap();
+
+
+
+
 
 		shader_ptr shader;
 	};
 
 	class Shader : gecom::Uncopyable, public std::enable_shared_from_this<Shader> {
+	private:
+		std::map<std::string, GLuint> m_uniformLocationCache;
+		std::map<GLenum, std::map<std::string, GLuint>> m_subroutineUniformIndexCache;
+		std::map<GLenum, std::map<std::string, GLuint>> m_subroutineIndexCache;
+		GLuint m_prog = 0;
+
 	public:
-		Shader();
+		static shader_ptr fromFile(const std::string &);
 		Shader(const std::string &);
 		~Shader();
 		void bind();
 
 		GLuint uniformLocation(const std::string &);
+		GLint  activeSubroutines(GLenum shadertype);
+		GLuint subroutineUniformIndex(GLenum, const std::string &);
+		GLuint subroutineIndex(GLenum, const std::string &);
 		GLuint program() const;
-
-	
-	private:
-		std::map<std::string, GLuint> m_uniformLocationCache;
-		GLuint m_prog = 0;
 	};
 }
