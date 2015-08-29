@@ -543,7 +543,9 @@ void PhysicsSystem::tick() {
 }
 
 
-void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
+void PhysicsSystem::debugDraw(Scene &s) {
+	mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
+	mat4d proj = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 	dynamicsWorld->debugDrawWorld();
 	m_debugDrawer.draw(view, proj);
 }

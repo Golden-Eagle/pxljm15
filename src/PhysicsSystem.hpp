@@ -275,7 +275,7 @@ namespace pxljm {
 		void resetClock();
 		void tick();
 
-		void debugDraw(i3d::mat4d, i3d::mat4d);
+		void debugDraw(Scene &);
 
 		void processPhysicsCallback(btScalar);
 
