@@ -54,8 +54,8 @@ namespace pxljm {
 
 	class Camera : public virtual EntityComponent {
 	public:
-		void Camera::registerWith(Scene &s);
-		void Camera::deregisterWith(Scene &s);
+		void registerWith(Scene &s);
+		void deregisterWith(Scene &s);
 
 		virtual void update(int, int) = 0; //update with width and height
 		
