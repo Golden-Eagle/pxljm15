@@ -14,6 +14,7 @@
 
 	"shaders" : {
 		"temp" : "./res/shaders/temp.glsl",
-		"physics_debug" : "./res/shaders/physics_debug.glsl"
+		"physics_debug" : "./res/shaders/physics_debug.glsl",
+		"mat_default" : "./res/shaders/mat_default.glsl"
 	}
 }

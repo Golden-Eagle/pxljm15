@@ -5,83 +5,57 @@ using namespace std;
 using namespace pxljm;
 
 
-Material::Material() { }
+Material::Material() {}
 
 
 Material::~Material() { }
 
 
-void Material::bind(i3d::mat4d projectionMatrix) {
+void Material::bind(i3d::mat4d projectionMatrix, float zfar) {
+	// basic
 	glUniformMatrix4fv(shader->uniformLocation("uProjectionMatrix"), 1, true, i3d::mat4f(projectionMatrix));
+	glUniform1f(shader->uniformLocation("uZFar"), zfar);
+
+	// material
+	glUniform3f(shader->uniformLocation("uColor"), m_color.x(), m_color.y(), m_color.z());
+	glUniform1f(shader->uniformLocation("uMetalicity"), 0);
+	glUniform1f(shader->uniformLocation("uRoughness"), 0);
+	glUniform1f(shader->uniformLocation("uSpecular"), 1.0);
+
+
+	vector<GLuint> fragSubroutines(shader->activeSubroutines(GL_FRAGMENT_SHADER), 0);
+
+	if (fragSubroutines.size() > 0) {
+		auto addFragSubroutine = [&](const string &uniform, const string &name) {
+			GLuint uidx = shader->subroutineUniformIndex(GL_FRAGMENT_SHADER, uniform);
+			GLuint pidx = shader->subroutineIndex(GL_FRAGMENT_SHADER, name);
+			if (uidx != GL_INVALID_INDEX && pidx != GL_INVALID_INDEX) {
+				fragSubroutines[uidx] = pidx;
+			}
+		};
+
+		addFragSubroutine("drawFragment", "material");
+		addFragSubroutine("getColor", "colorFromValue");
+		addFragSubroutine("getNormal", "normalFromValue");
+
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, fragSubroutines.size(), &fragSubroutines[0]);
+	}
 }
 
 
-
-Shader::Shader() {
-	static const char *shader_prog_src = R"delim(
-		/*
-		 *
-		 * Default shader program for writing to scene buffer using GL_TRIANGLES
-		 *
-		 */
-
-		uniform mat4 uModelViewMatrix;
-		uniform mat4 uProjectionMatrix;
-
-		#ifdef _VERTEX_
-
-		layout(location = 0) in vec3 aPosition;
-		layout(location = 1) in vec3 aNormal;
-		layout(location = 2) in vec3 aUV;
-
-		out VertexData {
-			vec4 pos;
-			vec4 normal;
-			vec2 uv;
-		} v_out;
-
-		void main() {
-			vec4 p = (uModelViewMatrix * vec4(aPosition, 1.0));
-			gl_Position = uProjectionMatrix * p;
-			v_out.pos = p;
-			v_out.normal = (uModelViewMatrix * vec4(aNormal, 0.0));
-		}
-
-		#endif
-
-
-		#ifdef _FRAGMENT_
-
-		in VertexData {
-			vec4 pos;
-			vec4 normal;
-			vec2 uv;
-		} v_in;
-
-		out vec3 color;
-
-		void main() {
-			vec3 grey = vec3(0.8, 0.8, 0.8);
-		    color = abs(v_in.normal.z) * grey;
-		}
-
-		#endif
-		)delim";
-
-	cout << "NOOOOP" << endl; 
-
-	m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, shader_prog_src);
-}
-
-
-Shader::Shader(const string &filename) {
+shader_ptr Shader::fromFile(const std::string &filename) {
 	ifstream fileStream(filename);
 
 	if (fileStream) {
 		stringstream buffer;
 		buffer << fileStream.rdbuf();
-		m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, buffer.str());
+		return make_shared<Shader>(buffer.str());
 	}
+}
+
+
+Shader::Shader(const string &text) {
+	m_prog = gecom::makeShaderProgram("410 core", { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER }, text);
 }
 
 
@@ -98,10 +72,39 @@ GLuint Shader::uniformLocation(const string &name) {
 		return m_uniformLocationCache.at(name);
 	} catch (const std::out_of_range& oor) {
 		GLuint location = glGetUniformLocation(m_prog, name.c_str());
-		if (location == GLuint(-1)) 
-			throw runtime_error("Error :: Tried to access invalid uniform name.");
 		m_uniformLocationCache[name] = location;
 		return location;
+	}
+}
+
+
+GLint Shader::activeSubroutines(GLenum shadertype) {
+	GLint activeCount = 0;
+	glGetProgramStageiv(m_prog, shadertype, GL_ACTIVE_SUBROUTINES, &activeCount);
+	return activeCount;
+}
+
+
+GLuint Shader::subroutineUniformIndex(GLenum shadertype, const string &name) {
+	try {
+		return m_subroutineUniformIndexCache.at(shadertype).at(name);
+	}
+	catch (const std::out_of_range& oor) {
+		GLuint index = glGetSubroutineUniformLocation(m_prog, shadertype, name.c_str());
+		m_subroutineUniformIndexCache[shadertype][name] = index;
+		return index;
+	}
+}
+
+
+GLuint Shader::subroutineIndex(GLenum shadertype, const string &name) {
+	try {
+		return m_subroutineIndexCache.at(shadertype).at(name);
+	}
+	catch (const std::out_of_range& oor) {
+		GLuint index = glGetSubroutineIndex(m_prog, shadertype, name.c_str());
+		m_subroutineIndexCache[shadertype][name] = index;
+		return index;
 	}
 }
 

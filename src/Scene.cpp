@@ -48,7 +48,7 @@ void Scene::tick() {
 		i3d::mat4d view_matrix = m_camera.getViewTransform();
 
 		std::priority_queue<DrawCall *> drawQueue = m_drawableSystem.getDrawQueue(view_matrix);
-		m_renderer.renderScene(proj_matrix, drawQueue);
+		m_renderer.renderScene(proj_matrix, zfar, drawQueue);
 		m_physicsSystem.debugDraw(view_matrix, proj_matrix);
 
 	}

@@ -24,7 +24,7 @@ namespace pxljm {
 				for (auto it = config["shaders"].begin(); it != config["shaders"].end(); ++it) {
 					cout << " " << it.key() << ":" << it.value() << endl;
 					string tag = it.key(), filePath = it.value();
-					shaderMap[tag] = make_shared<Shader>(filePath);
+					shaderMap[tag] = Shader::fromFile(filePath);
 				}
 
 

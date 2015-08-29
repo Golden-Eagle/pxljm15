@@ -483,6 +483,8 @@ namespace gecom {
 			if (major < 3) m_hints.erase(GLFW_OPENGL_FORWARD_COMPAT);
 			// core/compat profiles only work for 3.2+
 			if (major * 100 + minor <= 302) m_hints[GLFW_OPENGL_PROFILE] = GLFW_OPENGL_ANY_PROFILE;
+			m_hints[GLFW_CONTEXT_VERSION_MAJOR] = major;
+			m_hints[GLFW_CONTEXT_VERSION_MINOR] = minor;
 			return *this;
 		}
 
