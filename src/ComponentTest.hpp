@@ -15,7 +15,12 @@ namespace pxljm {
 		virtual void update(clock_t::time_point now, clock_t::time_point prev) override {
 			using namespace std::chrono;
 			i3d::vec3d pos = entity()->root()->getPosition();
-			entity()->root()->setPosition(pos + i3d::vec3d::i(0.3) * duration_cast<duration<double>>(now - prev).count());
+			entity()->root()->setPosition(pos + i3d::vec3d::i(0.5) * duration_cast<duration<double>>(now - prev).count());
+		}
+
+		virtual std::chrono::duration<double> updateInterval() override {
+			using namespace std::chrono_literals;
+			return 100ms;
 		}
 	};
 

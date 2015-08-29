@@ -279,7 +279,7 @@ namespace pxljm {
 
 		clock_t::time_point lastTick();
 
-		void debugDraw(i3d::mat4d, i3d::mat4d);
+		void debugDraw(Scene &);
 
 		void processPhysicsCallback(btScalar);
 

@@ -8,7 +8,6 @@ set(headers
 	"json.hpp"
 
 	"Game.hpp"
-	"Camera.hpp"
 	"Renderer.hpp"
 	"ComponentTest.hpp"
 	"SimpleShader.hpp"
@@ -20,6 +19,7 @@ set(headers
 
 	# Entity
 	"ComponentSystem.hpp"
+	"CameraSystem.hpp"
 	"Entity.hpp"
 	"DrawSystem.hpp"
 	"LightSystem.hpp"
@@ -48,6 +48,7 @@ set(sources
 
 	"ComponentSystem.cpp"
 	"Entity.cpp"
+	"CameraSystem.cpp"
 	"DrawSystem.cpp"
 	"LightSystem.cpp"
 	"PhysicsSystem.cpp"

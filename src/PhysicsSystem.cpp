@@ -546,7 +546,9 @@ PhysicsSystem::clock_t::time_point PhysicsSystem::lastTick() {
 	return m_lastTick;
 }
 
-void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
+void PhysicsSystem::debugDraw(Scene &s) {
+	mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
+	mat4d proj = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 	dynamicsWorld->debugDrawWorld();
 	m_debugDrawer.draw(view, proj);
 }
