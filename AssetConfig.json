@@ -9,7 +9,7 @@
 
 	"materials" : {
 		"basic" : {
-			"shader" : "temp"
+			"shader" : "mat_default"
 		}
 	},
 

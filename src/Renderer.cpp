@@ -164,7 +164,7 @@ namespace pxljm {
 		auto size = m_win->framebufferSize();
 
 		if (size == size2i(0, 0)) return;
-		
+
 		initFBO(size);
 
 		s.cameraSystem().update(size.w, size.h);
@@ -174,22 +174,23 @@ namespace pxljm {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo_scene);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
-		i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
-		std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
+			i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
+			i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
+			float zFar = s.cameraSystem().getPrimaryCamera()->getZfar();
+			std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
 
-		for (; !drawList.empty(); drawList.pop()) {
-			auto d = drawList.top();
-			// Bind shader program
-			// Bind material properties
-			// Bind Geometry
-			// Then render
+			for (; !drawList.empty(); drawList.pop()) {
+				auto d = drawList.top();
+				// Bind shader program
+				// Bind material properties
+				// Bind Geometry
+				// Then render
 
-			material_ptr m = d->material();
-			m->shader->bind();
-			m->bind(proj);
-			d->draw();
-		}
+				material_ptr m = d->material();
+				m->shader->bind();
+				m->bind(proj, zFar);
+				d->draw();
+			}
 
 		static GLuint prog_deferred0 = 0;
 		if (!prog_deferred0) {
@@ -218,7 +219,7 @@ namespace pxljm {
 
 		glUseProgram(0);
 
-		s.physicsSystem().debugDraw(s);
+			s.physicsSystem().debugDraw(s);
 		
 	}
 

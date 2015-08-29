@@ -27,7 +27,7 @@ namespace pxljm {
 	class Material : gecom::Uncopyable, public std::enable_shared_from_this<Material> {
 	private:
 		// bool m_texture;
-		i3d::vec3d m_color;
+		i3d::vec3d m_color = i3d::vec3d(0.5, 0.5, 0.5);
 		// Color Texture
 
 
