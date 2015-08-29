@@ -115,6 +115,7 @@ namespace pxljm {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, sz.w, sz.h, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_tex_scene_depth, 0);
 
 			// color + metallicity texture
@@ -123,7 +124,8 @@ namespace pxljm {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex_scene_depth, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, sz.w, sz.h, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex_scene_color, 0);
 
 			// normal + roughness + specularity texture
 			glBindTexture(GL_TEXTURE_2D, m_tex_scene_normal);
@@ -131,9 +133,10 @@ namespace pxljm {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_tex_scene_depth, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, sz.w, sz.h, 0, GL_RGBA, GL_FLOAT, nullptr);
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_tex_scene_normal, 0);
 
-			GLuint bufs_scene[] { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+			GLenum bufs_scene[] { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 			glDrawBuffers(2, bufs_scene);
 		}
 
@@ -159,10 +162,10 @@ namespace pxljm {
 		glDepthFunc(GL_LESS);
 
 		auto size = m_win->framebufferSize();
-		
-		initFBO(size);
 
 		if (size == size2i(0, 0)) return;
+		
+		initFBO(size);
 
 		s.cameraSystem().update(size.w, size.h);
 		glViewport(0, 0, size.w, size.h);
