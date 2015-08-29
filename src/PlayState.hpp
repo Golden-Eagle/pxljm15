@@ -46,11 +46,12 @@ namespace pxljm {
 
 				gecom::Log::info() << "using joy1: " << axes[3] << " : " << axes[4];
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(i3d::vec3d(axes[1], 0, -axes[0]));
+				auto up = entity()->root()->getRotation() * i3d::vec3d(-axes[1] * 0.2, -axes[2] * 0.2, axes[0] * 0.2);
+				m_rigidBody->applyTorque(i3d::vec3d(up));
 				// for(int i = 0; i < count; i++) {
 				// 	gecom::Log::info() << "axis[" << i << "]: " << axes[i];
 				// }
-				float thrustAmount = -(1 - ((axes[3]+1)/2.0));
+				float thrustAmount = ((1 - ((axes[3]+1)/2.0))) * 0.1;
 				gecom::Log::info() << "thrusting: " << thrustAmount;
 				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, thrustAmount);
 				m_rigidBody->wakeUp();
@@ -95,11 +96,14 @@ namespace pxljm {
 		PlayState(Game* game) : m_renderer(game->window()), m_game(game) {
 			m_scene = std::make_shared<Scene>(game->window());
 
+			LevelLoader ll;
+			ll.Load(m_scene, "sample.json");
+
 			m_window_scene_sub = game->window()->subscribeEventDispatcher(m_scene->updateSystem().eventProxy());
 
-			m_player = std::make_shared<Entity>(i3d::vec3d(0, 0, -5));
+			m_player = std::make_shared<Entity>(i3d::vec3d(0, 0, 20));
 			m_player->emplaceComponent<MeshDrawable>(
-				assets::getMesh("cube"),
+				assets::getMesh("ship"),
 				assets::getMaterial("basic"));
 
 			gecom::Log::info() << "glfw says joy1 is: " << glfwJoystickPresent(GLFW_JOYSTICK_1);
@@ -108,7 +112,7 @@ namespace pxljm {
 			m_player->emplaceComponent<PlayerControllable>();
 			m_scene->add(m_player);
 
-			m_camera = std::make_shared<Entity>(i3d::vec3d(0, 0, 0));
+			m_camera = std::make_shared<Entity>(i3d::vec3d(0, 0, 0), i3d::quatd::axisangle(i3d::vec3d(0, 1, 0), 3.1415));
 			m_camera->emplaceComponent<PerspectiveCamera>();
 			m_camera->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::zero())));
 			m_camera->emplaceComponent<CameraControllable>();

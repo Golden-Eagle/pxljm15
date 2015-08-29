@@ -3,7 +3,8 @@
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
-		"waypoint" : "./res/meshes/waypoint.obj"
+		"waypoint" : "./res/meshes/waypoint.obj",
+		"ship" : "./res/meshes/ship.obj"
 	},
 
 	"materials" : {
