@@ -2,7 +2,8 @@
 	"meshes" : {
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
-		"sphere" : "./res/meshes/sphere.obj"
+		"sphere" : "./res/meshes/sphere.obj",
+		"waypoint" : "./res/meshes/waypoint.obj"
 	},
 
 	"materials" : {
