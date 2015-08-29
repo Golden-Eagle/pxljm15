@@ -535,13 +535,16 @@ void PhysicsSystem::resetClock() {
 
 
 void PhysicsSystem::tick() {
+	using namespace std::chrono;
 	steady_clock::time_point now = steady_clock::now();
-	steady_clock::duration time_span = now - m_lastTick;
-	double nseconds = double(time_span.count()) * steady_clock::period::num / steady_clock::period::den;
+	double nseconds = duration_cast<duration<double>>(now - m_lastTick).count();
 	dynamicsWorld->stepSimulation(nseconds, 20);
 	m_lastTick = now;
 }
 
+PhysicsSystem::clock_t::time_point PhysicsSystem::lastTick() {
+	return m_lastTick;
+}
 
 void PhysicsSystem::debugDraw(i3d::mat4d view, i3d::mat4d proj) {
 	dynamicsWorld->debugDrawWorld();

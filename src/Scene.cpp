@@ -1,10 +1,13 @@
 
+#include <chrono>
+
 #include "Scene.hpp"
 
 using namespace std;
 using namespace pxljm;
 using namespace gecom;
 using namespace i3d;
+using namespace std::chrono_literals;
 
 Scene::Scene(Window *win) : m_camera(win, i3d::vec3d(0, 2, 3)), m_renderer(win), m_window(win) { }
 
@@ -29,7 +32,7 @@ void Scene::update() {
 	// Update
 	//
 	m_camera.update();
-	m_updateSystem.update();
+	m_updateSystem.update(m_physicsSystem.lastTick(), 10ms, 5ms);
 
 	// Animation
 	// Later Josh... later...

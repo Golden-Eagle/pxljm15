@@ -33,6 +33,9 @@ namespace pxljm {
 			m_player->emplaceComponent<PlayerControllable>();
 
 			m_player->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
+
+			m_player->emplaceComponent<BoxMove>();
+
 			m_scene->add(m_player);
 		}
 
