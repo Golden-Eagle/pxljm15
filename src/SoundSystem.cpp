@@ -3,7 +3,12 @@
 #include "fmod_studio.hpp"
 #include "fmod_errors.h"
 
+#include <gecom/Log.hpp>
+
+using namespace gecom;
+
 pxljm::SoundSystem::SoundSystem() {
+  section_guard("SoundSystem");
   FMOD_RESULT result;
 
   result = FMOD::Studio::System::create(&m_system);
@@ -25,9 +30,32 @@ pxljm::SoundSystem::SoundSystem() {
     std::cout << "loadBankFile() error: " << FMOD_ErrorString(result) << std::endl;
   }
 
-  result = m_system->getEvent("event:/Test", &m_testEvent);
+  // result = m_system->getEvent("event:/Test", &m_testEvent);
+  // if(result != FMOD_OK) {
+  //   std::cout << "getEvent() error: " << FMOD_ErrorString(result) << std::endl;
+  // }
+
+  // need to get a list of available effects
+  // we're making an assumption we're only using the main bank
+  FMOD::Studio::EventDescription *events[MAXIMUM_EVENTS];
+  int count;
+  result = m_masterBank->getEventList(events, MAXIMUM_EVENTS, &count);
   if(result != FMOD_OK) {
-    std::cout << "getEvent() error: " << FMOD_ErrorString(result) << std::endl;
+    std::cout << "getEventList() error: " << FMOD_ErrorString(result) << std::endl;
+  }
+
+
+  Log::info() << "Loading " << count << " event(s) from the master bank";
+  {
+    section_guard("LoadEvents");
+    for(int i = 0; i < count; i++) {
+      char eventPath[256];
+      int len;
+      result = events[i]->getPath(eventPath, 256, &len);
+      std::string eventPathString(eventPath);
+      Log::info() << "Loaded new event: '" << eventPathString << "'";
+      m_eventLibrary[eventPathString] = events[i];
+    }
   }
 }
 
@@ -36,19 +64,5 @@ pxljm::SoundSystem::~SoundSystem() {
 }
 
 void pxljm::SoundSystem::update() {
-  if(!triggeredSound) {
-    triggeredSound = true;
-    FMOD::Studio::EventInstance* eventInstance = NULL;
-    FMOD_RESULT result;
-    result = m_testEvent->createInstance(&eventInstance);
-    if(result != FMOD_OK) {
-      std::cout << "createInstance() error: " << FMOD_ErrorString(result) << std::endl;
-    }
-    result = eventInstance->start();
-    if(result != FMOD_OK) {
-      std::cout << "start() error: " << FMOD_ErrorString(result) << std::endl;
-    }
-  }
-
   m_system->update();
 }
