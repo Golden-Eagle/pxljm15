@@ -1,6 +1,7 @@
 #include "PhysicsSystem.hpp"
 #include "Scene.hpp"
 
+#include "Pxljm.hpp"
 
 using namespace std;
 using namespace chrono;
@@ -433,13 +434,13 @@ PhysicsSystem::PhysicsSystem() {
 	// TODO make it realitive?
 	// If not configurable
 	// HACK
-	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+	dynamicsWorld->setGravity(btVector3(0.0, 0.0, 0.0));
 
 
 
 	// Debug HACK
 	m_debugDrawer.setDebugMode(btIDebugDraw::DBG_DrawWireframe);
-    dynamicsWorld->setDebugDrawer(&m_debugDrawer);
+	dynamicsWorld->setDebugDrawer(&m_debugDrawer);
 
 
 

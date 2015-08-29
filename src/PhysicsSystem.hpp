@@ -8,10 +8,11 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
+#include <gecom/GL.hpp>
+
 #include "Collider.hpp"
 #include "Assets.hpp"
 #include "Material.hpp"
-#include "GLOW.hpp"
 #include "ComponentSystem.hpp"
 
 
@@ -57,12 +58,12 @@ namespace pxljm {
 		RigidBody();
 		RigidBody(collider_ptr, double = 1.0);
 
-		virtual void start();
+		virtual void start() override;
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual void addToDynamicsWorld(btDynamicsWorld *);
-		virtual void removeFromDynamicsWorld();
+		virtual void addToDynamicsWorld(btDynamicsWorld *) override;
+		virtual void removeFromDynamicsWorld() override;
 
 		btRigidBody * getRigidBody();
 
@@ -140,8 +141,8 @@ namespace pxljm {
 
 
 		// Bullet Physics related methods btMotionState
-		virtual void getWorldTransform (btTransform &) const;
-		virtual void setWorldTransform (const btTransform &);
+		virtual void getWorldTransform (btTransform &) const override;
+		virtual void setWorldTransform (const btTransform &) override;
 
 	};
 
@@ -159,14 +160,14 @@ namespace pxljm {
 	public:
 		Trigger(collider_ptr);
 
-		virtual void start();
+		virtual void start() override;
 		virtual void registerWith(Scene &) override;
 		virtual void deregisterWith(Scene &) override;
 
-		virtual void addToDynamicsWorld(btDynamicsWorld *);
-		virtual void removeFromDynamicsWorld();
+		virtual void addToDynamicsWorld(btDynamicsWorld *) override;
+		virtual void removeFromDynamicsWorld() override;
 
-		virtual void physicsUpdate();
+		virtual void physicsUpdate() override;
 
 		void setEnable(bool);
 		bool isEnabled();

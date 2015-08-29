@@ -1,5 +1,4 @@
 {
-	
 	"meshes" : {
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
@@ -15,5 +14,10 @@
 	"shaders" : {
 		"temp" : "./res/shaders/temp.glsl",
 		"physics_debug" : "./res/shaders/physics_debug.glsl"
+	},
+
+	"images": {
+		"testrgb" : "./res/images/testrgb.bmp",
+		"testrgba" : "./res/images/testrgba.png"
 	}
 }

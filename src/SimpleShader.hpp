@@ -5,8 +5,8 @@
 #include <vector>
 #include <sstream>
 
-#include "GLOW.hpp"
-#include "Log.hpp"
+#include <gecom/GL.hpp>
+#include <gecom/Log.hpp>
 
 namespace gecom {
 
@@ -38,7 +38,7 @@ namespace gecom {
 		if (infologLength > 1) {
 			std::vector<char> infoLog(infologLength);
 			glGetShaderInfoLog(obj, infologLength, &charsWritten, &infoLog[0]);
-			gecom::log("SimpleShader") << "SHADER:\n" << &infoLog[0];
+			gecom::Log::info("SimpleShader") << "SHADER:\n" << &infoLog[0];
 		}
 	}
 
@@ -49,7 +49,7 @@ namespace gecom {
 		if (infologLength > 1) {
 			std::vector<char> infoLog(infologLength);
 			glGetProgramInfoLog(obj, infologLength, &charsWritten, &infoLog[0]);
-			gecom::log("SimpleShader") << "PROGRAM:\n" << &infoLog[0];
+			gecom::Log::info("SimpleShader") << "PROGRAM:\n" << &infoLog[0];
 		}
 	}
 
@@ -111,7 +111,7 @@ namespace gecom {
 		}
 
 		linkShaderProgram(prog);
-		gecom::log("SimpleShader") << "Shader program compiled and linked successfully";
+		gecom::Log::info("SimpleShader") << "Shader program compiled and linked successfully";
 		return prog;
 	}
 

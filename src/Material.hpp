@@ -9,9 +9,10 @@
 #include <stdexcept>
 #include <map>
 
-#include "GECom.hpp"
-#include "GLOW.hpp"
-#include "Initial3D.hpp"
+#include <gecom/Uncopyable.hpp>
+#include <gecom/GL.hpp>
+#include <gecom/Initial3D.hpp>
+
 #include "SimpleShader.hpp"
 
 
@@ -29,12 +30,7 @@ namespace pxljm {
 		i3d::vec3d m_color;
 		// Color Texture
 
-		
-
 		// Normal Texture
-
-
-
 
 	public:
 		Material();

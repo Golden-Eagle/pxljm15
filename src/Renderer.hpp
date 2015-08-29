@@ -4,14 +4,13 @@
 #include <queue>
 #include <vector>
 
-#include "GECom.hpp"
+#include <gecom/Window.hpp>
+#include <gecom/Initial3D.hpp>
+
 #include "Entity.hpp"
-#include "GLOW.hpp"
-#include "Initial3D.hpp"
-#include "SimpleShader.hpp"
-#include "Material.hpp"
 #include "Mesh.hpp"
-#include "Window.hpp"
+#include "Material.hpp"
+#include "SimpleShader.hpp"
 
 
 namespace pxljm {

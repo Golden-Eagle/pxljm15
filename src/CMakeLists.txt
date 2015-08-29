@@ -1,16 +1,11 @@
-# list headers here
-SET(gecom_hdr
 
-	#System headers
-	"GECom.hpp"
-	"GLOW.hpp"
-	"Concurrent.hpp"
-	"Initial3D.hpp"
-	"Image.hpp"
-	"Log.hpp"
-	"Perlin.hpp"
+
+# list headers here
+set(headers
+
+	"Pxljm.hpp"
+
 	"json.hpp"
-	"Window.hpp"
 
 	"Game.hpp"
 	"Camera.hpp"
@@ -32,20 +27,21 @@ SET(gecom_hdr
 	"UpdateSystem.hpp"
 	"SoundSystem.hpp"
 
+	"Image.hpp"
+
 	"Scene.hpp"
 
 	"LevelLoader.hpp"
+
+	"State.hpp"
+	"PlayState.hpp"
 )
 
 
 # list sources here
-SET(gecom_src
+set(sources
 	"main.cpp"
-	"Log.cpp"
-	"Perlin.hpp"
-	"Window.cpp"
-	"Concurrent.cpp"
-
+	
 	"Assets.cpp"
 	"Material.cpp"
 	"Mesh.cpp"
@@ -62,13 +58,11 @@ SET(gecom_src
 )
 
 
-add_executable(gecom ${gecom_hdr} ${gecom_src})
+add_executable(pxljm ${headers} ${sources})
 
-target_link_libraries(gecom fmod_lowlevel fmod_studio)
+target_link_libraries(pxljm PRIVATE gecom)
 
-target_link_libraries(gecom glfw ${GLFW_LIBRARIES})
+target_link_libraries(pxljm PRIVATE BulletCollision BulletDynamics BulletSoftBody)
 
-add_definitions(${GLAER_DEFINITIONS})
-target_link_libraries(gecom glaer ${GLAER_LIBRARIES})
-
-target_link_libraries(gecom BulletCollision BulletDynamics BulletSoftBody)
+target_link_libraries(pxljm PRIVATE fmod_lowlevel fmod_studio)
+target_link_libraries(pxljm PRIVATE stb)
