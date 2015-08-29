@@ -12,7 +12,6 @@
 #include "Pxljm.hpp"
 
 #include "Assets.hpp"
-#include "Camera.hpp"
 #include "Scene.hpp"
 #include "Renderer.hpp"
 #include "SimpleShader.hpp"
