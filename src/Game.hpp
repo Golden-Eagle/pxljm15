@@ -34,6 +34,7 @@ namespace pxljm {
 			m_win = gecom::createWindow().size(1024, 768).hint(GLFW_SAMPLES, 16).title("Pxljm 2015").visible(true).contextVersion(4, 1);
 			m_win->makeCurrent();
 
+
 			m_win->onKeyPress.subscribe([&](const gecom::key_event &e) {
 				if (e.key == GLFW_KEY_TAB) {
 					}
