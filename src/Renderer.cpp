@@ -27,6 +27,7 @@ namespace pxljm {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			i3d::mat4d view = s.cameraSystem().getPrimaryCamera()->getViewMatrix();
 			i3d::mat4d proj = s.cameraSystem().getPrimaryCamera()->getProjectionMatrix();
+			float zFar = s.cameraSystem().getPrimaryCamera()->getZfar();
 			std::priority_queue<DrawCall *> drawList = s.drawableSystem().getDrawQueue(view);
 
 			for (; !drawList.empty(); drawList.pop()) {
@@ -38,7 +39,7 @@ namespace pxljm {
 
 				material_ptr m = d->material();
 				m->shader->bind();
-				m->bind(proj);
+				m->bind(proj, zFar);
 				d->draw();
 			}
 
