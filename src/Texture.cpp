@@ -20,7 +20,7 @@ Texture::Texture(unsigned char *data, int w, int h, int n)
 		case 2: return GL_RG;
 		case 3: return GL_RGB;
 		case 4: return GL_RGBA;
-		default: break;
+		default: return GL_RGB;
 		}
 	};
 
