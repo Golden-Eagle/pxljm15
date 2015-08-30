@@ -72,7 +72,7 @@ namespace pxljm {
 	private:
 		float m_fov = 1.0; //radians
 		float m_zNear = 0.1;
-		float m_zFar = 1000000;
+		float m_zFar = 10000;
 
 		i3d::mat4d m_proj;
 
