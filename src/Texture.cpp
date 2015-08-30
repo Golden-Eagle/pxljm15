@@ -44,7 +44,7 @@ texture_ptr Texture::fromFile(const std::string & filename) {
 }
 
 void Texture::bind(GLuint textureLocation) {
-	glActiveTexture(textureLocation);
+	glActiveTexture(GL_TEXTURE0 + textureLocation);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 }
 

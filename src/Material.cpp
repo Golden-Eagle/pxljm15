@@ -24,7 +24,7 @@ void Material::bind(i3d::mat4d projectionMatrix, float zfar) {
 	glUniform1f(shader->uniformLocation("uSpecular"), m_specular);
 
 	// material maps
-	GLuint textureLocation = GL_TEXTURE0;
+	GLuint textureLocation = 0;
 	auto setTexture = [&](texture_ptr tex,  const string &sampler) {
 		tex->bind(textureLocation);
 		glUniform1i(shader->uniformLocation(sampler), textureLocation);
