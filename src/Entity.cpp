@@ -22,9 +22,9 @@ Entity::Entity(quatd rot) {
 
 Entity::~Entity() {
 	// Remove all compoenents from scene
-	if (m_scene)
-		for (EntityComponent *c : m_components)
-			c->deregisterWith(*m_scene);
+	// if (m_scene)
+	// 	for (EntityComponent *c : m_components)
+	// 		c->deregisterWith(*m_scene);
 }
 
 
