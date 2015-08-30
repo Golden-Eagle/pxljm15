@@ -90,6 +90,8 @@ namespace pxljm {
 			m_player->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
 			m_player->getComponent<RigidBody>()->setDamping(0.1, 0.9);
 			m_player->emplaceComponent<PlayerControllable>();
+			m_player->emplaceComponent<PlayerScoreComponent>();
+			m_scene->uiRenderSystem().registerUiComponent(m_player->getComponent<PlayerScoreComponent>());
 			m_scene->add(m_player);
 
 			m_camera = std::make_shared<Entity>(i3d::vec3d(0, 0, 0), i3d::quatd::axisangle(i3d::vec3d(0, 1, 0), 3.1415));
@@ -103,8 +105,8 @@ namespace pxljm {
 			m_scene->add(m_camera);
 			m_player->root()->addChild(m_camera->root());
 
-			auto ui = make_shared<TestUIComponent>();
-			m_scene->uiRenderSystem().registerUiComponent(ui);
+			// auto ui = make_shared<TestUIComponent>();
+			// m_scene->uiRenderSystem().registerUiComponent(ui);
 		}
 
 		virtual action_ptr updateForeground() override {

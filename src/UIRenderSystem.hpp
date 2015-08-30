@@ -41,7 +41,7 @@ namespace pxljm {
 	};
 
 	class UIRenderSystem : public ComponentSystem {
-		static std::vector<std::shared_ptr<UIRenderComponent> > g_components;
+		static std::vector<UIRenderComponent* > g_components;
 		static int          g_shaderHandle, g_vertHandle, g_fragHandle;
 		static double       g_Time;
 		static int          g_AttribLocationTex, g_AttribLocationProjMtx;
@@ -54,7 +54,7 @@ namespace pxljm {
 			io.RenderDrawListsFn = RenderDrawLists;
 		}
 
-		static void registerUiComponent(std::shared_ptr<UIRenderComponent> c) {
+		static void registerUiComponent(UIRenderComponent* c) {
 			g_components.push_back(c);
 		}
 
