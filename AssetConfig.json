@@ -56,7 +56,7 @@
 	"images": {
 		"asteroid-diffuse" : "./res/images/asteroid-diffuse.jpg",
 		"asteroid-normal" : "./res/images/asteroid-normal.jpg",
-		"ship-diffuse" : "./res/images/ship-normal.jpg",
+		"ship-diffuse" : "./res/images/ship-diffuse.jpg",
 		
 		"waypoint_entrance-diffuse" : "./res/images/waypoint/entrance-diffuse.jpg",
 		"waypoint_entrance_slider-diffuse" : "./res/images/waypoint/entrance-slider-diffuse.jpg",

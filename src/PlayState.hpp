@@ -87,7 +87,7 @@ namespace pxljm {
 			m_player = std::make_shared<Entity>(i3d::vec3d(0, 0, 20));
 			m_player->emplaceComponent<MeshDrawable>(
 				assets::getMesh("ship"),
-				assets::getMaterial("basic"));
+				assets::getMaterial("ship"));
 
 			gecom::Log::info() << "glfw says joy1 is: " << glfwJoystickPresent(GLFW_JOYSTICK_1);
 
