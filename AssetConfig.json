@@ -3,15 +3,21 @@
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
-		"asteriod" : "./res/meshes/asteriod.obj",
-		"waypoint" : "./res/meshes/waypoint.obj",
-		"ship" : "./res/meshes/ship.obj"
+		"asteroid" : "./res/meshes/asteroid.obj",
+		"ship" : "./res/meshes/ship.obj",
+		
+		"waypoint_entrance" : "./res/meshes/waypoint/entrance.obj",
+		"waypoint_entrance-slider" : "./res/meshes/waypoint/entrance-slider.obj",
+		"waypoint_ring" : "./res/meshes/waypoint/ring.obj",
+		"waypoint_rock" : "./res/meshes/waypoint/rock.obj",
+		"waypoint_rod" : "./res/meshes/waypoint/rod.obj",
+		"waypoint_slider" : "./res/meshes/waypoint/slider.obj"
 	},
 
 	"materials" : {
 		"basic" : {
 			"shader" : "mat_default",
-			"diffuse-map" : "rock-diffuse"
+			"diffuse-map" : "asteroid-diffuse"
 		}
 	},
 
@@ -22,7 +28,24 @@
 	},
 
 	"images": {
-		"rock-diffuse" : "./res/images/rock-diffuse.jpg",
-		"rock-normal" : "./res/images/rock-normal.jpg"
+		"asteroid-diffuse" : "./res/images/asteroid-diffuse.jpg",
+		"asteroid-normal" : "./res/images/asteroid-normal.jpg",
+		
+		"waypoint_entrance-diffuse" : "./res/meshes/waypoint/entrance-diffuse",
+		"waypoint_entrance-slider-diffuse" : "./res/meshes/waypoint/entrance-slider-diffuse",
+		"waypoint_ring-diffuse" : "./res/meshes/waypoint/ring-diffuse",
+		"waypoint_rock-diffuse" : "./res/meshes/waypoint/rock-diffuse",
+		"waypoint_rod-diffuse" : "./res/meshes/waypoint/rod-diffuse",
+		"waypoint_slider-diffuse" : "./res/meshes/waypoint/slider-diffuse",
+
+		"waypoint_entrance-specular" : "./res/meshes/waypoint/entrance-specular",
+		"waypoint_entrance-slider-specular" : "./res/meshes/waypoint/entrance-slider-specular",
+		"waypoint_ring-specular" : "./res/meshes/waypoint/ring-specular",
+		"waypoint_rod-specular" : "./res/meshes/waypoint/rod-specular",
+		"waypoint_slider-specular" : "./res/meshes/waypoint/slider-specular",
+
+		"waypoint_entrance-slider-normal" : "./res/meshes/waypoint/entrance-slider-normal",
+		"waypoint_ring-normal" : "./res/meshes/waypoint/ring-normal",
+		"waypoint_rock-normal" : "./res/meshes/waypoint/rock-normal"
 	}
 }
