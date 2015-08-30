@@ -17,6 +17,7 @@ set(headers
 	"Assets.hpp"
 	"Material.hpp"
 	"Mesh.hpp"
+	"Texture.hpp"
 
 	# Entity
 	"ComponentSystem.hpp"
@@ -34,6 +35,8 @@ set(headers
 
 	"LevelLoader.hpp"
 
+	"UIRenderSystem.hpp"
+
 	"State.hpp"
 	"PlayState.hpp"
 )
@@ -42,11 +45,12 @@ set(headers
 # list sources here
 set(sources
 	"main.cpp"
+	"Renderer.cpp"
 	
 	"Assets.cpp"
 	"Material.cpp"
 	"Mesh.cpp"
-	"Renderer.cpp"
+	"Texture.cpp"
 
 	"ComponentSystem.cpp"
 	"Entity.cpp"
@@ -58,6 +62,8 @@ set(sources
 	"SoundSystem.cpp"
 
 	"Scene.cpp"
+
+	"UIRenderSystem.cpp"
 )
 
 
@@ -68,4 +74,4 @@ target_link_libraries(pxljm PRIVATE gecom)
 target_link_libraries(pxljm PRIVATE BulletCollision BulletDynamics BulletSoftBody)
 
 target_link_libraries(pxljm PRIVATE fmod_lowlevel fmod_studio)
-target_link_libraries(pxljm PRIVATE stb)
+target_link_libraries(pxljm PRIVATE stb imgui)

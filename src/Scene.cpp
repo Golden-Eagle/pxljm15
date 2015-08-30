@@ -62,4 +62,5 @@ SoundSystem & Scene::soundSystem() { return m_soundSystem; }
 
 LightSystem & Scene::lightSystem() { return m_lightSystem; }
 
+UIRenderSystem & Scene::uiRenderSystem() { return m_uiRenderSystem; }
 

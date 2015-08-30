@@ -3,13 +3,21 @@
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
-		"waypoint" : "./res/meshes/waypoint.obj",
-		"ship" : "./res/meshes/ship.obj"
+		"asteroid" : "./res/meshes/asteroid.obj",
+		"ship" : "./res/meshes/ship.obj",
+		
+		"waypoint_entrance" : "./res/meshes/waypoint/entrance.obj",
+		"waypoint_entrance-slider" : "./res/meshes/waypoint/entrance-slider.obj",
+		"waypoint_ring" : "./res/meshes/waypoint/ring.obj",
+		"waypoint_rock" : "./res/meshes/waypoint/rock.obj",
+		"waypoint_rod" : "./res/meshes/waypoint/rod.obj",
+		"waypoint_slider" : "./res/meshes/waypoint/slider.obj"
 	},
 
 	"materials" : {
 		"basic" : {
-			"shader" : "temp"
+			"shader" : "mat_default",
+			"diffuse-map" : "asteroid-diffuse"
 		}
 	},
 
@@ -20,7 +28,24 @@
 	},
 
 	"images": {
-		"testrgb" : "./res/images/testrgb.bmp",
-		"testrgba" : "./res/images/testrgba.png"
+		"asteroid-diffuse" : "./res/images/asteroid-diffuse.jpg",
+		"asteroid-normal" : "./res/images/asteroid-normal.jpg",
+		
+		"waypoint_entrance-diffuse" : "./res/images/waypoint/entrance-diffuse.jpg",
+		"waypoint_entrance-slider-diffuse" : "./res/images/waypoint/entrance-slider-diffuse.jpg",
+		"waypoint_ring-diffuse" : "./res/images/waypoint/ring-diffuse.jpg",
+		"waypoint_rock-diffuse" : "./res/images/waypoint/rock-diffuse.jpg",
+		"waypoint_rod-diffuse" : "./res/images/waypoint/rod-diffuse.jpg",
+		"waypoint_slider-diffuse" : "./res/images/waypoint/slider-diffuse.jpg",
+
+		"waypoint_entrance-specular" : "./res/images/waypoint/entrance-specular.jpg",
+		"waypoint_entrance-slider-specular" : "./res/images/waypoint/entrance-slider-specular.jpg",
+		"waypoint_ring-specular" : "./res/images/waypoint/ring-specular.jpg",
+		"waypoint_rod-specular" : "./res/images/waypoint/rod-specular.jpg",
+		"waypoint_slider-specular" : "./res/images/waypoint/slider-specular.jpg",
+
+		"waypoint_entrance-slider-normal" : "./res/images/waypoint/entrance-slider-normal.jpg",
+		"waypoint_ring-normal" : "./res/images/waypoint/ring-normal.jpg",
+		"waypoint_rock-normal" : "./res/images/waypoint/rock-normal"
 	}
 }

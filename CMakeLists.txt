@@ -20,6 +20,9 @@ add_subdirectory("${PROJECT_SOURCE_DIR}/ext/stb")
 # Fmod
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/fmod")
 
+# Imgui
+add_subdirectory("${PROJECT_SOURCE_DIR}/ext/imgui")
+
 # Bullet
 add_subdirectory("${PROJECT_SOURCE_DIR}/ext/bullet-2.83.5" "${PROJECT_BINARY_DIR}/ext/bullet")
 

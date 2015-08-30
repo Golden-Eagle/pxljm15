@@ -19,6 +19,7 @@
 #include "PhysicsSystem.hpp"
 #include "UpdateSystem.hpp"
 #include "SoundSystem.hpp"
+#include "UIRenderSystem.hpp"
 
 namespace pxljm {
 
@@ -36,6 +37,7 @@ namespace pxljm {
 		LightSystem    m_lightSystem;
 		SoundSystem	   m_soundSystem;
 		CameraSystem   m_cameraSystem;
+		UIRenderSystem m_uiRenderSystem;
 
 		gecom::Window *m_window;
 
@@ -44,7 +46,6 @@ namespace pxljm {
 		~Scene();
 
 		void update();
-		void render();
 		void add( entity_ptr e);
 
 		CameraSystem & cameraSystem();
@@ -53,5 +54,6 @@ namespace pxljm {
 		UpdateSystem & updateSystem();
 		SoundSystem & soundSystem();
 		LightSystem & lightSystem();
+		UIRenderSystem & uiRenderSystem();
 	};
 }

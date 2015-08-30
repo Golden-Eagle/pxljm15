@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cd build && cmake .. && make && cd .. && ./build/bin/pxljm
+cd build && cmake .. && make -j3 && cd .. && ./build/bin/pxljm
