@@ -29,5 +29,6 @@ namespace pxljm {
 		GLuint m_tex_scene_color = 0;
 		GLuint m_tex_scene_normal = 0;
 
+		GLuint m_light_ubo = 0;
 	};
 }

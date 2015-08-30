@@ -6,6 +6,7 @@
 #include "Pxljm.hpp"
 #include "Game.hpp"
 #include <gecom/Window.hpp>
+#include <gecom/Log.hpp>
 
 namespace pxljm {
 	class PlayerControllable : public virtual InputUpdatable {
@@ -21,26 +22,26 @@ namespace pxljm {
 
 			if(wep.getKey(GLFW_KEY_UP)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(-1, 0, 0));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3f(-1, 0, 0));
 			}
 			else if(wep.getKey(GLFW_KEY_DOWN)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(1, 0, 0));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3f(1, 0, 0));
 			}
 
 			if(wep.getKey(GLFW_KEY_LEFT)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, -1));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3f(0, 0, -1));
 			}
 			else if(wep.getKey(GLFW_KEY_RIGHT)) {
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, 1));
+				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3f(0, 0, 1));
 			}
 
 			if(wep.getKey(GLFW_KEY_SPACE)) {
 				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, 1);
 				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(keyBoardThrustScale * facing);
+				m_rigidBody->applyImpulse(keyBoardThrustScale * i3d::vec3f(facing));
 			}
 
 			if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {
@@ -121,6 +122,12 @@ namespace pxljm {
 			m_camera->emplaceComponent<CameraControllable>();
 			m_cameraComponent = m_camera->getComponent<PerspectiveCamera>();
 			m_cameraComponent->registerWith(*m_scene);
+
+			m_camera->emplaceComponent<DefaultPointLight>();
+			auto light = m_camera->getComponent<DefaultPointLight>();
+			light->flux(i3d::vec3f(10, 20, 30));
+			light->radius(1000);
+
 			m_scene->cameraSystem().setCamera(m_cameraComponent);
 
 			m_scene->add(m_camera);
@@ -134,7 +141,15 @@ namespace pxljm {
 		}
 
 		virtual void drawForeground() override {
-			m_renderer.renderScene(*m_scene);
+			try {
+				m_renderer.renderScene(*m_scene);
+			} catch (...) {
+				gecom::Log::error() << "FUUUUUUCK";
+			}
+		}
+
+		virtual ~PlayState() {
+
 		}
 	};
 }

@@ -28,6 +28,8 @@ uniform sampler2D uNormalMap;
 
 #ifdef _VERTEX_
 
+// @josh - don't we not need to pass bitangents to the shader? we can calculate them from tangent and normal, right?
+
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
@@ -36,22 +38,22 @@ layout(location = 4) in vec2 aUV;
 
 
 out VertexData {
-	vec4 pos;
-	vec4 normal;
-	vec4 tangent;
-	vec4 bitangent;
+	vec3 pos;
+	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
 	vec2 uv;
 } v_out;
 
 
 void main() {
-	v_out.pos = uModelViewMatrix * vec4(aPosition, 1.0);
-	v_out.normal = uModelViewMatrix * vec4(aNormal, 0.0);
-	v_out.tangent = uModelViewMatrix * vec4(aTangent, 0.0);
-	v_out.bitangent = uModelViewMatrix * vec4(aBiTangent, 0.0);
+	v_out.pos = (uModelViewMatrix * vec4(aPosition, 1.0)).xyz;
+	v_out.normal = (uModelViewMatrix * vec4(aNormal, 0.0)).xyz;
+	v_out.tangent = (uModelViewMatrix * vec4(aTangent, 0.0)).xyz;
+	v_out.bitangent = (uModelViewMatrix * vec4(aBiTangent, 0.0)).xyz;
 	v_out.uv  = aUV;
 
-	gl_Position = uProjectionMatrix * v_out.pos;
+	gl_Position = uProjectionMatrix * vec4(v_out.pos, 1.0);
 }
 
 #endif
@@ -66,10 +68,10 @@ void main() {
 
 // Viewspace data
 in VertexData {
-	vec4 pos;
-	vec4 normal;
-	vec4 tangent;
-	vec4 bitangent;
+	vec3 pos;
+	vec3 normal;
+	vec3 tangent;
+	vec3 bitangent;
 	vec2 uv;
 } f_in;
 
@@ -85,7 +87,7 @@ layout(location = 1) out vec4 fNormalMaterials;
 
 
 subroutine vec3 colorFetch();
-subroutine vec4 normalFetch();
+subroutine vec3 normalFetch();
 
 subroutine uniform colorFetch getColor;
 subroutine uniform normalFetch getNormal;
@@ -97,18 +99,18 @@ subroutine(colorFetch) vec3 colorFromValue() { return uColor; }
 
 // Normal
 //
-subroutine(normalFetch) vec4 normalFromTexture() {
-	mat3 tbn = transpose(mat3(f_in.tangent.xyz, f_in.bitangent.xyz, f_in.normal.xyz));
-	return vec4(tbn * normalize(texture(uNormalMap, f_in.uv).rgb * 2.0 - 1.0), 0.0);
+subroutine(normalFetch) vec3 normalFromTexture() {
+	mat3 tbn = transpose(mat3(normalize(f_in.tangent), normalize(f_in.bitangent), normalize(f_in.normal)));
+	return tbn * normalize(texture(uNormalMap, f_in.uv).rgb * 2.0 - 1.0);
 }
-subroutine(normalFetch) vec4 normalFromValue() { return f_in.normal; }
+subroutine(normalFetch) vec3 normalFromValue() { return normalize(f_in.normal); }
 
 
-void writeDepth(float depth) {
+void writeDepth() {
 	// this has to match with depth buffer settings from shadow shaders
 	const float C = 0.01;
 	float FC = 1.0 / log(uZFar * C + 1.0);
-	gl_FragDepth = log(depth * C + 1.0) * FC;
+	gl_FragDepth = log(-f_in.pos.z * C + 1.0) * FC;
 }
 
 
@@ -116,18 +118,58 @@ void writeDepth(float depth) {
 // Main
 //
 void main() {
-	vec4 p = uProjectionMatrix * f_in.pos;
-	writeDepth(p.z/p.w);
+	writeDepth();
 
 	#ifndef _DEPTH_ONLY_
 
-	vec4 n = uProjectionMatrix * getNormal();
-	n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
+	
+	vec3 n = normalize(f_in.normal);
+	float theta = atan(n.y / n.x);
+	float phi = atan(sqrt(n.x * n.x + n.y * n.y) / n.z);
+	
+	//vec3 a = normalize(f_in.pos);
+	//vec3 b = normalize(cross(vec3(1.0, 0.0, 0.0), a));
+	//vec3 c = normalize(cross(a, b));
+	
+	//vec3 n = mat3(c, b, a) * normalize(f_in.normal);
+	
+	//vec3 n = normalize((uProjectionMatrix * vec4(getNormal(), 0.0)).xyz);
+	//n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
+	
 	fColor = vec4(getColor(), uMetalicity);
-	fNormalMaterials = vec4(n.xy, uRoughness, uSpecular);
+	fNormalMaterials = vec4(theta, phi, uRoughness, uSpecular);
 
 	#endif
 }
 
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
