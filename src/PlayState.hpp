@@ -5,62 +5,47 @@
 
 #include "Pxljm.hpp"
 #include "Game.hpp"
+#include "Joystick.hpp"
 #include <gecom/Window.hpp>
 
 namespace pxljm {
 	class PlayerControllable : public virtual InputUpdatable {
-		RigidBody* m_rigidBody;
+		RigidBody* m_rigidBody = nullptr;
+		JoystickManager m_joystickManager;
+		std::shared_ptr<Joystick> m_joystick;
 
+	public:
+		PlayerControllable() : m_joystickManager("input.json") {
+			m_joystick = m_joystickManager.findJoystick();
+		}
 		virtual void inputUpdate(gecom::WindowEventProxy &wep) override {
 			if(!m_rigidBody) {
 				m_rigidBody = entity()->getComponent<RigidBody>();
 			}
 
-			const float keyBoardTorqueScale = 0.05;
-			const float keyBoardThrustScale = 0.025;
+			float pitchInc = m_joystick->getButtonValue("pitchUp", wep);
+			float pitchDec = m_joystick->getButtonValue("pitchDown", wep);
+			float pitchDelta = pitchInc + pitchDec;
 
-			if(wep.getKey(GLFW_KEY_UP)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(-1, 0, 0));
-			}
-			else if(wep.getKey(GLFW_KEY_DOWN)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(1, 0, 0));
-			}
+			float rollInc = m_joystick->getButtonValue("rollLeft", wep);
+			float rollDec = m_joystick->getButtonValue("rollRight", wep);
+			float rollDelta = rollInc + rollDec;
 
-			if(wep.getKey(GLFW_KEY_LEFT)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, -1));
-			}
-			else if(wep.getKey(GLFW_KEY_RIGHT)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyTorque(keyBoardTorqueScale * i3d::vec3d(0, 0, 1));
-			}
+			float yawInc = m_joystick->getButtonValue("yawLeft", wep);
+			float yawDec = m_joystick->getButtonValue("yawRight", wep);
+			float yawDelta = yawInc + yawDec;
 
-			if(wep.getKey(GLFW_KEY_SPACE)) {
-				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, 1);
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(keyBoardThrustScale * facing);
-			}
+			float pitch = m_joystick->getAxisValue("pitch") + pitchDelta;
+			float roll  = m_joystick->getAxisValue("roll") + rollDelta;
+			float yaw   = m_joystick->getAxisValue("yaw") + yawDelta;
 
-			if(glfwJoystickPresent(GLFW_JOYSTICK_1)) {
-				int count;
-				const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
+			auto up = entity()->root()->getRotation() * i3d::vec3d(pitch, yaw, roll);
+			m_rigidBody->applyTorqueImpulse(up);
 
-				gecom::Log::info() << "using joy1: " << axes[3] << " : " << axes[4];
-				m_rigidBody->wakeUp();
-				auto up = entity()->root()->getRotation() * i3d::vec3d(-axes[1] * 0.2, -axes[2] * 0.2, axes[0] * 0.2);
-				m_rigidBody->applyTorque(i3d::vec3d(up));
-				// for(int i = 0; i < count; i++) {
-				// 	gecom::Log::info() << "axis[" << i << "]: " << axes[i];
-				// }
-				float thrustAmount = ((1 - ((axes[3]+1)/2.0))) * 0.1;
-				gecom::Log::info() << "thrusting: " << thrustAmount;
-				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, thrustAmount);
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(facing);
+			float thrust = m_joystick->getAxisValue("thrust");
 
-			}
+			auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, thrust);
+			m_rigidBody->applyImpulse(facing);
 		}
 	};
 
@@ -70,15 +55,6 @@ namespace pxljm {
 		virtual void inputUpdate(gecom::WindowEventProxy &wep) override {
 			if(!m_rigidBody) {
 				m_rigidBody = entity()->getComponent<RigidBody>();
-			}
-
-			if(wep.getKey(GLFW_KEY_W)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(i3d::vec3d(0, 0, -0.1));
-			}
-			else if(wep.getKey(GLFW_KEY_S)) {
-				m_rigidBody->wakeUp();
-				m_rigidBody->applyImpulse(i3d::vec3d(0, 0, 0.1));
 			}
 		}
 	};
@@ -112,6 +88,7 @@ namespace pxljm {
 			gecom::Log::info() << "glfw says joy1 is: " << glfwJoystickPresent(GLFW_JOYSTICK_1);
 
 			m_player->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
+			m_player->getComponent<RigidBody>()->setDamping(0.1, 0.9);
 			m_player->emplaceComponent<PlayerControllable>();
 			m_scene->add(m_player);
 
@@ -125,6 +102,9 @@ namespace pxljm {
 
 			m_scene->add(m_camera);
 			m_player->root()->addChild(m_camera->root());
+
+			auto ui = make_shared<TestUIComponent>();
+			m_scene->uiRenderSystem().registerUiComponent(ui);
 		}
 
 		virtual action_ptr updateForeground() override {

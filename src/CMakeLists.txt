@@ -34,6 +34,8 @@ set(headers
 
 	"LevelLoader.hpp"
 
+	"UIRenderSystem.hpp"
+
 	"State.hpp"
 	"PlayState.hpp"
 )
@@ -58,6 +60,8 @@ set(sources
 	"SoundSystem.cpp"
 
 	"Scene.cpp"
+
+	"UIRenderSystem.cpp"
 )
 
 
@@ -68,4 +72,4 @@ target_link_libraries(pxljm PRIVATE gecom)
 target_link_libraries(pxljm PRIVATE BulletCollision BulletDynamics BulletSoftBody)
 
 target_link_libraries(pxljm PRIVATE fmod_lowlevel fmod_studio)
-target_link_libraries(pxljm PRIVATE stb)
+target_link_libraries(pxljm PRIVATE stb imgui)

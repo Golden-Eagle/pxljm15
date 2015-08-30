@@ -1,0 +1,114 @@
+{
+  "joystick_profiles": [
+    {
+      "name": "X360Controller",
+      "sticks": [
+        {
+          "role": "pitch",
+          "axis": 1,
+          "dead": [-0.110, 0.0],
+          "invert": true,
+          "scale": 0.25
+        },
+        {
+          "role": "roll",
+          "axis": 0,
+          "dead": [0, 0.1],
+          "invert": false,
+          "scale": 0.25
+        },
+        {
+          "role": "yaw",
+          "axis": 2,
+          "dead": [0, 0],
+          "invert": true,
+          "scale": 0.25
+        },
+        {
+          "role": "thrust",
+          "axis": 5,
+          "dead": [-1, 0],
+          "invert": false,
+          "scale": 0.1
+        }
+      ],
+      "buttons": []
+    },
+    {
+      "name": "Cyborg X",
+      "sticks": [
+        {
+          "role": "pitch",
+          "axis": 1,
+          "dead": [-0.001, 0.001],
+          "invert": true,
+          "scale": 1
+        },
+        {
+          "role": "roll",
+          "axis": 0,
+          "dead": [-0.001, 0.001],
+          "invert": false,
+          "scale": 1
+        },
+        {
+          "role": "yaw",
+          "axis": 2,
+          "dead": [-0.005, 0.005],
+          "invert": true,
+          "scale": 1
+        },
+        {
+          "role": "thrust",
+          "axis": 3,
+          "dead": [0, 1],
+          "invert": true,
+          "scale": 1
+        }
+      ],
+      "buttons": []
+    },
+    {
+      "name": "Keyboard",
+      "sticks": [],
+      "buttons": [
+        {
+          "role": "pitchUp",
+          "btn": 87,
+          "amt": 0.1,
+          "invert": false
+        },
+        {
+          "role": "pitchDown",
+          "btn": 83,
+          "amt": -0.1,
+          "invert": false
+        },
+        {
+          "role": "rollLeft",
+          "btn": 65,
+          "amt": -0.1,
+          "invert": false
+        },
+        {
+          "role": "rollRight",
+          "btn": 68,
+          "amt": 0.1,
+          "invert": false
+        },
+        {
+          "role": "yawLeft",
+          "btn": 81,
+          "amt": 0.1,
+          "invert": false
+        },
+        {
+          "role": "yawRight",
+          "btn": 69,
+          "amt": -0.1,
+          "invert": false
+        }
+      ]
+    }
+  ]
+}

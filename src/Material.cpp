@@ -50,6 +50,7 @@ shader_ptr Shader::fromFile(const std::string &filename) {
 		buffer << fileStream.rdbuf();
 		return make_shared<Shader>(buffer.str());
 	}
+	throw std::runtime_error("fuck you");
 }
 
 
