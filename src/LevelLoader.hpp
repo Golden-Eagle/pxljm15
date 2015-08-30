@@ -57,12 +57,32 @@ namespace pxljm {
 
         auto waypt = std::make_shared<Entity>(i3d::vec3d(x, y, z));
         waypt->emplaceComponent<MeshDrawable>(
-          assets::getMesh("waypoint"),
-          assets::getMaterial("basic")
+          assets::getMesh("waypoint_ring"),
+          assets::getMaterial("waypoint_ring")
+        );
+        waypt->emplaceComponent<MeshDrawable>(
+          assets::getMesh("waypoint_entrance"),
+          assets::getMaterial("waypoint_entrance")
+        );
+        waypt->emplaceComponent<MeshDrawable>(
+          assets::getMesh("waypoint_entrance_slider"),
+          assets::getMaterial("waypoint_entrance_slider")
+        );
+        waypt->emplaceComponent<MeshDrawable>(
+          assets::getMesh("waypoint_rock"),
+          assets::getMaterial("waypoint_rock")
+        );
+        waypt->emplaceComponent<MeshDrawable>(
+          assets::getMesh("waypoint_rod"),
+          assets::getMaterial("waypoint_rod")
+        );
+        waypt->emplaceComponent<MeshDrawable>(
+          assets::getMesh("waypoint_slider"),
+          assets::getMaterial("waypoint_slider")
         );
 
-		    waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(2));
-        waypt->emplaceComponent<PlayerTriggerCallback>();
+		    waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(150));
+        // waypt->emplaceComponent<PlayerTriggerCallback>();
 
         scene->add(waypt);
       }
@@ -73,10 +93,11 @@ namespace pxljm {
         double z = asteroid["z"];
 
         auto aster = std::make_shared<Entity>(i3d::vec3d(x, y, z));
-		aster->emplaceComponent<MeshDrawable>(
-          assets::getMesh("cube"),
+		    aster->emplaceComponent<MeshDrawable>(
+          assets::getMesh("asteroid"),
           assets::getMaterial("basic")
         );
+        aster->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(100), 20);
 
         scene->add(aster);
       }

@@ -105,6 +105,9 @@ namespace pxljm {
 
 
 		mesh_ptr getMesh(const std::string &tag) {
+			for(auto meshPair : meshMap) {
+				gecom::Log::info() << "meshPair: " << meshPair.first;
+			}
 			return meshMap.at(tag);
 		}
 

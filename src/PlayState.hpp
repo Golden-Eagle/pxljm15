@@ -88,14 +88,14 @@ namespace pxljm {
 
 			gecom::Log::info() << "glfw says joy1 is: " << glfwJoystickPresent(GLFW_JOYSTICK_1);
 
-			m_player->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::one())));
+			m_player->emplaceComponent<RigidBody>(std::make_shared<SphereCollider>(20), 200);
 			m_player->getComponent<RigidBody>()->setDamping(0.1, 0.9);
 			m_player->emplaceComponent<PlayerControllable>();
 			m_player->emplaceComponent<PlayerScoreComponent>();
 			m_scene->uiRenderSystem().registerUiComponent(m_player->getComponent<PlayerScoreComponent>());
 			m_scene->add(m_player);
 
-			m_camera = std::make_shared<Entity>(i3d::vec3d(0, 0, 0), i3d::quatd::axisangle(i3d::vec3d(0, 1, 0), 3.1415));
+			m_camera = std::make_shared<Entity>(i3d::vec3d(0, 50, -100), i3d::quatd::axisangle(i3d::vec3d(0, 1, 0.02), 3.1415));
 			m_camera->emplaceComponent<PerspectiveCamera>();
 			m_camera->emplaceComponent<RigidBody>(std::make_shared<BoxCollider>(pxljm::i3d2bt(i3d::vec3d::zero())));
 			m_camera->emplaceComponent<CameraControllable>();

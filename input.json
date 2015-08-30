@@ -29,7 +29,7 @@
           "axis": 5,
           "dead": [-1, 0],
           "invert": false,
-          "scale": 0.1
+          "scale": 20
         }
       ],
       "buttons": []
@@ -42,28 +42,28 @@
           "axis": 1,
           "dead": [-0.001, 0.001],
           "invert": true,
-          "scale": 0.01
+          "scale": 400
         },
         {
           "role": "roll",
           "axis": 0,
           "dead": [-0.001, 0.001],
           "invert": false,
-          "scale": 0.01
+          "scale": 400
         },
         {
           "role": "yaw",
           "axis": 2,
           "dead": [-0.005, 0.005],
           "invert": true,
-          "scale": 0.01
+          "scale": 400
         },
         {
           "role": "thrust",
           "axis": 3,
           "dead": [0, 1],
           "invert": true,
-          "scale": 0.1
+          "scale": 300
         }
       ],
       "buttons": []
