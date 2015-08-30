@@ -58,7 +58,7 @@ namespace pxljm {
 		void deregisterWith(Scene &s);
 
 		virtual void update(int, int) = 0; //update with width and height
-		
+
 		virtual i3d::mat4d getViewMatrix();
 		virtual i3d::mat4d getProjectionMatrix() = 0;
 		virtual double getZnear() = 0;
@@ -72,7 +72,7 @@ namespace pxljm {
 	private:
 		float m_fov = 1.0; //radians
 		float m_zNear = 0.1;
-		float m_zFar = 1000;
+		float m_zFar = 1000000;
 
 		i3d::mat4d m_proj;
 
