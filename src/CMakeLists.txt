@@ -39,6 +39,7 @@ set(headers
 
 	"State.hpp"
 	"PlayState.hpp"
+	"Joystick.hpp"
 )
 
 
@@ -60,7 +61,7 @@ set(sources
 	"PhysicsSystem.cpp"
 	"UpdateSystem.cpp"
 	"SoundSystem.cpp"
-
+	
 	"Scene.cpp"
 
 	"UIRenderSystem.cpp"

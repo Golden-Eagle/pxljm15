@@ -17,6 +17,10 @@
 			"shader" : "mat_default",
 			"diffuse-map" : "asteroid-diffuse"
 		},
+		"ship": {
+			"shader": "mat_default",
+			"diffuse-map": "ship-diffuse"
+		},
 		"waypoint_entrance": {
 			"shader": "mat_default",
 			"diffuse-map": "waypoint_entrance-diffuse"
@@ -52,6 +56,7 @@
 	"images": {
 		"asteroid-diffuse" : "./res/images/asteroid-diffuse.jpg",
 		"asteroid-normal" : "./res/images/asteroid-normal.jpg",
+		"ship-diffuse" : "./res/images/ship-normal.jpg",
 		
 		"waypoint_entrance-diffuse" : "./res/images/waypoint/entrance-diffuse.jpg",
 		"waypoint_entrance_slider-diffuse" : "./res/images/waypoint/entrance-slider-diffuse.jpg",
