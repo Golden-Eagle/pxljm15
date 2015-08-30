@@ -82,7 +82,7 @@ namespace pxljm {
         );
 
 		    waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(150));
-        // waypt->emplaceComponent<PlayerTriggerCallback>();
+        waypt->emplaceComponent<PlayerTriggerCallback>();
 
         scene->add(waypt);
       }
