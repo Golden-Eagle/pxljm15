@@ -33,8 +33,8 @@ Mesh::Mesh(const std::string &filepath) {
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 
 		// Cleanup

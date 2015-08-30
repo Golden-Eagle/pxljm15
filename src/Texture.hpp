@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include <gecom/Uncopyable.hpp>
 #include <gecom/GL.hpp>
 #include <gecom/Initial3D.hpp>
 #include <stb_image.h>
@@ -14,7 +15,7 @@ namespace pxljm {
 	class Texture;
 	using texture_ptr = std::shared_ptr<Texture>;
 
-	class Texture {
+	class Texture : gecom::Uncopyable, public std::enable_shared_from_this<Texture> {
 	private:
 		GLuint m_textureID = 0;
 		std::vector<unsigned char> m_data;
