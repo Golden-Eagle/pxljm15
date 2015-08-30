@@ -42,6 +42,7 @@ namespace pxljm {
 		GLuint m_ibo = 0;
 		GLuint m_vbo_pos = 0;
 		GLuint m_vbo_norm = 0;
+		GLuint m_vbo_tang = 0;
 		GLuint m_vbo_uv = 0;
 
 

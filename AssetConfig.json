@@ -3,13 +3,15 @@
 		"cube" : "./res/meshes/cube.obj",
 		"plane" : "./res/meshes/plane.obj",
 		"sphere" : "./res/meshes/sphere.obj",
+		"asteriod" : "./res/meshes/asteriod.obj",
 		"waypoint" : "./res/meshes/waypoint.obj",
 		"ship" : "./res/meshes/ship.obj"
 	},
 
 	"materials" : {
 		"basic" : {
-			"shader" : "mat_default"
+			"shader" : "mat_default",
+			"diffuse-map" : "rock-diffuse"
 		}
 	},
 
@@ -20,7 +22,7 @@
 	},
 
 	"images": {
-		"testrgb" : "./res/images/testrgb.bmp",
-		"testrgba" : "./res/images/testrgba.png"
+		"rock-diffuse" : "./res/images/rock-diffuse.jpg",
+		"rock-normal" : "./res/images/rock-normal.jpg"
 	}
 }

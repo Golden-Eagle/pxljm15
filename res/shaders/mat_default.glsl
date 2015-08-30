@@ -12,12 +12,12 @@ uniform mat4 uModelViewMatrix;
 uniform float uZFar;
 
 
-uniform vec3 uColor;
+uniform vec3 uDiffuse;
 uniform float uMetalicity;
 uniform float uRoughness;
 uniform float uSpecular;
 
-uniform sampler2D uColorMap;
+uniform sampler2D uDiffuseMap;
 uniform sampler2D uNormalMap;
 
 
@@ -31,27 +31,25 @@ uniform sampler2D uNormalMap;
 layout(location = 0) in vec3 aPosition;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec3 aTangent;
-layout(location = 3) in vec3 aBiTangent;
-layout(location = 4) in vec2 aUV;
+layout(location = 3) in vec2 aUV;
 
 
 out VertexData {
-	vec4 pos;
-	vec4 normal;
-	vec4 tangent;
-	vec4 bitangent;
+	vec3 pos;
+	vec3 normal;
+	vec3 tangent;
 	vec2 uv;
 } v_out;
 
 
 void main() {
-	v_out.pos = uModelViewMatrix * vec4(aPosition, 1.0);
-	v_out.normal = uModelViewMatrix * vec4(aNormal, 0.0);
-	v_out.tangent = uModelViewMatrix * vec4(aTangent, 0.0);
-	v_out.bitangent = uModelViewMatrix * vec4(aBiTangent, 0.0);
+	vec4 pos = uModelViewMatrix * vec4(aPosition, 1.0);
+	v_out.pos = pos.xyz;
+	v_out.normal = (uModelViewMatrix * vec4(aNormal, 0.0)).xyz;
+	v_out.tangent = (uModelViewMatrix * vec4(aTangent, 0.0)).xyz;
 	v_out.uv  = aUV;
 
-	gl_Position = uProjectionMatrix * v_out.pos;
+	gl_Position = uProjectionMatrix * pos;
 }
 
 #endif
@@ -66,42 +64,43 @@ void main() {
 
 // Viewspace data
 in VertexData {
-	vec4 pos;
-	vec4 normal;
-	vec4 tangent;
-	vec4 bitangent;
+	vec3 pos;
+	vec3 normal;
+	vec3 tangent;
 	vec2 uv;
 } f_in;
 
 #ifndef _DEPTH_ONLY_
 
-// (rgb) color, (a) metalicity or (rgb) color, (a) opacity
+// (rgb) diffuse, (a) metalicity or (rgb) diffuse, (a) opacity
 // (rg) normal, (b) roughness, (a) specularity
 //
-layout(location = 0) out vec4 fColor;
+layout(location = 0) out vec4 fDiffuse;
 layout(location = 1) out vec4 fNormalMaterials;
 
 #endif
 
 
-subroutine vec3 colorFetch();
+subroutine vec3 diffuseFetch();
 subroutine vec4 normalFetch();
 
-subroutine uniform colorFetch getColor;
+subroutine uniform diffuseFetch getDiffuse;
 subroutine uniform normalFetch getNormal;
 
-// Color
+// Diffuse
 //
-subroutine(colorFetch) vec3 colorFromTexture() { return texture(uColorMap, f_in.uv).rgb; }
-subroutine(colorFetch) vec3 colorFromValue() { return uColor; }
+subroutine(diffuseFetch) vec3 diffuseFromTexture() { return texture(uDiffuseMap, f_in.uv).rgb; }
+subroutine(diffuseFetch) vec3 diffuseFromValue() { return uDiffuse; }
 
 // Normal
 //
 subroutine(normalFetch) vec4 normalFromTexture() {
-	mat3 tbn = transpose(mat3(f_in.tangent.xyz, f_in.bitangent.xyz, f_in.normal.xyz));
+	vec3 bitangent = normalize(cross(f_in.normal, f_in.tangent));
+	vec3 tangent = normalize(cross(bitangent, f_in.normal));
+	mat3 tbn = transpose(mat3(tangent, bitangent, f_in.normal));
 	return vec4(tbn * normalize(texture(uNormalMap, f_in.uv).rgb * 2.0 - 1.0), 0.0);
 }
-subroutine(normalFetch) vec4 normalFromValue() { return f_in.normal; }
+subroutine(normalFetch) vec4 normalFromValue() { return vec4(f_in.normal, 0.0); }
 
 
 void writeDepth(float depth) {
@@ -116,14 +115,14 @@ void writeDepth(float depth) {
 // Main
 //
 void main() {
-	vec4 p = uProjectionMatrix * f_in.pos;
+	vec4 p = uProjectionMatrix * vec4(f_in.pos, 1.0);
 	writeDepth(p.z/p.w);
 
 	#ifndef _DEPTH_ONLY_
 
 	vec4 n = uProjectionMatrix * getNormal();
 	n = faceforward(n, vec4(0.0, 0.0, 1.0, 0.0), n);
-	fColor = vec4(getColor(), uMetalicity);
+	fDiffuse = vec4(getDiffuse(), uMetalicity);
 	fNormalMaterials = vec4(n.xy, uRoughness, uSpecular);
 
 	#endif

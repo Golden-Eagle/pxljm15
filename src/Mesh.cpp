@@ -18,6 +18,7 @@ Mesh::Mesh(const std::string &filepath) {
 		glGenBuffers(1, &m_ibo);
 		glGenBuffers(1, &m_vbo_pos);
 		glGenBuffers(1, &m_vbo_norm);
+		glGenBuffers(1, &m_vbo_tang);
 		glGenBuffers(1, &m_vbo_uv);
 
 
@@ -32,9 +33,13 @@ Mesh::Mesh(const std::string &filepath) {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_tang);
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+		glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
 
 		// Cleanup
@@ -62,6 +67,9 @@ void Mesh::generateGeometry() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_positions.size(), &m_positions[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_norm);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_normals.size(), &m_normals[0], GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_tang);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * m_normals.size(), &m_normals[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vbo_uv);

@@ -14,6 +14,7 @@
 #include <gecom/Initial3D.hpp>
 
 #include "SimpleShader.hpp"
+#include "Texture.hpp"
 
 
 namespace pxljm {
@@ -26,18 +27,15 @@ namespace pxljm {
 
 	class Material : gecom::Uncopyable, public std::enable_shared_from_this<Material> {
 	private:
-		// bool m_texture;
-		i3d::vec3d m_color = i3d::vec3d(0.5, 0.5, 0.5);
-		// Color Texture
+		bool m_useDiffuseMap = false;
+		i3d::vec3d m_diffuse = i3d::vec3d(0.5, 0.5, 0.5);
+		texture_ptr m_diffuseMap;
 
-
-		float m_metalicity;
-		float m_roughness;
-		float m_specular;
+		float m_metalicity = 0;
+		float m_roughness = 0;
+		float m_specular = 0;
 		
-
-		// Normal Texture
-
+		texture_ptr m_normalMap;
 
 
 	public:
@@ -45,6 +43,33 @@ namespace pxljm {
 		~Material();
 
 		void bind(i3d::mat4d, float);
+
+		// Diffuse
+		i3d::vec3d getDiffuseValue();
+		texture_ptr getDiffuseMap();
+		void setDiffuseValue(i3d::vec3d);
+		void setDiffuseMap(texture_ptr);
+		void setUseDiffuseMap(bool);
+		bool useDiffuseMap();
+
+		// Attributes
+		float getMetalicityValue();
+		void setMetalicityValue(float);
+
+		float getRoughnessValue();
+		void setRoughnessValue(float);
+
+		float getSpecularValue();
+		void setSpecularValue(float);
+
+
+		// Normals
+		void setNormalMap(texture_ptr);
+		texture_ptr getNormalMap();
+
+
+
+
 
 		shader_ptr shader;
 	};
