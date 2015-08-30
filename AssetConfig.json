@@ -10,7 +10,8 @@
 
 	"materials" : {
 		"basic" : {
-			"shader" : "mat_default"
+			"shader" : "mat_default",
+			"diffuse" : [1, 0, 0]
 		}
 	},
 

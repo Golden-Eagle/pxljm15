@@ -47,7 +47,6 @@ namespace pxljm {
 				int count;
 				const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &count);
 
-				gecom::Log::info() << "using joy1: " << axes[3] << " : " << axes[4];
 				m_rigidBody->wakeUp();
 				auto up = entity()->root()->getRotation() * i3d::vec3d(-axes[1] * 0.2, -axes[2] * 0.2, axes[0] * 0.2);
 				m_rigidBody->applyTorque(i3d::vec3d(up));
@@ -55,7 +54,6 @@ namespace pxljm {
 				// 	gecom::Log::info() << "axis[" << i << "]: " << axes[i];
 				// }
 				float thrustAmount = ((1 - ((axes[3]+1)/2.0))) * 0.1;
-				gecom::Log::info() << "thrusting: " << thrustAmount;
 				auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, thrustAmount);
 				m_rigidBody->wakeUp();
 				m_rigidBody->applyImpulse(facing);

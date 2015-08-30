@@ -63,8 +63,8 @@ void Material::bind(i3d::mat4d projectionMatrix, float zfar) {
 // Diffuse
 vec3d Material::getDiffuseValue() { return m_diffuse; }
 texture_ptr Material::getDiffuseMap() { return m_diffuseMap; }
-void Material::setDiffuseValue(vec3d d) { m_diffuse = d; }
-void Material::setDiffuseMap(texture_ptr d) { m_diffuseMap = d; }
+void Material::setDiffuseValue(vec3d d) { m_diffuse = d; m_useDiffuseMap = false; }
+void Material::setDiffuseMap(texture_ptr d) { m_diffuseMap = d; m_useDiffuseMap = true; }
 void Material::setUseDiffuseMap(bool b) { m_useDiffuseMap = b; }
 bool Material::useDiffuseMap() { return m_useDiffuseMap;  }
 
