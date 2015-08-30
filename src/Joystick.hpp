@@ -154,6 +154,7 @@ namespace pxljm {
                 if(!glfwJoystickPresent(i)) continue;
 
                 const char* name = glfwGetJoystickName(i);
+				gecom::Log::info() << "Testing against: " << name;
                 if(m_profiles.count(name) == 1) {
                     gecom::Log::info() << "Found joystick: " << name;
                     return std::make_shared<Joystick>(i, m_profiles[name]);

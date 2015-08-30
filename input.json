@@ -1,35 +1,35 @@
 {
   "joystick_profiles": [
     {
-      "name": "X360Controller",
+      "name": "Microsoft PC-joystick driver",
       "sticks": [
         {
           "role": "pitch",
           "axis": 1,
           "dead": [-0.110, 0.0],
           "invert": true,
-          "scale": 0.25
+          "scale": 500
         },
         {
           "role": "roll",
           "axis": 0,
           "dead": [0, 0.1],
           "invert": false,
-          "scale": 0.25
+          "scale": 500
         },
         {
           "role": "yaw",
           "axis": 2,
           "dead": [0, 0],
-          "invert": true,
-          "scale": 0.25
+          "invert": false,
+          "scale": 500
         },
         {
           "role": "thrust",
-          "axis": 5,
-          "dead": [-1, 0],
-          "invert": false,
-          "scale": 20
+          "axis": 3,
+          "dead": [0, 0],
+          "invert": true,
+          "scale": 200
         }
       ],
       "buttons": []
