@@ -95,8 +95,9 @@ subroutine(diffuseFetch) vec3 diffuseFromValue() { return uDiffuse; }
 // Normal
 //
 subroutine(normalFetch) vec4 normalFromTexture() {
-	vec3 bitangent = vec3(1, 0, 0);
-	mat3 tbn = transpose(mat3(f_in.tangent, bitangent, f_in.normal));
+	vec3 bitangent = normalize(cross(f_in.normal, f_in.tangent));
+	vec3 tangent = normalize(cross(bitangent, f_in.normal));
+	mat3 tbn = transpose(mat3(tangent, bitangent, f_in.normal));
 	return vec4(tbn * normalize(texture(uNormalMap, f_in.uv).rgb * 2.0 - 1.0), 0.0);
 }
 subroutine(normalFetch) vec4 normalFromValue() { return vec4(f_in.normal, 0.0); }
