@@ -43,7 +43,11 @@ namespace pxljm {
 			auto up = entity()->root()->getRotation() * i3d::vec3d(pitch, yaw, roll);
 			m_rigidBody->applyTorqueImpulse(up);
 
-			float thrust = m_joystick->getAxisValue("thrust");
+			float thrustInc = m_joystick->getButtonValue("thrustUp", wep);
+			float thrustDec = m_joystick->getButtonValue("thrustDown", wep);
+			float thrustDelta = thrustInc + thrustDec;
+
+			float thrust = m_joystick->getAxisValue("thrust") + thrustDelta;
 
 			auto facing = entity()->root()->getRotation() * i3d::vec3d(0, 0, thrust);
 				m_rigidBody->applyImpulse(facing);
