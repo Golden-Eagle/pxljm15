@@ -108,7 +108,7 @@ namespace pxljm {
 
 			m_camera->emplaceComponent<DefaultPointLight>();
 			auto light = m_camera->getComponent<DefaultPointLight>();
-			light->flux(i3d::vec3f(10, 20, 30));
+			light->flux(i3d::vec3f(20, 20, 20));
 			light->radius(1000);
 
 			m_scene->cameraSystem().setCamera(m_cameraComponent);
