@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace pxljm {
-    std::vector<std::shared_ptr<UIRenderComponent> > UIRenderSystem::g_components;
+    std::vector<UIRenderComponent* > UIRenderSystem::g_components;
     int          UIRenderSystem::g_shaderHandle = 0, UIRenderSystem::g_vertHandle = 0, UIRenderSystem::g_fragHandle = 0;
     double       UIRenderSystem::g_Time = 0;
     int          UIRenderSystem::g_AttribLocationTex = 0, UIRenderSystem::g_AttribLocationProjMtx = 0;

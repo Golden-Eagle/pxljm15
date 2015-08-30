@@ -9,6 +9,38 @@
 using namespace nlohmann;
 
 namespace pxljm {
+    class PlayerScoreComponent : public UIRenderComponent {
+    int m_points = 0;
+  public:
+    void markWaypointComplete() {
+      m_points += 1;
+    }
+
+    void draw() override {
+      ImGui::Begin("Game");
+
+      char msg[1024];
+      sprintf(msg, "Score: %d", m_points);
+
+      ImGui::Text(msg);
+
+      ImGui::End();
+    }
+  };
+
+  class PlayerTriggerCallback : public TriggerCallback {
+    PlayerScoreComponent *m_playerScore = nullptr;
+  public:
+    void onTriggerEnter(Physical *p) override {
+      gecom::Log::info() << "trigger fired";
+
+      if(!m_playerScore)
+        m_playerScore = p->entity()->getComponent<PlayerScoreComponent>();
+
+      m_playerScore->markWaypointComplete();
+    }
+  };
+
   class LevelLoader {
   public:
     void Load(std::shared_ptr<Scene> scene, std::string levelname) {
@@ -28,7 +60,9 @@ namespace pxljm {
           assets::getMesh("waypoint"),
           assets::getMaterial("basic")
         );
-		waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(1));
+
+		    waypt->emplaceComponent<Trigger>(std::make_shared<SphereCollider>(2));
+        waypt->emplaceComponent<PlayerTriggerCallback>();
 
         scene->add(waypt);
       }
