@@ -75,37 +75,49 @@
         {
           "role": "pitchUp",
           "btn": 87,
-          "amt": 0.1,
+          "amt": 400,
           "invert": false
         },
         {
           "role": "pitchDown",
           "btn": 83,
-          "amt": -0.1,
+          "amt": -400,
           "invert": false
         },
         {
           "role": "rollLeft",
           "btn": 65,
-          "amt": -0.1,
+          "amt": -400,
           "invert": false
         },
         {
           "role": "rollRight",
           "btn": 68,
-          "amt": 0.1,
+          "amt": 400,
           "invert": false
         },
         {
           "role": "yawLeft",
           "btn": 81,
-          "amt": 0.1,
+          "amt": 400,
           "invert": false
         },
         {
           "role": "yawRight",
           "btn": 69,
-          "amt": -0.1,
+          "amt": -400,
+          "invert": false
+        },
+        {
+          "role": "thrustUp",
+          "btn": 265,
+          "amt": 400,
+          "invert": false
+        },
+        {
+          "role": "thrustDown",
+          "btn": 264,
+          "amt": -400,
           "invert": false
         }
       ]
